@@ -46,6 +46,8 @@ are exactly the ones worth testing against real decisions later.
 | `index.html` | The prototype: inputs, weather fetch, result, score breakdown |
 | `momuk-data.js` | 126 hand-tagged dishes |
 | `momuk-engine.js` | Context builder, scoring terms, sampling, explanations |
+| `momuk-data.csv` | The same dishes, for editing in a spreadsheet |
+| `tools/sync-data.js` | Round-trips the dataset between the two |
 
 ## Data
 
@@ -57,6 +59,21 @@ band, speed, solo/share suitability, a ubiquity rating and tags
 `ubiquity` — how findable a dish is near anywhere — stands in for a nearby
 places API. Biasing toward common dishes covers the "suggested something with
 nowhere to get it" risk without needing an integration.
+
+### Editing the dishes
+
+`momuk-data.csv` is the comfortable place to work — open it in Excel, Numbers
+or Google Sheets, sort and filter, then convert back:
+
+```bash
+node tools/sync-data.js to-js     # csv -> js, validates before writing
+node tools/sync-data.js to-csv    # js  -> csv, if you edited the js instead
+```
+
+`to-js` refuses to write if anything is off — an unknown `temp` value, a
+number out of range, a duplicate id, a stray comma — and lists every problem
+with its row number. Tags are separated by `|`, not commas, so they survive
+the CSV. Adding a dish means adding a row; nothing else needs to change.
 
 **This data is hand-written and unvalidated.** It came from general knowledge
 of Korean food, not from any database or API. The numeric fields are judgment
