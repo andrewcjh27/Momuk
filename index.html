@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<title>momuk</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<style>
+  /* Deliberately plain. This is a logic test rig — the visual design
+     happens in Figma. Nothing here should be treated as a proposal. */
+  :root { --line:#d8d8d4; --dim:#6b6b66; --bg:#fbfbf9; --fg:#1a1a18; --hi:#1f6f5c; }
+  @media (prefers-color-scheme: dark) {
+    :root { --line:#33332f; --dim:#8f8f88; --bg:#131312; --fg:#e8e8e4; --hi:#6fc0a6; }
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--fg); font:15px/1.5 -apple-system,"Segoe UI",Roboto,"Noto Sans KR",sans-serif; }
+  .wrap { max-width:560px; margin:0 auto; padding:1.5rem 1.1rem 4rem; }
+  h1 { font-size:1.05rem; font-weight:600; margin:0; }
+  .sub { color:var(--dim); font-size:0.8rem; margin:0.25rem 0 0; }
+  fieldset { border:1px solid var(--line); border-radius:4px; padding:0.9rem; margin:1rem 0 0; }
+  legend { font-size:0.7rem; text-transform:uppercase; letter-spacing:0.1em; color:var(--dim); padding:0 0.4rem; }
+  label { display:block; font-size:0.82rem; color:var(--dim); margin-bottom:0.3rem; }
+  .row { display:flex; gap:0.5rem; flex-wrap:wrap; align-items:center; }
+  .field + .field { margin-top:0.9rem; }
+  input[type=range] { width:100%; accent-color:var(--hi); }
+  input[type=number] { width:5.5rem; padding:0.35rem 0.45rem; border:1px solid var(--line); border-radius:3px; background:var(--bg); color:var(--fg); font:inherit; font-size:0.85rem; }
+  button { font:inherit; cursor:pointer; border:1px solid var(--line); background:transparent; color:var(--fg); border-radius:3px; padding:0.4rem 0.7rem; font-size:0.85rem; }
+  button[aria-pressed=true] { background:var(--hi); border-color:var(--hi); color:var(--bg); }
+  button:focus-visible { outline:2px solid var(--hi); outline-offset:2px; }
+  .go { width:100%; padding:0.85rem; font-size:1rem; font-weight:600; background:var(--hi); border-color:var(--hi); color:var(--bg); margin-top:1.2rem; }
+  #status { font-size:0.78rem; color:var(--dim); margin-top:0.6rem; min-height:1.2em; }
+  #result { margin-top:1.4rem; border:1px solid var(--line); border-radius:4px; padding:1.3rem 1.1rem; display:none; }
+  #dish { font-size:2rem; font-weight:700; letter-spacing:-0.02em; margin:0; }
+  #dishEn { color:var(--dim); font-size:0.85rem; margin:0.15rem 0 0; }
+  #why { list-style:none; padding:0; margin:0.9rem 0 0; display:flex; flex-wrap:wrap; gap:0.4rem; }
+  #why li { font-size:0.78rem; border:1px solid var(--line); border-radius:99px; padding:0.22rem 0.6rem; color:var(--dim); }
+  #why li.folk { border-style:dashed; }
+  .acts { display:flex; gap:0.5rem; margin-top:1.1rem; }
+  .acts button { flex:1; padding:0.6rem; }
+  details { margin-top:1.2rem; border-top:1px solid var(--line); padding-top:0.8rem; }
+  summary { font-size:0.78rem; color:var(--dim); cursor:pointer; }
+  table { width:100%; border-collapse:collapse; font-size:0.76rem; margin-top:0.7rem; }
+  th,td { text-align:left; padding:0.28rem 0.4rem; border-bottom:1px solid var(--line); }
+  th { color:var(--dim); font-weight:500; }
+  td.n { text-align:right; font-variant-numeric:tabular-nums; }
+  .neg { color:#b1502c; }
+  .foot { margin-top:2rem; font-size:0.75rem; color:var(--dim); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="row" style="justify-content:space-between;align-items:flex-start">
+    <div>
+      <h1>momuk</h1>
+      <p class="sub">오늘 뭐 먹지 · logic prototype, unstyled on purpose</p>
+    </div>
+    <div class="row" role="group" aria-label="Language">
+      <button id="ko" aria-pressed="true">한국어</button>
+      <button id="en" aria-pressed="false">EN</button>
+    </div>
+  </div>
+
+  <fieldset>
+    <legend>You</legend>
+    <div class="field">
+      <label for="hunger">배고픔 <b id="hungerVal">5</b> / 10</label>
+      <input type="range" id="hunger" min="1" max="10" value="5" />
+    </div>
+    <div class="field">
+      <label>예산</label>
+      <div class="row" role="group" id="budget">
+        <button data-v="1">₩10,000 이하</button>
+        <button data-v="2" aria-pressed="true">₩10–20,000</button>
+        <button data-v="3">₩20,000+</button>
+      </div>
+    </div>
+    <div class="field">
+      <label>인원</label>
+      <div class="row" role="group" id="party">
+        <button data-v="1" aria-pressed="true">혼자</button>
+        <button data-v="2">2명</button>
+        <button data-v="4">3명+</button>
+      </div>
+    </div>
+  </fieldset>
+
+  <button class="go" id="go">추천받기</button>
+  <p id="status"></p>
+
+  <div id="result">
+    <p id="dish"></p>
+    <p id="dishEn"></p>
+    <ul id="why"></ul>
+    <div class="acts">
+      <button id="again">다른 거</button>
+      <button id="accept">이걸로</button>
+    </div>
+  </div>
+
+  <details>
+    <summary>Context — auto-filled, override to tune</summary>
+    <div class="field"><label for="mTemp">체감 온도 °C</label><input type="number" id="mTemp" value="18" step="1" /></div>
+    <div class="field"><label for="mRain">강수 mm/h</label><input type="number" id="mRain" value="0" step="0.5" min="0" /></div>
+    <div class="field"><label for="mPm">PM2.5 ㎍/㎥</label><input type="number" id="mPm" value="15" step="5" min="0" /></div>
+    <div class="field"><label for="mHour">시각 (0-23)</label><input type="number" id="mHour" value="12" min="0" max="23" /></div>
+    <div class="field">
+      <label for="tau">탐험도 τ = <b id="tauVal">0.7</b> — 낮으면 무난, 높으면 모험</label>
+      <input type="range" id="tau" min="0.2" max="2" step="0.1" value="0.7" />
+    </div>
+  </details>
+
+  <details>
+    <summary>Score breakdown</summary>
+    <div id="debug"></div>
+  </details>
+
+  <p class="foot">최근 먹은 것: <span id="recent">없음</span> · <button id="clear" style="font-size:0.72rem;padding:0.15rem 0.4rem">초기화</button></p>
+
+</div>
+
+<script src="momuk-data.js"></script>
+<script src="momuk-engine.js"></script>
+<script>
+(function () {
+  'use strict';
+  var $ = function (id) { return document.getElementById(id); };
+  var lang = 'ko';
+  var last = null;
+  var recent = JSON.parse(localStorage.getItem('momuk.recent') || '[]');
+
+  var T = {
+    ko: { go:'추천받기', again:'다른 거', accept:'이걸로', hunger:'배고픔', none:'없음',
+          locating:'위치 확인 중…', fetching:'날씨 불러오는 중…',
+          denied:'위치를 못 받았어요 — 아래 Context 값으로 계산합니다.',
+          failed:'날씨를 못 불러왔어요 — 아래 Context 값으로 계산합니다.',
+          ok:function(t,p){ return '체감 ' + t + '°C · 미세먼지 ' + p + '㎍'; },
+          empty:'조건에 맞는 게 없어요. 예산을 올려보세요.' },
+    en: { go:'Suggest', again:'Something else', accept:'This one', hunger:'Hunger', none:'none',
+          locating:'Finding you…', fetching:'Fetching weather…',
+          denied:'No location — using the Context values below.',
+          failed:'Weather unavailable — using the Context values below.',
+          ok:function(t,p){ return 'Feels ' + t + '°C · PM2.5 ' + p; },
+          empty:'Nothing fits. Try raising the budget.' }
+  };
+  var t = function () { return T[lang]; };
+
+  // ── pick-group buttons ────────────────────────────────────
+  function group(id, initial) {
+    var el = $(id), value = initial;
+    el.addEventListener('click', function (e) {
+      var b = e.target.closest('button'); if (!b) return;
+      [].forEach.call(el.querySelectorAll('button'), function (x) { x.setAttribute('aria-pressed', String(x === b)); });
+      value = +b.dataset.v;
+    });
+    return function () { return value; };
+  }
+  var getBudget = group('budget', 2);
+  var getParty = group('party', 1);
+
+  $('hunger').addEventListener('input', function () { $('hungerVal').textContent = this.value; });
+  $('tau').addEventListener('input', function () { $('tauVal').textContent = this.value; });
+
+  // ── weather: keyless, straight from the browser ───────────
+  var weather = { hasWeather:false };
+
+  function loadWeather() {
+    if (!navigator.geolocation) { $('status').textContent = t().denied; return; }
+    $('status').textContent = t().locating;
+    // Some browsers neither resolve nor reject. Never leave the user on "locating…".
+    var settled = false;
+    var giveUp = setTimeout(function () {
+      if (!settled) { settled = true; $('status').textContent = t().denied; }
+    }, 9000);
+    var done = function (msg) { if (settled) return; settled = true; clearTimeout(giveUp); $('status').textContent = msg; };
+    navigator.geolocation.getCurrentPosition(function (pos) {
+      if (!settled) $('status').textContent = t().fetching;
+      var la = pos.coords.latitude.toFixed(3), lo = pos.coords.longitude.toFixed(3);
+      Promise.all([
+        fetch('https://api.open-meteo.com/v1/forecast?latitude=' + la + '&longitude=' + lo +
+              '&current=temperature_2m,apparent_temperature,precipitation,relative_humidity_2m').then(function (r) { return r.json(); }),
+        fetch('https://air-quality-api.open-meteo.com/v1/air-quality?latitude=' + la + '&longitude=' + lo +
+              '&current=pm2_5').then(function (r) { return r.json(); }).catch(function () { return null; })
+      ]).then(function (res) {
+        var c = res[0].current;
+        weather = {
+          hasWeather: true,
+          tempC: c.temperature_2m,
+          feelsC: c.apparent_temperature,
+          rainMm: c.precipitation,
+          humidity: c.relative_humidity_2m,
+          pm25: res[1] && res[1].current ? res[1].current.pm2_5 : 15
+        };
+        $('mTemp').value = Math.round(weather.feelsC);
+        $('mRain').value = weather.rainMm;
+        $('mPm').value = Math.round(weather.pm25);
+        done(t().ok(Math.round(weather.feelsC), Math.round(weather.pm25)));
+      }).catch(function () { done(t().failed); });
+    }, function () { done(t().denied); }, { timeout: 8000 });
+  }
+
+  // ── run ───────────────────────────────────────────────────
+  function buildInput() {
+    var now = new Date();
+    now.setHours(+$('mHour').value);
+    return {
+      now: now,
+      feelsC: +$('mTemp').value,
+      tempC: +$('mTemp').value,
+      rainMm: +$('mRain').value,
+      pm25: +$('mPm').value,
+      hasWeather: weather.hasWeather,
+      hunger: +$('hunger').value,
+      budget: getBudget(),
+      party: getParty(),
+      recent: recent
+    };
+  }
+
+  function run() {
+    var out = window.Momuk.suggest(buildInput(), { tau: +$('tau').value, lang: lang });
+    if (!out.picked) { $('status').textContent = t().empty; $('result').style.display = 'none'; return; }
+    last = out;
+    var d = out.picked.dish;
+    $('result').style.display = 'block';
+    $('dish').textContent = lang === 'en' ? d.en : d.ko;
+    $('dishEn').textContent = lang === 'en' ? d.ko : d.en;
+    $('why').innerHTML = out.why.map(function (w) {
+      return '<li' + (w.folklore ? ' class="folk" title="folk heuristic — to be tested against real data"' : '') + '>' + w.text + '</li>';
+    }).join('');
+    renderDebug(out);
+  }
+
+  function renderDebug(out) {
+    var rows = out.ranked.slice(0, 10).map(function (r, i) {
+      return '<tr><td>' + (i + 1) + '</td><td>' + r.dish.ko + '</td><td class="n">' + r.score.toFixed(2) + '</td></tr>';
+    }).join('');
+    var parts = out.picked.parts.filter(function (p) { return Math.abs(p.contrib) > 0.01; })
+      .sort(function (a, b) { return b.contrib - a.contrib; })
+      .map(function (p) {
+        return '<tr><td>' + p.key + (p.folklore ? ' *' : '') + '</td><td class="n">' + p.v.toFixed(2) +
+               '</td><td class="n">×' + p.w + '</td><td class="n' + (p.contrib < 0 ? ' neg' : '') + '">' + p.contrib.toFixed(2) + '</td></tr>';
+      }).join('');
+    $('debug').innerHTML =
+      '<table><tr><th>#</th><th>Top 10 of ' + out.ranked.length + '</th><th class="n">score</th></tr>' + rows + '</table>' +
+      '<table><tr><th>term</th><th class="n">f</th><th class="n">w</th><th class="n">contrib</th></tr>' + parts +
+      '<tr><td colspan="3"><b>' + out.picked.dish.ko + '</b></td><td class="n"><b>' + out.picked.score.toFixed(2) +
+      '</b></td></tr></table><p class="sub">* folk heuristic — the terms v2 should test against logged decisions. ' +
+      'p(this pick) = ' + (out.p * 100).toFixed(1) + '%</p>';
+  }
+
+  function drawRecent() {
+    var names = recent.map(function (id) {
+      var d = window.MOMUK_DATA.filter(function (x) { return x.id === id; })[0];
+      return d ? d.ko : id;
+    });
+    $('recent').textContent = names.length ? names.join(', ') : t().none;
+  }
+
+  $('go').addEventListener('click', run);
+  $('again').addEventListener('click', run);
+  $('accept').addEventListener('click', function () {
+    if (!last) return;
+    recent.unshift(last.picked.dish.id);
+    recent = recent.slice(0, 7);
+    localStorage.setItem('momuk.recent', JSON.stringify(recent));
+    drawRecent();
+    // v2: this is the moment to POST {context, shown, accepted} to a log endpoint.
+    $('result').style.display = 'none';
+  });
+  $('clear').addEventListener('click', function () {
+    recent = []; localStorage.removeItem('momuk.recent'); drawRecent();
+  });
+
+  function setLang(l) {
+    lang = l;
+    $('ko').setAttribute('aria-pressed', String(l === 'ko'));
+    $('en').setAttribute('aria-pressed', String(l === 'en'));
+    $('go').textContent = t().go; $('again').textContent = t().again; $('accept').textContent = t().accept;
+    drawRecent();
+    if (last) run();
+  }
+  $('ko').addEventListener('click', function () { setLang('ko'); });
+  $('en').addEventListener('click', function () { setLang('en'); });
+
+  $('mHour').value = new Date().getHours();
+  drawRecent();
+  loadWeather();
+})();
+</script>
+</body>
+</html>
