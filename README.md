@@ -6,8 +6,7 @@ It reads the weather, the air quality, the hour and the day, asks you two
 things (how hungry, what budget), and returns one dish with a visible reason.
 No accounts, no server, no API keys.
 
-Current state: **working logic prototype.** The interface is deliberately
-unstyled — visual design is being done separately in Figma.
+Current state: **working end to end**, built from the Figma designs.
 
 ## Run it
 
@@ -43,11 +42,31 @@ are exactly the ones worth testing against real decisions later.
 
 | File | What's in it |
 |---|---|
-| `index.html` | The prototype: inputs, weather fetch, result, score breakdown |
+| `index.html` | Screen markup for the whole flow |
+| `momuk.css` | Design tokens and components |
+| `momuk-app.js` | Flow controller: screens, inputs, weather, rendering |
 | `momuk-data.js` | 126 hand-tagged dishes |
 | `momuk-engine.js` | Context builder, scoring terms, sampling, explanations |
 | `momuk-data.csv` | The same dishes, for editing in a spreadsheet |
 | `tools/sync-data.js` | Round-trips the dataset between the two |
+
+## The flow
+
+Landing → how many people → how hungry → price range → a brief thinking
+beat → one dish with its reasons. Weather and location load quietly in the
+background while the questions are being answered, so nothing ever waits on
+the network.
+
+The bowl is a single element for the whole flow. It travels from the centre
+of the landing screen to the foot of the question screens, and fills as
+answers come in — a progress indicator that never looks like one. At the
+answer it steams.
+
+Design tokens live in `momuk.css` under `:root`, named to match the Figma
+variables so the two stay legible against each other.
+
+Add `?debug=1` to the URL for the score breakdown: the ranked shortlist and
+the term-by-term contributions behind the pick.
 
 ## Data
 

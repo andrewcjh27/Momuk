@@ -249,9 +249,14 @@
 
   // The chips: top positive contributions, deduped, with text from the term itself.
   function explain(result, ctx, lang, max) {
-    return result.parts
-      .filter(function (p) { return p.contrib > 0.45; })
-      .sort(function (a, b) { return b.contrib - a.contrib; })
+    var positive = result.parts
+      .filter(function (p) { return p.contrib > 0.1 && p.term.reason(result.dish, ctx).ko; })
+      .sort(function (a, b) { return b.contrib - a.contrib; });
+    var strong = positive.filter(function (p) { return p.contrib > 0.45; });
+    // A recommendation with no stated reason is worse than no recommendation,
+    // so fall back to the best available rather than showing nothing.
+    var chosen = strong.length >= 2 ? strong : positive.slice(0, 2);
+    return chosen
       .slice(0, max || 3)
       .map(function (p) {
         var r = p.term.reason(result.dish, ctx);
