@@ -1,2 +1,10 @@
 .DS_Store
 node_modules/
+
+# pipeline: secrets, local data, scratch
+.env
+pipeline/raw/
+__pycache__/
+*.pyc
+*.backup.csv
+*-excel.csv
