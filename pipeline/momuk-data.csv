@@ -1,0 +1,127 @@
+id,ko,en,cuisine,temp,soup,spice,heavy,price,speed,solo,share,ubiq,tags,meal_morning,meal_lunch,meal_dinner,meal_late_night,search_keyword
+kimchi-jjigae,김치찌개,Kimchi stew,한식,hot,3,2,2,1,fast,1,1,3,해장|국물|밥,1,1,1,0,김치찌개|김치 찌개|김치찌게
+doenjang-jjigae,된장찌개,Soybean paste stew,한식,hot,3,1,2,1,fast,1,1,3,국물|밥,1,1,1,0,된장찌개|된장 찌개|된장찌게
+sundubu,순두부찌개,Soft tofu stew,한식,hot,3,2,1,1,fast,1,1,3,국물|밥|해장,1,1,1,0,순두부찌개|순두부|순두부찌게
+budae-jjigae,부대찌개,Army stew,한식,hot,3,2,3,2,sit,0,1,3,국물|술안주,0,0,1,1,부대찌개|부대찌게
+cheonggukjang,청국장,Rich fermented stew,한식,hot,3,1,2,2,sit,1,1,1,국물|밥,0,1,1,0,청국장|청국장찌개
+galbitang,갈비탕,Short rib soup,한식,hot,3,0,2,3,sit,1,1,2,국물|보양,0,1,1,0,갈비탕
+seolleongtang,설렁탕,Ox bone soup,한식,hot,3,0,2,2,fast,1,0,3,국물|해장|겨울,1,1,1,0,설렁탕|설농탕
+gomtang,곰탕,Beef bone soup,한식,hot,3,0,2,2,fast,1,0,2,국물|해장,1,1,1,0,나주곰탕
+samgyetang,삼계탕,Ginseng chicken soup,한식,hot,3,0,3,3,sit,1,0,2,보양|여름|국물,0,1,1,0,삼계탕
+yukgaejang,육개장,Spicy beef soup,한식,hot,3,3,2,2,fast,1,0,3,국물|해장,1,1,1,0,육개장|육계장
+gamjatang,감자탕,Pork bone stew,한식,hot,3,2,3,2,sit,0,1,3,국물|해장|술안주,1,0,1,1,감자탕
+haejangguk,뼈해장국,Pork bone hangover soup,한식,hot,3,2,2,1,fast,1,0,3,해장|국물,1,1,1,0,뼈해장국
+kongnamul-gukbap,콩나물국밥,Bean sprout soup rice,한식,hot,3,1,1,1,fast,1,0,2,해장|국물|다이어트,1,1,1,0,콩나물국밥
+sundae-gukbap,순대국밥,Blood sausage soup,한식,hot,3,1,2,1,fast,1,0,3,해장|국물,1,1,1,0,순대국|순대국밥|순댓국
+dwaeji-gukbap,돼지국밥,Pork soup rice,한식,hot,3,1,2,1,fast,1,0,2,해장|국물,1,1,1,0,돼지국밥
+chueotang,추어탕,Loach soup,한식,hot,3,2,2,2,sit,1,0,1,보양|국물,0,1,1,0,추어탕
+maeuntang,매운탕,Spicy fish stew,한식,hot,3,3,2,2,sit,0,1,2,국물|술안주,0,0,1,1,매운탕
+daegutang,대구탕,Cod soup,한식,hot,3,1,1,2,sit,1,0,1,해장|국물|다이어트,1,1,1,0,대구탕|대구지리
+tteokguk,떡국,Rice cake soup,한식,hot,3,0,1,1,fast,1,0,2,국물|겨울,1,1,1,0,떡국|떡만둣국
+manduguk,만둣국,Dumpling soup,한식,hot,3,0,1,1,fast,1,0,2,국물|겨울,0,1,1,0,만두국|만둣국
+sujebi,수제비,Hand-torn noodle soup,한식,hot,3,1,1,1,fast,1,1,2,비오는날|국물|면,0,1,1,0,수제비
+kalguksu,칼국수,Knife-cut noodle soup,한식,hot,3,0,1,1,fast,1,1,3,비오는날|국물|면,0,1,1,0,칼국수
+bajirak-kalguksu,바지락칼국수,Clam knife-cut noodles,한식,hot,3,0,1,2,sit,1,1,2,비오는날|국물|면,0,1,1,0,바지락칼국수|바지락 칼국수
+dak-kalguksu,닭칼국수,Chicken knife noodles,한식,hot,3,1,2,2,sit,1,1,2,비오는날|국물|면|보양,0,1,1,0,닭칼국수
+pajeon,해물파전,Seafood scallion pancake,한식,hot,0,0,2,2,sit,0,1,2,비오는날|술안주,0,0,1,1,해물파전|파전
+kimchijeon,김치전,Kimchi pancake,한식,hot,0,1,2,1,sit,0,1,2,비오는날|술안주,0,0,1,1,김치전|김치부침개
+bibimbap,비빔밥,Bibimbap,한식,room,0,1,1,1,fast,1,0,3,밥|다이어트,0,1,1,0,비빔밥
+dolsot-bibimbap,돌솥비빔밥,Hot stone bibimbap,한식,hot,0,1,2,2,sit,1,0,2,밥,0,1,1,0,돌솥비빔밥
+jeyuk-bokkeum,제육볶음,Spicy stir-fried pork,한식,hot,0,3,2,1,fast,1,1,3,밥|고기,0,1,1,0,제육볶음
+bulgogi,불고기,Bulgogi,한식,hot,0,0,2,2,sit,1,1,3,고기|밥,0,1,1,0,불고기
+galbi,갈비,Grilled short ribs,한식,hot,0,0,3,3,sit,0,1,2,고기|술안주,0,0,1,1,돼지갈비|소갈비
+samgyeopsal,삼겹살,Pork belly,한식,hot,0,0,3,3,sit,0,1,3,고기|술안주|미세먼지,0,0,1,1,삼겹살
+moksal,목살,Pork shoulder,한식,hot,0,0,3,3,sit,0,1,3,고기|술안주|미세먼지,0,0,1,1,목살
+sogogi-gui,소고기구이,Grilled beef,한식,hot,0,0,3,3,sit,0,1,2,고기|술안주,0,0,1,1,소고기구이
+gopchang,곱창,Grilled intestines,한식,hot,0,1,3,3,sit,0,1,2,고기|술안주|야식,0,0,1,1,곱창
+dakgalbi,닭갈비,Spicy stir-fried chicken,한식,hot,0,3,2,2,sit,0,1,2,고기|술안주,0,0,1,1,닭갈비
+jjimdak,찜닭,Braised chicken,한식,hot,1,2,2,2,sit,0,1,2,고기|밥,0,0,1,0,찜닭|안동찜닭
+dakbokkeumtang,닭볶음탕,Spicy chicken stew,한식,hot,2,3,2,2,sit,0,1,2,고기|국물,0,0,1,0,닭볶음탕|닭도리탕
+bossam,보쌈,Boiled pork wraps,한식,room,0,0,3,3,sit,0,1,2,고기|술안주,0,0,1,1,보쌈
+jokbal,족발,Braised pig trotters,한식,room,0,0,3,3,sit,0,1,3,고기|술안주|야식,0,0,1,1,족발
+nakji-bokkeum,낙지볶음,Spicy stir-fried octopus,한식,hot,0,3,2,2,sit,1,1,2,밥|술안주,0,1,1,1,낙지볶음
+jjukkumi,쭈꾸미볶음,Spicy baby octopus,한식,hot,0,3,2,2,sit,0,1,2,밥|술안주,0,0,1,1,쭈꾸미|쭈꾸미볶음|주꾸미|주꾸미볶음
+ojingeo-bokkeum,오징어볶음,Spicy stir-fried squid,한식,hot,0,3,2,2,fast,1,1,2,밥,0,1,1,0,오징어볶음
+godeungeo-gui,고등어구이,Grilled mackerel,한식,hot,0,0,1,2,fast,1,0,2,밥|다이어트,0,1,1,0,고등어구이
+galchi-gui,갈치구이,Grilled hairtail,한식,hot,0,0,1,3,sit,1,0,1,밥,0,1,1,0,갈치구이
+saengseon-baekban,생선구이백반,Grilled fish set meal,한식,hot,1,0,1,2,fast,1,0,2,밥|다이어트,1,1,1,0,생선구이
+ganjang-gejang,간장게장,Soy-marinated crab,한식,cold,0,0,2,3,sit,0,1,1,밥,0,0,1,0,간장게장
+kimchi-bokkeumbap,김치볶음밥,Kimchi fried rice,한식,hot,0,2,2,1,fast,1,0,3,밥|혼밥,0,1,1,0,김치볶음밥
+gyeran-bokkeumbap,계란볶음밥,Egg fried rice,한식,hot,0,0,1,1,fast,1,0,2,밥|혼밥,0,1,1,0,계란볶음밥|달걀볶음밥
+baekban,백반,Home-style set meal,한식,hot,1,1,1,1,fast,1,0,3,밥,1,1,1,0,백반
+tteokbokki,떡볶이,Tteokbokki,분식,hot,1,3,2,1,fast,1,1,3,야식|분식,0,1,1,1,떡볶이|떡뽁이
+rose-tteokbokki,로제떡볶이,Rosé tteokbokki,분식,hot,1,2,2,1,fast,1,1,2,야식|분식,0,1,1,1,로제떡볶이
+gimbap,김밥,Gimbap,분식,room,0,0,1,1,fast,1,0,3,혼밥|다이어트|분식,1,1,0,0,김밥
+chamchi-gimbap,참치김밥,Tuna gimbap,분식,room,0,0,1,1,fast,1,0,3,혼밥|분식,1,1,0,0,참치김밥
+ramyeon,라면,Ramyeon,분식,hot,3,2,1,1,fast,1,0,3,야식|국물|면|해장,1,1,1,1,라면
+jjolmyeon,쫄면,Chewy cold noodles,분식,cold,0,3,1,1,fast,1,0,2,면|여름,0,1,1,0,쫄면
+janchi-guksu,잔치국수,Warm somen noodles,분식,hot,3,0,1,1,fast,1,0,2,국물|면,0,1,1,0,잔치국수
+bibim-guksu,비빔국수,Spicy cold noodles,분식,cold,0,2,1,1,fast,1,0,2,면|여름,0,1,1,0,비빔국수
+udon,우동,Udon,분식,hot,3,0,1,1,fast,1,0,3,국물|면,0,1,1,0,우동
+sundae,순대,Sundae,분식,hot,0,0,2,1,fast,1,1,3,분식|야식,0,1,1,1,순대
+twigim,튀김,Assorted fritters,분식,hot,0,0,2,1,fast,1,1,3,분식|야식,0,1,1,1,분식튀김
+mandu,만두,Dumplings,분식,hot,0,0,1,1,fast,1,1,3,분식,0,1,1,1,만두
+eomuk,어묵,Fish cake skewers,분식,hot,2,0,1,1,fast,1,0,3,겨울|분식|국물,0,1,1,0,어묵|오뎅
+toast,토스트,Street toast,분식,hot,0,0,1,1,fast,1,0,3,혼밥|분식,1,1,0,0,토스트|길거리토스트
+mul-naengmyeon,물냉면,Cold broth noodles,한식,cold,2,0,1,2,fast,1,0,3,여름|면,0,1,1,0,냉면|물냉면
+bibim-naengmyeon,비빔냉면,Spicy cold noodles,한식,cold,0,3,1,2,fast,1,0,3,여름|면,0,1,1,0,비빔냉면
+pyeongyang-naengmyeon,평양냉면,Pyongyang cold noodles,한식,cold,2,0,1,3,sit,1,0,1,여름|면,0,1,1,0,평양냉면
+milmyeon,밀면,Busan wheat cold noodles,한식,cold,2,2,1,1,fast,1,0,1,여름|면,0,1,1,0,밀면
+kongguksu,콩국수,Chilled soybean noodles,한식,cold,2,0,2,2,sit,1,0,2,여름|면,0,1,1,0,콩국수
+chogye-guksu,초계국수,Chilled chicken noodles,한식,cold,2,1,1,2,sit,1,0,1,여름|면|다이어트,0,1,1,0,초계국수
+makguksu,막국수,Buckwheat cold noodles,한식,cold,1,2,1,2,sit,1,0,1,여름|면,0,1,1,0,막국수
+naeng-momil,냉모밀,Chilled soba,일식,cold,1,0,1,1,fast,1,0,2,여름|면|다이어트,0,1,1,0,냉모밀|모밀|냉메밀
+jjajangmyeon,짜장면,Jjajangmyeon,중식,hot,0,0,2,1,fast,1,0,3,면,0,1,1,0,짜장면|자장면
+jjamppong,짬뽕,Spicy seafood noodles,중식,hot,3,3,2,1,fast,1,0,3,국물|면|해장,1,1,1,0,짬뽕
+junghwa-bokkeumbap,중화볶음밥,Chinese fried rice,중식,hot,0,0,2,1,fast,1,0,3,밥,0,1,1,0,중화볶음밥
+tangsuyuk,탕수육,Sweet and sour pork,중식,hot,0,0,3,2,sit,0,1,3,고기,0,0,1,0,탕수육
+mapa-dubu,마파두부,Mapo tofu,중식,hot,1,2,2,2,fast,1,0,1,밥,0,1,1,0,마파두부
+kkanpunggi,깐풍기,Sweet-spicy fried chicken,중식,hot,0,2,3,3,sit,0,1,1,고기|술안주,0,0,1,1,깐풍기
+malatang,마라탕,Malatang,중식,hot,3,3,2,2,fast,1,0,3,국물|면,0,1,1,0,마라탕
+mala-xiangguo,마라샹궈,Mala xiang guo,중식,hot,0,3,3,2,sit,0,1,2,술안주,0,0,1,1,마라샹궈
+huoguo,훠궈,Hot pot,중식,hot,3,3,3,3,sit,0,1,1,국물|겨울,0,0,1,0,훠궈
+guobaorou,꿔바로우,Guo bao rou,중식,hot,0,0,3,2,sit,0,1,2,고기,0,0,1,0,꿔바로우
+dimsum,딤섬,Dim sum,중식,hot,0,0,1,2,sit,0,1,1,,0,0,1,0,딤섬
+chobap,초밥,Sushi,일식,cold,0,0,1,3,sit,1,1,2,다이어트,0,1,1,0,초밥|스시
+hoe,회,Sashimi,일식,cold,0,0,1,3,sit,0,1,2,술안주|다이어트,0,0,1,1,횟집
+hoedeopbap,회덮밥,Sashimi rice bowl,일식,cold,0,1,1,2,fast,1,0,2,밥|다이어트,0,1,1,0,회덮밥
+yeoneo-deopbap,연어덮밥,Salmon rice bowl,일식,cold,0,0,1,2,fast,1,0,2,밥,0,1,1,0,연어덮밥
+gyudon,규동,Beef rice bowl,일식,hot,0,0,2,1,fast,1,0,2,밥|혼밥,0,1,1,0,규동
+katsudon,가츠동,Pork cutlet rice bowl,일식,hot,0,0,3,2,fast,1,0,2,밥|혼밥,0,1,1,0,가츠동
+oyakodon,오야코동,Chicken and egg bowl,일식,hot,0,0,2,2,fast,1,0,1,밥|혼밥,0,1,1,0,오야코동
+tendon,텐동,Tempura rice bowl,일식,hot,0,0,3,2,fast,1,0,1,밥,0,1,1,0,텐동
+donkatsu,돈카츠,Tonkatsu,일식,hot,0,0,3,2,fast,1,0,3,고기,0,1,1,0,돈까스|돈가스|돈카츠
+soba,소바,Soba,일식,cold,1,0,1,2,fast,1,0,2,면|여름|다이어트,0,1,1,0,메밀소바|소바
+ramen,라멘,Ramen,일식,hot,3,1,3,2,fast,1,0,3,국물|면|야식,0,1,1,1,라멘|일본라멘
+tonkotsu-ramen,돈코츠라멘,Tonkotsu ramen,일식,hot,3,0,3,2,fast,1,0,2,국물|면,0,1,1,0,돈코츠라멘|돈코츠
+tsukemen,츠케멘,Tsukemen,일식,hot,2,1,3,2,sit,1,0,1,면,0,1,1,0,츠케멘
+yakitori,야키토리,Yakitori,일식,hot,0,0,2,2,sit,0,1,1,술안주|고기|야식,0,0,1,1,야키토리
+okonomiyaki,오코노미야키,Okonomiyaki,일식,hot,0,0,2,2,sit,0,1,1,비오는날|술안주,0,0,1,1,오코노미야키
+takoyaki,타코야키,Takoyaki,일식,hot,0,0,1,1,fast,1,1,2,분식|야식,0,1,1,1,타코야키|다코야끼
+curry-rice,카레라이스,Japanese curry rice,일식,hot,1,1,2,1,fast,1,0,2,밥|혼밥,0,1,1,0,카레|일본카레|카레라이스
+nabe,나베,Nabe hot pot,일식,hot,3,1,2,3,sit,0,1,1,국물|겨울,0,0,1,0,나베
+carbonara,까르보나라,Carbonara,양식,hot,0,0,3,2,sit,1,0,3,면,0,1,1,0,까르보나라|카르보나라
+aglio-olio,알리오올리오,Aglio e olio,양식,hot,0,1,2,2,sit,1,0,2,면,0,1,1,0,알리오올리오|알리오 올리오
+rose-pasta,로제파스타,Rosé pasta,양식,hot,0,1,3,2,sit,1,0,3,면,0,1,1,0,로제파스타
+vongole,봉골레,Vongole,양식,hot,1,0,1,2,sit,1,0,2,면|다이어트,0,1,1,0,봉골레파스타|봉골레
+tomato-pasta,토마토파스타,Tomato pasta,양식,hot,0,1,2,2,sit,1,0,3,면,0,1,1,0,토마토파스타
+pizza,피자,Pizza,양식,hot,0,0,3,2,sit,0,1,3,야식,0,0,1,1,피자
+hamburger,햄버거,Burger,양식,hot,0,0,3,1,fast,1,0,3,혼밥,0,1,1,1,햄버거|버거
+sujebeoger,수제버거,Craft burger,양식,hot,0,0,3,2,sit,1,0,2,,0,1,1,0,수제버거
+steak,스테이크,Steak,양식,hot,0,0,3,3,sit,0,1,2,고기,0,0,1,0,스테이크
+risotto,리조또,Risotto,양식,hot,1,0,2,2,sit,1,0,2,밥,0,1,1,0,리조또|리조토
+salad,샐러드,Salad,양식,cold,0,0,0,2,fast,1,0,2,다이어트|혼밥,0,1,0,0,샐러드
+sandwich,샌드위치,Sandwich,양식,room,0,0,1,1,fast,1,0,3,혼밥|다이어트,1,1,0,0,샌드위치
+brunch,브런치,Brunch plate,양식,hot,0,0,2,3,sit,0,1,2,,1,0,0,0,브런치카페|브런치맛집
+fried-chicken,후라이드치킨,Fried chicken,양식,hot,0,0,3,2,sit,0,1,3,야식|술안주,0,0,1,1,후라이드치킨
+yangnyeom-chicken,양념치킨,Sweet-spicy chicken,양식,hot,0,2,3,2,sit,0,1,3,야식|술안주,0,0,1,1,양념치킨
+ganjang-chicken,간장치킨,Soy-glazed chicken,양식,hot,0,0,3,2,sit,0,1,3,야식|술안주,0,0,1,1,간장치킨
+pho,쌀국수,Pho,아시안,hot,3,0,1,2,fast,1,0,3,국물|면|해장|다이어트,1,1,1,0,쌀국수|베트남쌀국수
+buncha,분짜,Bun cha,아시안,room,1,1,2,2,sit,1,0,1,면,0,1,1,0,분짜
+padthai,팟타이,Pad thai,아시안,hot,0,1,2,2,fast,1,0,2,면,0,1,1,0,팟타이
+banhmi,반미,Banh mi,아시안,room,0,1,1,1,fast,1,0,2,혼밥,0,1,0,0,반미
+tomyum,똠얌꿍,Tom yum goong,아시안,hot,3,3,1,2,sit,0,1,1,국물,0,0,1,0,똠양꿍|똠얌꿍
+curry-indian,커리,Indian curry,아시안,hot,1,2,2,2,sit,1,1,2,밥,0,1,1,0,인도커리|인도카레
+kebab,케밥,Kebab,아시안,room,0,1,2,1,fast,1,0,2,혼밥|야식,0,1,1,1,케밥
+burrito,부리토,Burrito,아시안,room,0,1,3,2,fast,1,0,1,혼밥,0,1,1,0,부리또|부리토
+taco,타코,Tacos,아시안,room,0,1,2,2,sit,0,1,1,,0,0,1,0,타코
