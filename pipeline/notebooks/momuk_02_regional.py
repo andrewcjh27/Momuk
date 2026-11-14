@@ -188,7 +188,7 @@ weekend_lift.write.mode("overwrite").saveAsTable("gold_weekend_lift")
 
 # event lift (event study against the same weekday in surrounding weeks)
 occ = cal.select("event", "date").distinct()
-special_days = cal.filter(F.col("event") != "payday").select(F.col("date").alias("base_date")).distinct()
+special_days = cal.select(F.col("date").alias("base_date")).distinct()
 offsets = spark.createDataFrame([(k,) for k in (-21, -14, -7, 7, 14, 21)], ["offset"])
 base_days = (occ.crossJoin(offsets)
              .withColumn("base_date", F.expr("date_add(date, CAST(offset AS INT))"))
@@ -252,7 +252,7 @@ display(spark.table("gold_event_lift").join(menu.select("dish_id", "ko"), "dish_
 # MAGIC   otherwise `OFF_MEAL` (0.3). Soft, not a filter: 삼겹살 at lunch is possible, just much less likely.
 # MAGIC   Naver data is daily, so this comes from the catalog, not from search data.
 # MAGIC - **calendar boost** — weekend lift on Saturdays and Sundays, times the event lift of any food day
-# MAGIC   on `DATE` (설날, 추석, 복날, 동지, 크리스마스, 수능, payday, 삼겹살데이, 블랙데이).
+# MAGIC   on `DATE` (설날, 추석, 복날, 동지, 크리스마스, 수능, 삼겹살데이, 블랙데이).
 # MAGIC - **the 3 questions** filter the menu first: party size, hunger, budget.
 # MAGIC
 # MAGIC Change the inputs in the next cell and rerun it to see recommendations shift.

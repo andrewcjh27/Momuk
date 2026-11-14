@@ -11,7 +11,6 @@ dish's "holiday lift" the same way it measures rain lift.
   dongji           동지 (winter solstice, KST)            팥죽 (not in catalog)
   christmas        12/24 and 12/25                        치킨, 피자
   suneung          수능 day                               (exam-day meals, celebrations after)
-  payday           25th through 29th (app's convention)   pricier dishes
   samgyeopsal_day  3/3 삼겹살데이                         삼겹살
   black_day        4/14 블랙데이                           짜장면
 
@@ -30,7 +29,6 @@ Run      pip3 install holidays ephem && python3 build_calendar.py
 Output   calendar_kr.csv   (date, event, label) — upload to the Databricks volume
 """
 
-import calendar
 import datetime as dt
 import math
 from pathlib import Path
@@ -125,10 +123,6 @@ def build() -> pd.DataFrame:
         add(f"{y}-04-14", "black_day", "블랙데이")
         if y in SUNEUNG:
             add(SUNEUNG[y], "suneung", "수능")
-        for m in range(1, 13):
-            last = calendar.monthrange(y, m)[1]
-            for day in range(25, min(29, last) + 1):
-                add(dt.date(y, m, day), "payday", "월급날 직후")
 
     cal = pd.DataFrame(rows).drop_duplicates(["date", "event"]).sort_values(["date", "event"])
     return cal
@@ -139,7 +133,7 @@ def check(cal: pd.DataFrame) -> None:
         got = tuple(str(d) for d in sorted(cal[(cal.event == "boknal") &
                                                 (pd.to_datetime(cal.date).dt.year == y)].date))
         assert got == expected, f"복날 {y}: computed {got}, published {expected}"
-    per_year = cal[cal.event != "payday"].groupby([pd.to_datetime(cal.date).dt.year, "event"]).size().unstack()
+    per_year = cal.groupby([pd.to_datetime(cal.date).dt.year, "event"]).size().unstack()
     assert (per_year["seollal"] == 3).all() and (per_year["chuseok"] == 3).all()
     assert (per_year["boknal"] == 3).all() and (per_year["dongji"] == 1).all()
 
@@ -149,5 +143,5 @@ if __name__ == "__main__":
     check(cal)
     cal.to_csv(OUT, index=False, encoding="utf-8")
     print(f"Wrote {OUT.name}: {len(cal)} rows")
-    print(cal[cal.event != "payday"].assign(year=pd.to_datetime(cal.date).dt.year)
+    print(cal.assign(year=pd.to_datetime(cal.date).dt.year)
           .query("year in (2024, 2025)").to_string(index=False))
