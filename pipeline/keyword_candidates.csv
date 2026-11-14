@@ -16,7 +16,7 @@ galbitang,갈비탕,main,0
 seolleongtang,설렁탕,main,0
 seolleongtang,설농탕,spelling,0
 gomtang,곰탕,main,0
-gomtang,나주곰탕,synonym,0
+gomtang,나주곰탕,regional,0
 samgyetang,삼계탕,main,0
 yukgaejang,육개장,main,0
 yukgaejang,육계장,spelling,0
@@ -63,7 +63,7 @@ gopchang,막창,synonym,0
 gopchang,대창,synonym,0
 dakgalbi,닭갈비,main,0
 jjimdak,찜닭,main,0
-jjimdak,안동찜닭,synonym,0
+jjimdak,안동찜닭,regional,0
 dakbokkeumtang,닭볶음탕,main,0
 dakbokkeumtang,닭도리탕,synonym,0
 bossam,보쌈,main,0

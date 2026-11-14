@@ -16,7 +16,8 @@ Method — two independent signals per candidate keyword
      콩국수. We correlate WEEK-TO-WEEK CHANGES of log interest instead, which keeps
      shared spikes (a TV episode, a viral trend) and removes shared seasons.
 
-  The most-searched SPECIFIC name becomes the dish's reference (generic terms like
+  The most-searched SPECIFIC name becomes the dish's reference (place-named terms like
+  나주곰탕, generic terms like
   냉면 and ambiguous ones like 회 are never the reference). Others are kept if they
   behave like it (correlation), with a looser bar for spelling variants that are
   clearly the same word (high string similarity), and a stricter bar for generic or
@@ -123,7 +124,9 @@ def evaluate(dish_id: str, cands: pd.DataFrame) -> pd.DataFrame:
     # The reference must be a SPECIFIC name for the dish. Generic terms (냉면 covers
     # three dishes) and ambiguous ones (회, 라면) are often the most searched, but
     # letting them lead would pull in searches about other things.
-    strict = (cands["ambiguous"] == 1) | (cands["kind"] == "generic")
+    # "regional" = named after a place (나주곰탕, 안동찜닭): as the reference it would make
+    # regional lookups circular (a Naju-named dish naturally leans toward Naju).
+    strict = (cands["ambiguous"] == 1) | cands["kind"].isin(["generic", "regional"])
     specific = cands.loc[~strict, "candidate"].tolist() or terms
     ref = totals[specific].idxmax() if totals[specific].max() > 0 else specific[0]
     main = cands.loc[cands["kind"] == "main", "candidate"].iloc[0]
@@ -138,9 +141,9 @@ def evaluate(dish_id: str, cands: pd.DataFrame) -> pd.DataFrame:
             decision, why = "keep", "reference (most searched specific name)"
         elif share < MIN_SHARE:
             decision, why = "drop", "too few searches to matter"
-        elif c["ambiguous"] or c["kind"] == "generic":
+        elif c["ambiguous"] or c["kind"] in ("generic", "regional"):
             ok = corr >= CORR_OK_AMBIGUOUS
-            decision, why = ("keep" if ok else "drop"), "generic/ambiguous term: strict bar"
+            decision, why = ("keep" if ok else "drop"), "generic/ambiguous/regional term: strict bar"
         elif corr >= CORR_OK:
             decision, why = "keep", "searched the same way"
         elif c["kind"] in ("spelling", "spacing") and sim >= STRING_SIM_SPELLING and corr >= CORR_OK_SPELLING:
