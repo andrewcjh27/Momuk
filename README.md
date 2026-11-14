@@ -221,7 +221,6 @@ any regional facts, the data recovered Korea's well-known local specialties:
 | 막국수 | Gangwon | ×5.18 | 춘천 막국수 |
 | 밀면 | Busan | ×4.01 | Busan's cold noodle |
 | 돼지국밥 | Busan | ×4.00 | Busan's pork soup |
-| 곰탕 | Jeollanam-do | ×3.68 | 나주곰탕 |
 | 닭갈비 | Gangwon | ×3.51 | 춘천 닭갈비 |
 | 콩나물국밥 | Jeollabuk-do | ×2.78 | 전주 콩나물국밥 |
 | 평양냉면 | Seoul | ×2.27 | Seoul's 평양냉면 culture |
@@ -231,6 +230,10 @@ any regional facts, the data recovered Korea's well-known local specialties:
 Clusters show up too: the southeast (Busan, Ulsan, Gyeongsangnam-do) leans
 toward 밀면 and 돼지국밥, and the capital region (Seoul, Gyeonggi, Incheon)
 toward 순대국밥.
+
+One apparent finding was withdrawn: 곰탕 seemed to lean ×3.68 toward Jeollanam-do (나주곰탕), but the
+search term used for it was "나주곰탕" itself, so the lean was circular. Place-named keywords can no
+longer become a dish's main search term.
 
 Two limits are visible as well. Province data dilutes city specialties —
 추어탕, famous in Namwon, leans only ×1.31 in Jeollabuk-do — and low-volume

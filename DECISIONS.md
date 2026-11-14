@@ -51,6 +51,8 @@ bottom. Open questions are listed at the end, waiting for data or a decision.
 | 2026-11-14 | Province level dilutes city specialties: 추어탕 is famous in Namwon, but leans only 1.31 in Jeollabuk-do as a whole | Accept as a known limit of province data; city specialties are under-weighted, never wrongly boosted |
 | 2026-11-14 | Low-volume dishes give noisy leans: Chungcheongbuk-do's top dish is 부리토 (1.39); Ulsan's 닭칼국수 (2.29) has no obvious explanation | Treat as noise for now; consider a minimum national-interest threshold before trusting a dish's regional lean |
 | 2026-11-14 | Some raw leans are very large (막국수 5.18 in Gangwon, 밀면 4.01 in Busan), partly from tourists searching before a trip | Keep the 0.5–2.0 clip, so region can at most double a dish's score |
+| 2026-11-14 | 곰탕's search term had become 나주곰탕 (slightly more searched than 곰탕), so the regional lookup searched a Naju-named dish and its ×3.68 Jeollanam-do lean was circular | Withdrew the 곰탕 regional finding. Place-named candidates (나주곰탕, 안동찜닭) are now kind `regional`: never the reference, strict bar to be kept. Re-run validation, Naver and Google for 곰탕 |
+| 2026-11-14 | Locals may search less for regional food they already know, and visitors search more, so a province's lean may reflect tourists rather than local eating | **Test before adjusting.** Dialing region down for everyone would hurt dishes that are both famous and everyday local food (e.g. 돼지국밥 in Busan). Tourist-season test: does the dish's in-province share rise in holiday and vacation weeks? Adjust only dishes that show a visitor pattern |
 | 2026-10-31 | 마라탕 and 로제떡볶이 sit near zero before their boom years | **Open** — see below |
 
 ## Personalization design
