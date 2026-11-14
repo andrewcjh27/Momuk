@@ -167,6 +167,9 @@ display(spark.table("gold_temp_boost").filter(F.col("dish_id").isin(check))
 # MAGIC - **weather boost** — each dish's rain lift (from notebook 01's method) when it's rainy, times its
 # MAGIC   temperature boost for today's temperature.
 # MAGIC - **regional lean** — the shrunk, clipped lean for the user's province (Google).
+# MAGIC - **time-of-day fit** — from the catalog's `meal_*` columns: 1.0 if the dish fits the current meal,
+# MAGIC   otherwise `OFF_MEAL` (0.3). Soft, not a filter: 삼겹살 at lunch is possible, just much less likely.
+# MAGIC   Naver data is daily, so this comes from the catalog, not from search data.
 # MAGIC - **the 3 questions** filter the menu first: party size, hunger, budget.
 # MAGIC
 # MAGIC Change the inputs in the next cell and rerun it to see recommendations shift.
@@ -177,6 +180,8 @@ display(spark.table("gold_temp_boost").filter(F.col("dish_id").isin(check))
 GEO = "KR-26"      # province code: KR-11 Seoul, KR-26 Busan, KR-42 Gangwon, ...
 IS_RAINY = True
 TEMP_C = 8         # today's mean temperature in °C (8 ≈ a November day; try 28 for midsummer)
+HOUR = 19          # local hour, 0-23 (try 12 for lunch, 23 for late night)
+OFF_MEAL = 0.3     # score multiplier for dishes that don't fit the current meal
 PEOPLE = 1        # 1 = solo; 2+ = sharing dishes
 HUNGER = 2         # 1 light, 2 normal, 3 very hungry   (menu `heavy` is 0-3)
 MAX_PRICE = 2      # 1 cheap, 2 mid, 3 any              (menu `price` is 1-3)
@@ -198,6 +203,18 @@ rain_lift = (cell.groupBy("dish_id", "month", "dow").pivot("is_rainy", [0, 1]).a
 region = (spark.table("silver_region_lean").filter(F.col("geo_code") == GEO)
           .select("dish_id", F.col("lean_shrunk").alias("regional_lean")))
 
+def meal_period(hour):
+    if 5 <= hour <= 10:
+        return "meal_morning"
+    if 11 <= hour <= 15:
+        return "meal_lunch"
+    if 16 <= hour <= 20:
+        return "meal_dinner"
+    return "meal_late_night"     # 21:00-04:59
+
+MEAL_COL = meal_period(HOUR)
+print("meal period:", MEAL_COL)
+
 today_bin = max(-10, min(30, (TEMP_C // TEMP_BIN) * TEMP_BIN))
 temp_today = (spark.table("gold_temp_boost").filter(F.col("temp_bin") == today_bin)
               .select("dish_id", "temp_boost"))
@@ -213,8 +230,11 @@ recs = (menu.filter(party_ok & hunger_ok & (F.col("price") <= MAX_PRICE))
         .fillna({"rain_lift": 1.0, "regional_lean": 1.0, "temp_boost": 1.0})
         .withColumn("rain_boost", F.col("rain_lift") if IS_RAINY else F.lit(1.0))
         .withColumn("weather_boost", F.col("rain_boost") * F.col("temp_boost"))
-        .withColumn("score", F.sqrt("popularity") * F.col("weather_boost") * F.col("regional_lean"))
-        .select("ko", "en", "score", "popularity", "rain_boost", "temp_boost", "regional_lean", "tags")
+        .withColumn("meal_fit", F.when(F.col(MEAL_COL) == 1, F.lit(1.0)).otherwise(F.lit(OFF_MEAL)))
+        .withColumn("score", F.sqrt("popularity") * F.col("weather_boost")
+                    * F.col("regional_lean") * F.col("meal_fit"))
+        .select("ko", "en", "score", "popularity", "rain_boost", "temp_boost", "regional_lean",
+                "meal_fit", "tags")
         .orderBy(F.desc("score"))
         .limit(TOP_N))
 

@@ -69,6 +69,7 @@ bottom. Open questions are listed at the end, waiting for data or a decision.
 |---|---|---|
 | 2026-11-14 | First sanity checks (Busan, rainy, solo vs Seoul, dry, group of 3): filters and regional dishes behave sensibly, but 밀면 — a cold noodle — ranked 5th on a rainy day | **Add temperature to the score.** `temp_boost` = a dish's average interest in today's 5 °C temperature bin ÷ its overall average, clipped to 0.5–2.0. Predictive, not causal: it captures season and temperature together |
 | 2026-11-14 | Regional lean (up to ×2) outweighs rain (≤ ×1.25): 곱창 beat 삼겹살 in Seoul despite half the national popularity | **Open** — soften region (lean^0.5) or lower the cap |
+| 2026-11-14 | Time of day matters: people eat 고기 less at lunch than dinner, and 브런치 at lunch, not dinner | **Add a time-of-day fit** from the catalog's `meal_*` columns: ×1.0 if the dish fits the current meal (morning 5–10, lunch 11–15, dinner 16–20, late night 21–4), ×0.3 if not. Soft, so off-meal dishes stay possible. Fixed 브런치 to count as lunch. Naver data is daily, so this comes from the catalog, not from search data |
 | 2026-11-14 | Fried chicken never appears, even for a hungry group | Caused by the keyword issue below; settle that first |
 | 2026-11-14 | 파전 and 김치전 are hidden from solo diners (`solo = 0`), even on rainy days | **Open** — review `solo` for 전 dishes |
 
