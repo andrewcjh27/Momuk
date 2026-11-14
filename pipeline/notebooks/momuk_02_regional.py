@@ -157,10 +157,91 @@ display(spark.table("gold_temp_boost").filter(F.col("dish_id").isin(check))
 # COMMAND ----------
 
 # MAGIC %md
+# MAGIC ## Calendar — weekends and Korean food days
+# MAGIC **Weekend lift** — same method as notebook 01: weekend vs weekday interest within the same month and
+# MAGIC rain state, median across those comparisons.
+# MAGIC
+# MAGIC **Event lift** — for days like 복날 or 설날, an *event study*: each event day is compared with the
+# MAGIC **same weekday 1, 2 and 3 weeks before and after** (skipping baseline days that are themselves events).
+# MAGIC Same weekday removes the weekday effect; nearby weeks remove season and temperature. The lift is the
+# MAGIC median ratio across all event days 2016-2026, clipped to 0.5–3.0 (food days can be big).
+# MAGIC
+# MAGIC Needs `calendar_kr.csv` (from `build_calendar.py`) in the `raw` volume.
+
+# COMMAND ----------
+
+(spark.read.option("header", True).option("encoding", "UTF-8").csv(f"{VOL}/calendar_kr.csv")
+ .withColumn("date", F.to_date("date"))
+ .write.mode("overwrite").saveAsTable("bronze_calendar"))
+cal = spark.table("bronze_calendar")
+g = spark.table("gold_dish_day")
+
+# weekend lift
+cw = g.groupBy("dish_id", "month", "is_rainy", "is_weekend").agg(F.avg("interest").alias("m"))
+weekend_lift = (cw.groupBy("dish_id", "month", "is_rainy").pivot("is_weekend", [0, 1]).agg(F.first("m"))
+                .withColumnRenamed("0", "weekday").withColumnRenamed("1", "weekend")
+                .filter((F.col("weekday") > 0) & F.col("weekend").isNotNull())
+                .withColumn("ratio", F.col("weekend") / F.col("weekday"))
+                .groupBy("dish_id").agg(F.expr("percentile_approx(ratio, 0.5)").alias("weekend_lift"))
+                .withColumn("weekend_lift", F.greatest(F.lit(0.5), F.least(F.lit(2.0), F.col("weekend_lift")))))
+weekend_lift.write.mode("overwrite").saveAsTable("gold_weekend_lift")
+
+# event lift (event study against the same weekday in surrounding weeks)
+occ = cal.select("event", "date").distinct()
+special_days = cal.filter(F.col("event") != "payday").select(F.col("date").alias("base_date")).distinct()
+offsets = spark.createDataFrame([(k,) for k in (-21, -14, -7, 7, 14, 21)], ["offset"])
+base_days = (occ.crossJoin(offsets)
+             .withColumn("base_date", F.expr("date_add(date, CAST(offset AS INT))"))
+             .join(special_days, "base_date", "left_anti"))
+values = g.select("dish_id", "date", "interest")
+baseline = (base_days.join(values.withColumnRenamed("date", "base_date"), "base_date")
+            .groupBy("event", "date", "dish_id").agg(F.avg("interest").alias("baseline")))
+event_lift = (occ.join(values, "date")
+              .join(baseline, ["event", "date", "dish_id"])
+              .filter(F.col("baseline") > 0)
+              .withColumn("ratio", F.col("interest") / F.col("baseline"))
+              .groupBy("dish_id", "event")
+              .agg(F.expr("percentile_approx(ratio, 0.5)").alias("event_lift"), F.count("*").alias("event_days"))
+              .withColumn("event_lift", F.greatest(F.lit(0.5), F.least(F.lit(3.0), F.col("event_lift")))))
+event_lift.write.mode("overwrite").saveAsTable("gold_event_lift")
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ## Findings 3 — do the food days show up?
+# MAGIC Each row is a food–date link Koreans know. A lift well above 1 supports it.
+
+# COMMAND ----------
+
+food_days = spark.createDataFrame([
+    ("boknal",          "samgyetang",   "복날 → 삼계탕"),
+    ("seollal",         "tteokguk",     "설날 → 떡국"),
+    ("seollal",         "manduguk",     "설날 → 만둣국"),
+    ("chuseok",         "kimchijeon",   "추석 → 전"),
+    ("christmas",       "fried-chicken", "크리스마스 → 치킨"),
+    ("christmas",       "pizza",        "크리스마스 → 피자"),
+    ("samgyeopsal_day", "samgyeopsal",  "삼겹살데이 → 삼겹살"),
+    ("black_day",       "jjajangmyeon", "블랙데이 → 짜장면"),
+], ["event", "dish_id", "link"])
+display(food_days.join(spark.table("gold_event_lift"), ["event", "dish_id"], "left")
+        .select("link", "event_lift", "event_days").orderBy(F.desc("event_lift")))
+
+# Top 5 dishes for every event — including ones nobody predicted
+rank_e = W.partitionBy("event").orderBy(F.desc("event_lift"))
+display(spark.table("gold_event_lift").join(menu.select("dish_id", "ko"), "dish_id")
+        .withColumn("rank", F.row_number().over(rank_e)).filter(F.col("rank") <= 5)
+        .groupBy("event").agg(F.concat_ws(", ", F.collect_list(
+            F.concat(F.col("ko"), F.lit(" ("), F.format_number("event_lift", 2), F.lit(")")))).alias("top_5"))
+        .orderBy("event"))
+
+# COMMAND ----------
+
+# MAGIC %md
 # MAGIC ## Recommender v0 — putting the pieces together
 # MAGIC ```
-# MAGIC score = popularity^0.5 × weather boost × regional lean
-# MAGIC weather boost = rain lift (if rainy) × temperature boost
+# MAGIC score = popularity^0.5 × weather boost × regional lean × time-of-day fit × calendar boost
+# MAGIC weather boost  = rain lift (if rainy) × temperature boost
+# MAGIC calendar boost = weekend lift (if Sat/Sun) × event lift for every food day on DATE
 # MAGIC ```
 # MAGIC - **popularity** — national interest over the last 2 years (Naver). The square root dampens it so
 # MAGIC   치킨-level dishes don't win every time.
@@ -170,6 +251,8 @@ display(spark.table("gold_temp_boost").filter(F.col("dish_id").isin(check))
 # MAGIC - **time-of-day fit** — from the catalog's `meal_*` columns: 1.0 if the dish fits the current meal,
 # MAGIC   otherwise `OFF_MEAL` (0.3). Soft, not a filter: 삼겹살 at lunch is possible, just much less likely.
 # MAGIC   Naver data is daily, so this comes from the catalog, not from search data.
+# MAGIC - **calendar boost** — weekend lift on Saturdays and Sundays, times the event lift of any food day
+# MAGIC   on `DATE` (설날, 추석, 복날, 동지, 크리스마스, 수능, payday, 삼겹살데이, 블랙데이).
 # MAGIC - **the 3 questions** filter the menu first: party size, hunger, budget.
 # MAGIC
 # MAGIC Change the inputs in the next cell and rerun it to see recommendations shift.
@@ -178,6 +261,7 @@ display(spark.table("gold_temp_boost").filter(F.col("dish_id").isin(check))
 
 # ---- user inputs (try changing these) ----
 GEO = "KR-26"      # province code: KR-11 Seoul, KR-26 Busan, KR-42 Gangwon, ...
+DATE = "2026-11-14"  # try 2026-07-15 (초복), 2026-12-24 (크리스마스 이브), 2027-02-07 (설날)
 IS_RAINY = True
 TEMP_C = 8         # today's mean temperature in °C (8 ≈ a November day; try 28 for midsummer)
 HOUR = 19          # local hour, 0-23 (try 12 for lunch, 23 for late night)
@@ -219,6 +303,17 @@ today_bin = max(-10, min(30, (TEMP_C // TEMP_BIN) * TEMP_BIN))
 temp_today = (spark.table("gold_temp_boost").filter(F.col("temp_bin") == today_bin)
               .select("dish_id", "temp_boost"))
 
+import datetime as _dt
+IS_WEEKEND = _dt.date.fromisoformat(DATE).weekday() >= 5
+events_today = [r.event for r in spark.table("bronze_calendar")
+                .filter(F.col("date") == F.lit(DATE).cast("date")).select("event").distinct().collect()]
+print("weekend:", IS_WEEKEND, "| food days:", events_today or "none")
+
+weekend_today = spark.table("gold_weekend_lift").select(
+    "dish_id", (F.col("weekend_lift") if IS_WEEKEND else F.lit(1.0)).alias("weekend_boost"))
+event_today = (spark.table("gold_event_lift").filter(F.col("event").isin(events_today or ["-"]))
+               .groupBy("dish_id").agg(F.exp(F.sum(F.log("event_lift"))).alias("event_boost")))
+
 hunger_ok = {1: F.col("heavy") <= 1, 2: F.col("heavy").between(1, 2), 3: F.col("heavy") >= 2}[HUNGER]
 party_ok = (F.col("solo") == 1) if PEOPLE == 1 else (F.col("share") == 1)
 
@@ -227,14 +322,18 @@ recs = (menu.filter(party_ok & hunger_ok & (F.col("price") <= MAX_PRICE))
         .join(rain_lift, "dish_id", "left")
         .join(region, "dish_id", "left")
         .join(temp_today, "dish_id", "left")
-        .fillna({"rain_lift": 1.0, "regional_lean": 1.0, "temp_boost": 1.0})
+        .join(weekend_today, "dish_id", "left")
+        .join(event_today, "dish_id", "left")
+        .fillna({"rain_lift": 1.0, "regional_lean": 1.0, "temp_boost": 1.0,
+                 "weekend_boost": 1.0, "event_boost": 1.0})
         .withColumn("rain_boost", F.col("rain_lift") if IS_RAINY else F.lit(1.0))
         .withColumn("weather_boost", F.col("rain_boost") * F.col("temp_boost"))
         .withColumn("meal_fit", F.when(F.col(MEAL_COL) == 1, F.lit(1.0)).otherwise(F.lit(OFF_MEAL)))
+        .withColumn("calendar_boost", F.col("weekend_boost") * F.col("event_boost"))
         .withColumn("score", F.sqrt("popularity") * F.col("weather_boost")
-                    * F.col("regional_lean") * F.col("meal_fit"))
+                    * F.col("regional_lean") * F.col("meal_fit") * F.col("calendar_boost"))
         .select("ko", "en", "score", "popularity", "rain_boost", "temp_boost", "regional_lean",
-                "meal_fit", "tags")
+                "meal_fit", "weekend_boost", "event_boost", "tags")
         .orderBy(F.desc("score"))
         .limit(TOP_N))
 

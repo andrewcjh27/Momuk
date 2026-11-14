@@ -35,10 +35,11 @@ sources' terms apply to it. The scripts recreate it.
 | `ingest_local.py` | Naver trends in batches of 4 dishes + the 김치찌개 anchor, and province weather. `--naver-only`, `--weather-only`; weather resumes after rate limits |
 | `validate_keywords.py` | Keyword entity resolution: keeps a candidate keyword only if it behaves like the dish in search data. Writes `search_keyword` into `momuk-data.csv` |
 | `keyword_candidates.csv` | 202 hand-listed candidates (spellings, spacing, synonyms, generic, ambiguous) |
+| `build_calendar.py` → `calendar_kr.csv` | Korean food calendar 2016–2027: 설날, 추석, 복날, 동지, 크리스마스, 수능, payday, 삼겹살데이, 블랙데이 |
 | `ingest_google_trends.py` | Province profile for each dish's top keyword. Resumable; re-fetches dishes whose keyword changed |
 | `momuk-data.csv` | Pipeline copy of the catalog: the app's 14 columns plus `meal_*` time-of-day columns and `search_keyword` |
 | `notebooks/momuk_01_bronze_silver_gold.py` | Databricks: anchor rescaling, missing-day fill, weather (national + province), gold table, rain lift, weekend lift |
-| `notebooks/momuk_02_regional.py` | Databricks: regional lean with shrinkage, regional hypotheses, recommender v0 |
+| `notebooks/momuk_02_regional.py` | Databricks: regional lean with shrinkage, regional hypotheses, temperature boost, weekend and food-day lifts, recommender v0 |
 | `reports/keyword_validation.csv` | Every keyword candidate with volume share, change correlation, string similarity, decision and reason |
 
 ## Run it
@@ -49,9 +50,10 @@ pip3 install requests pandas trendspyg
 python3 validate_keywords.py          # resolve keywords (few minutes)
 python3 ingest_local.py               # Naver + weather (weather may need an hourly rerun)
 caffeinate -i python3 ingest_google_trends.py   # hours; rerun after rate limits
+pip3 install holidays ephem && python3 build_calendar.py
 ```
 
-Upload `momuk-data.csv` and `raw/*.csv` to the Databricks volume
+Upload `momuk-data.csv`, `calendar_kr.csv` and `raw/*.csv` to the Databricks volume
 `/Volumes/workspace/momuk/raw`, then run notebook 01, then 02.
 
 ## Methods in brief
@@ -69,8 +71,10 @@ Upload `momuk-data.csv` and `raw/*.csv` to the Databricks volume
   month × rain state), so season and weekday don't masquerade as weather.
 - **Regional lean.** Province value ÷ the dish's average across provinces,
   shrunk toward 1 when few provinces have data, and clipped to 0.5–2.
-- **Recommender v0.** `score = √popularity × rain boost × regional lean`,
-  after filtering by the three questions.
+- **Food-day lift.** Event study: each event day vs the same weekday 1–3 weeks
+  before and after, median across years.
+- **Recommender v0.** `score = √popularity × rain × temperature × regional lean
+  × time-of-day fit × weekend × food day`, after filtering by the three questions.
 
 ## Known limitations
 
