@@ -63,6 +63,15 @@ bottom. Open questions are listed at the end, waiting for data or a decision.
 | 2026-10-31 | Optional onboarding: up to 5 dishes you love, any you never want | Fixes day one. "Never" is a hard exclusion; "love" boosts similar dishes through catalog attributes (content-based filtering) |
 | 2026-10-31 | Personal patterns (e.g. 해장 on Saturday mornings) from the app's own logs | No public data can show an individual's habits |
 
+## Recommender v0
+
+| Date | Observation | Decision |
+|---|---|---|
+| 2026-11-14 | First sanity checks (Busan, rainy, solo vs Seoul, dry, group of 3): filters and regional dishes behave sensibly, but 밀면 — a cold noodle — ranked 5th on a rainy day | **Add temperature to the score.** `temp_boost` = a dish's average interest in today's 5 °C temperature bin ÷ its overall average, clipped to 0.5–2.0. Predictive, not causal: it captures season and temperature together |
+| 2026-11-14 | Regional lean (up to ×2) outweighs rain (≤ ×1.25): 곱창 beat 삼겹살 in Seoul despite half the national popularity | **Open** — soften region (lean^0.5) or lower the cap |
+| 2026-11-14 | Fried chicken never appears, even for a hungry group | Caused by the keyword issue below; settle that first |
+| 2026-11-14 | 파전 and 김치전 are hidden from solo diners (`solo = 0`), even on rainy days | **Open** — review `solo` for 전 dishes |
+
 ## Open questions
 
 - **Dish start dates:** from when should each newer dish (마라탕, 로제떡볶이, 마라샹궈…) count? Zeros before a boom aren't "low interest".

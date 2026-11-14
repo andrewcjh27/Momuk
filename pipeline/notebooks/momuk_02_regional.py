@@ -117,13 +117,55 @@ display(hypotheses.join(spark.table("gold_region_lean"), ["dish_id", "geo_code"]
 # COMMAND ----------
 
 # MAGIC %md
+# MAGIC ## Temperature boost — how each dish's interest changes with temperature
+# MAGIC Days are grouped into 5 °C bins of national mean temperature (−10 … 30 °C). For each dish:
+# MAGIC
+# MAGIC `temp_boost = average interest on days in this bin ÷ the dish's overall average interest`
+# MAGIC
+# MAGIC So `temp_boost = 1.8` at 25–30 °C means the dish gets 80% more interest on such days than usual.
+# MAGIC - Bins with fewer than 30 days are treated as unknown (boost 1), so rare extremes can't create noise.
+# MAGIC - Clipped to 0.5–2.0, like the regional lean.
+# MAGIC - This is **predictive, not causal**: temperature and season move together, so the boost captures both
+# MAGIC   ("hot days" are also summer). That's what a recommender needs; separating the two is a causal question
+# MAGIC   for later. It doesn't double count rain: rain lift is measured within the same month.
+
+# COMMAND ----------
+
+TEMP_BIN = 5
+MIN_DAYS = 30
+
+t = (spark.table("gold_dish_day")
+     .withColumn("temp_bin", F.greatest(F.lit(-10), F.least(F.lit(30),
+                 F.floor(F.col("temperature_2m_mean") / TEMP_BIN) * TEMP_BIN))))
+overall = t.groupBy("dish_id").agg(F.avg("interest").alias("overall_interest"))
+
+temp_boost = (t.groupBy("dish_id", "temp_bin")
+              .agg(F.avg("interest").alias("bin_interest"), F.count("*").alias("days"))
+              .join(overall, "dish_id")
+              .filter((F.col("overall_interest") > 0) & (F.col("days") >= MIN_DAYS))
+              .withColumn("temp_boost", F.col("bin_interest") / F.col("overall_interest"))
+              .withColumn("temp_boost", F.greatest(F.lit(0.5), F.least(F.lit(2.0), F.col("temp_boost")))))
+temp_boost.write.mode("overwrite").saveAsTable("gold_temp_boost")
+
+# Sanity check: cold dishes should rise with temperature, hot soups should fall
+check = ["mul-naengmyeon", "milmyeon", "kongguksu", "samgyetang", "seolleongtang", "eomuk", "tteokguk", "kalguksu"]
+display(spark.table("gold_temp_boost").filter(F.col("dish_id").isin(check))
+        .join(menu.select("dish_id", "ko"), "dish_id")
+        .groupBy("ko").pivot("temp_bin").agg(F.round(F.first("temp_boost"), 2))
+        .orderBy("ko"))
+
+# COMMAND ----------
+
+# MAGIC %md
 # MAGIC ## Recommender v0 — putting the pieces together
 # MAGIC ```
 # MAGIC score = popularity^0.5 × weather boost × regional lean
+# MAGIC weather boost = rain lift (if rainy) × temperature boost
 # MAGIC ```
 # MAGIC - **popularity** — national interest over the last 2 years (Naver). The square root dampens it so
 # MAGIC   치킨-level dishes don't win every time.
-# MAGIC - **weather boost** — each dish's rain lift (from notebook 01's method) when it's rainy, else 1.
+# MAGIC - **weather boost** — each dish's rain lift (from notebook 01's method) when it's rainy, times its
+# MAGIC   temperature boost for today's temperature.
 # MAGIC - **regional lean** — the shrunk, clipped lean for the user's province (Google).
 # MAGIC - **the 3 questions** filter the menu first: party size, hunger, budget.
 # MAGIC
@@ -134,7 +176,8 @@ display(hypotheses.join(spark.table("gold_region_lean"), ["dish_id", "geo_code"]
 # ---- user inputs (try changing these) ----
 GEO = "KR-26"      # province code: KR-11 Seoul, KR-26 Busan, KR-42 Gangwon, ...
 IS_RAINY = True
-PEOPLE = 1         # 1 = solo; 2+ = sharing dishes
+TEMP_C = 8         # today's mean temperature in °C (8 ≈ a November day; try 28 for midsummer)
+PEOPLE = 1        # 1 = solo; 2+ = sharing dishes
 HUNGER = 2         # 1 light, 2 normal, 3 very hungry   (menu `heavy` is 0-3)
 MAX_PRICE = 2      # 1 cheap, 2 mid, 3 any              (menu `price` is 1-3)
 TOP_N = 10
@@ -155,6 +198,10 @@ rain_lift = (cell.groupBy("dish_id", "month", "dow").pivot("is_rainy", [0, 1]).a
 region = (spark.table("silver_region_lean").filter(F.col("geo_code") == GEO)
           .select("dish_id", F.col("lean_shrunk").alias("regional_lean")))
 
+today_bin = max(-10, min(30, (TEMP_C // TEMP_BIN) * TEMP_BIN))
+temp_today = (spark.table("gold_temp_boost").filter(F.col("temp_bin") == today_bin)
+              .select("dish_id", "temp_boost"))
+
 hunger_ok = {1: F.col("heavy") <= 1, 2: F.col("heavy").between(1, 2), 3: F.col("heavy") >= 2}[HUNGER]
 party_ok = (F.col("solo") == 1) if PEOPLE == 1 else (F.col("share") == 1)
 
@@ -162,10 +209,12 @@ recs = (menu.filter(party_ok & hunger_ok & (F.col("price") <= MAX_PRICE))
         .join(popularity, "dish_id")
         .join(rain_lift, "dish_id", "left")
         .join(region, "dish_id", "left")
-        .fillna({"rain_lift": 1.0, "regional_lean": 1.0})
-        .withColumn("weather_boost", F.col("rain_lift") if IS_RAINY else F.lit(1.0))
+        .join(temp_today, "dish_id", "left")
+        .fillna({"rain_lift": 1.0, "regional_lean": 1.0, "temp_boost": 1.0})
+        .withColumn("rain_boost", F.col("rain_lift") if IS_RAINY else F.lit(1.0))
+        .withColumn("weather_boost", F.col("rain_boost") * F.col("temp_boost"))
         .withColumn("score", F.sqrt("popularity") * F.col("weather_boost") * F.col("regional_lean"))
-        .select("ko", "en", "score", "popularity", "weather_boost", "regional_lean", "tags")
+        .select("ko", "en", "score", "popularity", "rain_boost", "temp_boost", "regional_lean", "tags")
         .orderBy(F.desc("score"))
         .limit(TOP_N))
 
