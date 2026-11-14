@@ -1,5 +1,5 @@
 """
-momuk — Korean food calendar, 2016-2027
+momuk — Korean food calendar, 2016 to two years ahead
 
 Dates that Koreans tie to particular foods, so the notebook can measure each
 dish's "holiday lift" the same way it measures rain lift.
@@ -22,8 +22,11 @@ How the varying dates are found
     the day's heavenly stem from a fixed reference (2000-01-07 was a 甲子 day).
     Checked against published dates for 2023-2025.
   - 동지: winter solstice date in KST, from `ephem`.
-  - 수능: published exam dates (2017: postponed a week after the Pohang earthquake;
+  - 수능: published exam dates, added by hand (2017: postponed a week after the Pohang earthquake;
     2020: moved to December because of COVID-19).
+
+Every date except 수능 is calculated, so rerunning this script extends the calendar
+automatically. 수능 dates are added by hand to SUNEUNG when announced.
 
 Run      pip3 install holidays ephem && python3 build_calendar.py
 Output   calendar_kr.csv   (date, event, label) — upload to the Databricks volume
@@ -37,10 +40,13 @@ import ephem
 import holidays
 import pandas as pd
 
-YEARS = range(2016, 2028)
+# 2016 (start of the Naver data) through two years ahead, so future dates are always covered
+YEARS = range(2016, dt.date.today().year + 3)
 KST = dt.timedelta(hours=9)
 OUT = Path(__file__).resolve().parent / "calendar_kr.csv"
 
+# 수능 is the only date that can't be calculated: it is announced about a year ahead.
+# Add each new year here when it is announced (usually a Thursday in mid-November).
 SUNEUNG = {
     2016: "2016-11-17", 2017: "2017-11-23", 2018: "2018-11-15", 2019: "2019-11-14",
     2020: "2020-12-03", 2021: "2021-11-18", 2022: "2022-11-17", 2023: "2023-11-16",
@@ -123,6 +129,8 @@ def build() -> pd.DataFrame:
         add(f"{y}-04-14", "black_day", "블랙데이")
         if y in SUNEUNG:
             add(SUNEUNG[y], "suneung", "수능")
+        elif y <= dt.date.today().year + 1:
+            print(f"Note: no 수능 date for {y} yet — add it to SUNEUNG once announced.")
 
     cal = pd.DataFrame(rows).drop_duplicates(["date", "event"]).sort_values(["date", "event"])
     return cal
