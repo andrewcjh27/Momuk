@@ -47,6 +47,10 @@ bottom. Open questions are listed at the end, waiting for data or a decision.
 | 2026-10-31 | In testing, generic terms (냉면, 치킨) had the most searches and pushed out specific names | Only a specific name can be a dish's reference; generic terms must prove they behave like it |
 | 2026-10-31 | Result on real data: 177 candidates kept, 25 dropped. Main names 95%, spacing variants 100%, spellings 86%, synonyms 78%, generic terms 22% kept | 46 dishes now use a different or larger keyword set |
 | 2026-11-02 | 7 dishes (부리토, 똠얌꿍, 리조또, 인도커리, 브런치, 햄버거, 쌀국수) were sent to Google Trends with pipe-joined keywords, because an outdated script was still in use; four came back with almost no regional data | Google lookups use each dish's top validated keyword; the script re-fetches any dish whose keyword changed |
+| 2026-11-02 | Re-fetch finished: all 126 dishes have regional data under their top keyword; 123 cover all 16 provinces (fewest: 중화볶음밥, 10) | Shrinkage now affects only a handful of dishes |
+| 2026-11-14 | Province level dilutes city specialties: 추어탕 is famous in Namwon, but leans only 1.31 in Jeollabuk-do as a whole | Accept as a known limit of province data; city specialties are under-weighted, never wrongly boosted |
+| 2026-11-14 | Low-volume dishes give noisy leans: Chungcheongbuk-do's top dish is 부리토 (1.39); Ulsan's 닭칼국수 (2.29) has no obvious explanation | Treat as noise for now; consider a minimum national-interest threshold before trusting a dish's regional lean |
+| 2026-11-14 | Some raw leans are very large (막국수 5.18 in Gangwon, 밀면 4.01 in Busan), partly from tourists searching before a trip | Keep the 0.5–2.0 clip, so region can at most double a dish's score |
 | 2026-10-31 | 마라탕 and 로제떡볶이 sit near zero before their boom years | **Open** — see below |
 
 ## Personalization design

@@ -212,6 +212,32 @@ like 짬뽕, 마라탕 and 부대찌개.
 (콩나물국밥 ×1.59, 감자탕, 돼지국밥), and so do day-trip foods — 매운탕 ×1.67,
 막국수 ×1.65, 바지락칼국수 ×1.64 — dishes people tend to eat on an outing.
 
+**Regions.** Google Trends by province, turned into a *lean*: how much more a
+province searches a dish than the typical province does. Without being told
+any regional facts, the data recovered Korea's well-known local specialties:
+
+| Dish | Province | Lean | Known as |
+|---|---|---|---|
+| 막국수 | Gangwon | ×5.18 | 춘천 막국수 |
+| 밀면 | Busan | ×4.01 | Busan's cold noodle |
+| 돼지국밥 | Busan | ×4.00 | Busan's pork soup |
+| 곰탕 | Jeollanam-do | ×3.68 | 나주곰탕 |
+| 닭갈비 | Gangwon | ×3.51 | 춘천 닭갈비 |
+| 콩나물국밥 | Jeollabuk-do | ×2.78 | 전주 콩나물국밥 |
+| 평양냉면 | Seoul | ×2.27 | Seoul's 평양냉면 culture |
+| 찜닭 | Daegu / Gyeongsangbuk-do | ×2.29 / ×2.11 | 안동찜닭 |
+| 칼국수 | Daejeon | ×1.75 | Daejeon's 칼국수 |
+
+Clusters show up too: the southeast (Busan, Ulsan, Gyeongsangnam-do) leans
+toward 밀면 and 돼지국밥, and the capital region (Seoul, Gyeonggi, Incheon)
+toward 순대국밥.
+
+Two limits are visible as well. Province data dilutes city specialties —
+추어탕, famous in Namwon, leans only ×1.31 in Jeollabuk-do — and low-volume
+dishes produce noise, such as 부리토 topping Chungcheongbuk-do. Very large
+leans also partly reflect tourists searching before a trip, so the
+recommender clips regional leans to 0.5–2.0.
+
 ## Roadmap
 
 - **Now:** data cleaning, with each choice recorded in `DECISIONS.md` (dish
