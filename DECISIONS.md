@@ -47,6 +47,10 @@ bottom. Open questions are listed at the end, waiting for data or a decision.
 | 2026-10-31 | In testing, generic terms (냉면, 치킨) had the most searches and pushed out specific names | Only a specific name can be a dish's reference; generic terms must prove they behave like it |
 | 2026-10-31 | Result on real data: 177 candidates kept, 25 dropped. Main names 95%, spacing variants 100%, spellings 86%, synonyms 78%, generic terms 22% kept | 46 dishes now use a different or larger keyword set |
 | 2026-11-02 | 7 dishes (부리토, 똠얌꿍, 리조또, 인도커리, 브런치, 햄버거, 쌀국수) were sent to Google Trends with pipe-joined keywords, because an outdated script was still in use; four came back with almost no regional data | Google lookups use each dish's top validated keyword; the script re-fetches any dish whose keyword changed |
+| 2026-11-02 | Re-fetch finished: all 126 dishes have regional data under their top keyword; 123 cover all 16 provinces (fewest: 중화볶음밥, 10) | Shrinkage now affects only a handful of dishes |
+| 2026-11-14 | Province level dilutes city specialties: 추어탕 is famous in Namwon, but leans only 1.31 in Jeollabuk-do as a whole | Accept as a known limit of province data; city specialties are under-weighted, never wrongly boosted |
+| 2026-11-14 | Low-volume dishes give noisy leans: Chungcheongbuk-do's top dish is 부리토 (1.39); Ulsan's 닭칼국수 (2.29) has no obvious explanation | Treat as noise for now; consider a minimum national-interest threshold before trusting a dish's regional lean |
+| 2026-11-14 | Some raw leans are very large (막국수 5.18 in Gangwon, 밀면 4.01 in Busan), partly from tourists searching before a trip | Keep the 0.5–2.0 clip, so region can at most double a dish's score |
 | 2026-10-31 | 마라탕 and 로제떡볶이 sit near zero before their boom years | **Open** — see below |
 
 ## Personalization design
@@ -59,6 +63,18 @@ bottom. Open questions are listed at the end, waiting for data or a decision.
 | 2026-10-31 | Optional onboarding: up to 5 dishes you love, any you never want | Fixes day one. "Never" is a hard exclusion; "love" boosts similar dishes through catalog attributes (content-based filtering) |
 | 2026-10-31 | Personal patterns (e.g. 해장 on Saturday mornings) from the app's own logs | No public data can show an individual's habits |
 
+## Recommender v0
+
+| Date | Observation | Decision |
+|---|---|---|
+| 2026-11-14 | First sanity checks (Busan, rainy, solo vs Seoul, dry, group of 3): filters and regional dishes behave sensibly, but 밀면 — a cold noodle — ranked 5th on a rainy day | **Add temperature to the score.** `temp_boost` = a dish's average interest in today's 5 °C temperature bin ÷ its overall average, clipped to 0.5–2.0. Predictive, not causal: it captures season and temperature together |
+| 2026-11-14 | Regional lean (up to ×2) outweighs rain (≤ ×1.25): 곱창 beat 삼겹살 in Seoul despite half the national popularity | **Open** — soften region (lean^0.5) or lower the cap |
+| 2026-11-14 | Time of day matters: people eat 고기 less at lunch than dinner, and 브런치 at lunch, not dinner | **Add a time-of-day fit** from the catalog's `meal_*` columns: ×1.0 if the dish fits the current meal (morning 5–10, lunch 11–15, dinner 16–20, late night 21–4), ×0.3 if not. Soft, so off-meal dishes stay possible. Fixed 브런치 to count as lunch. Naver data is daily, so this comes from the catalog, not from search data |
+| 2026-11-14 | Weekend lift was measured but not used, and Korean food days (복날 → 삼계탕, 설날 → 떡국, 크리스마스 → 치킨 …) were missing | **Add a calendar boost.** Weekend lift on Sat/Sun. For food days, an event study: each event day vs the same weekday 1–3 weeks before and after (removes weekday and season), median across 2016–2026, clipped to 0.5–3.0. Calendar built by `build_calendar.py`: 설날/추석 from the lunar calendar, 복날 from solar terms and the 경일 rule (checked against published 2023–2025 dates), 동지, 크리스마스, 수능, 삼겹살데이, 블랙데이 |
+| 2026-11-14 | Payday (25th–29th) was in the first calendar draft | **Removed from the pipeline calendar** — a monthly 5-day window isn't a food day, and its effect belongs to budget rather than dish choice. The app's own payday term is unchanged |
+| 2026-11-14 | Fried chicken never appears, even for a hungry group | Caused by the keyword issue below; settle that first |
+| 2026-11-14 | 파전 and 김치전 are hidden from solo diners (`solo = 0`), even on rainy days | **Open** — review `solo` for 전 dishes |
+
 ## Open questions
 
 - **Dish start dates:** from when should each newer dish (마라탕, 로제떡볶이, 마라샹궈…) count? Zeros before a boom aren't "low interest".
@@ -70,3 +86,5 @@ bottom. Open questions are listed at the end, waiting for data or a decision.
 - **Fried chicken is still under-measured:** 후라이드 and 프라이드치킨 behaved differently and 치킨 is generic, so 후라이드치킨 remains alone. Split 치킨 across the three chicken dishes, or merge them?
 - **Holidays and COVID (2020–2022):** flag, model, or exclude?
 - **Meal-time columns:** drafted by rule; review dish by dish.
+- **Event lift cap (3.0):** big food days may exceed it (떡국 on 설날). Raise it, or keep it so one day can't dominate?
+- **Festival days ≠ eating out:** on 설날 and 추석 many people cook at home and many restaurants close; should the app recommend 떡국 to eat out, or treat these days differently?
