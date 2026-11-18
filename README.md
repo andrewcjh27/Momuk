@@ -259,23 +259,23 @@ and after (removing weekday and season effects), across 2016–2026:
 
 | Link | Lift |
 |---|---|
-| 복날 → 삼계탕 | ×3 or more |
-| 설날 → 떡국 | ×3 or more |
-| 삼겹살데이 → 삼겹살 | ×3 or more |
+| 복날 → 삼계탕 | **×9.73** |
+| 설날 → 떡국 | **×8.16** |
+| 삼겹살데이 → 삼겹살 | **×4.01** |
 | 블랙데이 → 짜장면 | ×2.14 |
 | 크리스마스 → 피자 | ×1.65 |
 | 설날 → 만둣국 | ×1.58 |
 | 크리스마스 → 치킨 | ×1.18 — chicken is under-measured (keyword issue) |
 | 추석 → 김치전 | ×0.76 — not confirmed |
 
-The three largest reached the score's ×3 cap; their true sizes are now
-reported separately and will replace "×3 or more" on the next run.
+These are true sizes. The recommender caps food-day boosts at ×3 so one day
+can't take over a whole list, but the findings report the uncapped effect.
 
 The surprises were more interesting than the folklore:
 
 - **복날 is a chicken day, not just a 삼계탕 day:** 닭칼국수 ×2.65, 초계국수
   ×2.55, 닭볶음탕 ×1.82, 찜닭 ×1.73.
-- **Christmas is a date-night holiday:** 스테이크 ×3 or more and four pastas
+- **Christmas is a date-night holiday:** 스테이크 ×3.59 and four pastas
   (×1.95–2.62) top the list, above 치킨 and 피자.
 - **Holidays bring travel food:** on 설날 and 추석, 막국수, 매운탕 and 밀면 rise —
   the same outing foods that rise on weekends. On 추석, pizza (×1.84) suggests
