@@ -220,7 +220,7 @@ food_days = spark.createDataFrame([
     ("seollal",         "tteokguk",     "설날 → 떡국"),
     ("seollal",         "manduguk",     "설날 → 만둣국"),
     ("chuseok",         "kimchijeon",   "추석 → 전"),
-    ("christmas",       "fried-chicken", "크리스마스 → 치킨"),
+    ("christmas",       "chicken",      "크리스마스 → 치킨"),
     ("christmas",       "pizza",        "크리스마스 → 피자"),
     ("samgyeopsal_day", "samgyeopsal",  "삼겹살데이 → 삼겹살"),
     ("black_day",       "jjajangmyeon", "블랙데이 → 짜장면"),

@@ -35,6 +35,7 @@ sources' terms apply to it. The scripts recreate it.
 | `ingest_local.py` | Naver trends in batches of 4 dishes + the 김치찌개 anchor, and province weather. `--naver-only`, `--weather-only`; weather resumes after rate limits |
 | `validate_keywords.py` | Keyword entity resolution: keeps a candidate keyword only if it behaves like the dish in search data. Writes `search_keyword` into `momuk-data.csv` |
 | `keyword_candidates.csv` | 202 hand-listed candidates (spellings, spacing, synonyms, generic, ambiguous) |
+| `merge_chicken.py` | One-off: merges 후라이드치킨 / 양념치킨 / 간장치킨 into one dish, 치킨 (see DECISIONS.md) |
 | `ingest_tourism_trends.py` | Locals or visitors? Compares each regional dish's in-province share of searches in travel weeks (summer vacation, 설날, 추석) vs other weeks, with 김치찌개 as a control. Writes `reports/visitor_signature.csv` |
 | `build_calendar.py` → `calendar_kr.csv` | Korean food calendar 2016–2027: 설날, 추석, 복날, 크리스마스, 수능, 삼겹살데이, 블랙데이 |
 | `ingest_google_trends.py` | Province profile for each dish's top keyword. Resumable; re-fetches dishes whose keyword changed |
