@@ -77,9 +77,21 @@ SUMMER = ((7, 25), (8, 15))
 
 
 # ---------------------------------------------------------------- fetching
+def allow_province_codes() -> None:
+    """trendspyg only accepts countries and US states, but Google Trends itself takes
+    province codes like KR-42 (the same codes its regional data returns). Skip the
+    library's check so those codes reach Google."""
+    import importlib
+    for name in ("trendspyg.explore", "trendspyg.downloader"):
+        mod = importlib.import_module(name)
+        if hasattr(mod, "validate_geo"):
+            mod.validate_geo = lambda geo: geo
+
+
 def fetch(keyword: str, geo: str) -> list[dict]:
     from trendspyg import download_google_trends_explore
     from ingest_google_trends import call_supported
+    allow_province_codes()
     env = call_supported(download_google_trends_explore, keyword, geo=geo, timeframe=TIMEFRAME,
                          engine="auto", cache="disk", cookies="disk")
     return env.get("interest_over_time", []) or []
