@@ -7,4 +7,5 @@ pipeline/raw/
 __pycache__/
 *.pyc
 *.backup.csv
+*.before-chicken.csv
 *-excel.csv

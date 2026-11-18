@@ -113,9 +113,7 @@ risotto,리조또,Risotto,양식,hot,1,0,2,2,sit,1,0,2,밥,0,1,1,0,리조또|리
 salad,샐러드,Salad,양식,cold,0,0,0,2,fast,1,0,2,다이어트|혼밥,0,1,0,0,샐러드
 sandwich,샌드위치,Sandwich,양식,room,0,0,1,1,fast,1,0,3,혼밥|다이어트,1,1,0,0,샌드위치
 brunch,브런치,Brunch plate,양식,hot,0,0,2,3,sit,0,1,2,,1,1,0,0,브런치카페|브런치맛집
-fried-chicken,후라이드치킨,Fried chicken,양식,hot,0,0,3,2,sit,0,1,3,야식|술안주,0,0,1,1,후라이드치킨
-yangnyeom-chicken,양념치킨,Sweet-spicy chicken,양식,hot,0,2,3,2,sit,0,1,3,야식|술안주,0,0,1,1,양념치킨
-ganjang-chicken,간장치킨,Soy-glazed chicken,양식,hot,0,0,3,2,sit,0,1,3,야식|술안주,0,0,1,1,간장치킨
+chicken,치킨,Korean fried chicken,양식,hot,0,1,3,2,sit,0,1,3,야식|술안주,0,0,1,1,치킨|후라이드치킨|양념치킨|간장치킨
 pho,쌀국수,Pho,아시안,hot,3,0,1,2,fast,1,0,3,국물|면|해장|다이어트,1,1,1,0,쌀국수|베트남쌀국수
 buncha,분짜,Bun cha,아시안,room,1,1,2,2,sit,1,0,1,면,0,1,1,0,분짜
 padthai,팟타이,Pad thai,아시안,hot,0,1,2,2,fast,1,0,2,면,0,1,1,0,팟타이

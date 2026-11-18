@@ -28,7 +28,7 @@ VOL = f"/Volumes/{CATALOG}/{SCHEMA}/raw"
 
 (spark.read.option("header", True).option("inferSchema", True).option("encoding", "UTF-8")
  .csv(f"{VOL}/google_region_raw.csv")
- .write.mode("overwrite").saveAsTable("bronze_google_region"))
+ .write.mode("overwrite").option("overwriteSchema", "true").saveAsTable("bronze_google_region"))
 
 print("rows:", spark.table("bronze_google_region").count(),
       "| dishes:", spark.table("bronze_google_region").select("dish_id").distinct().count())
@@ -58,7 +58,7 @@ lean = (reg
     .withColumn("lean_shrunk", F.lit(1.0) + F.col("reliability") * (F.col("lean") - 1))
     .withColumn("lean_shrunk", F.greatest(F.lit(0.5), F.least(F.lit(2.0), F.col("lean_shrunk")))))
 
-lean.write.mode("overwrite").saveAsTable("silver_region_lean")
+lean.write.mode("overwrite").option("overwriteSchema", "true").saveAsTable("silver_region_lean")
 
 # Data quality: dishes Google only sees in a few provinces (their leans are mostly shrunk away)
 display(lean.select("dish_id", "keyword", "n_regions").distinct().orderBy("n_regions"))
@@ -72,7 +72,7 @@ display(lean.select("dish_id", "keyword", "n_regions").distinct().orderBy("n_reg
 menu = spark.table("bronze_menu").withColumnRenamed("id", "dish_id")
 gold_lean = (spark.table("silver_region_lean")
              .join(menu.select("dish_id", "ko", "cuisine", "tags", "solo", "share", "speed"), "dish_id"))
-gold_lean.write.mode("overwrite").saveAsTable("gold_region_lean")
+gold_lean.write.mode("overwrite").option("overwriteSchema", "true").saveAsTable("gold_region_lean")
 
 # COMMAND ----------
 
@@ -145,7 +145,7 @@ temp_boost = (t.groupBy("dish_id", "temp_bin")
               .filter((F.col("overall_interest") > 0) & (F.col("days") >= MIN_DAYS))
               .withColumn("temp_boost", F.col("bin_interest") / F.col("overall_interest"))
               .withColumn("temp_boost", F.greatest(F.lit(0.5), F.least(F.lit(2.0), F.col("temp_boost")))))
-temp_boost.write.mode("overwrite").saveAsTable("gold_temp_boost")
+temp_boost.write.mode("overwrite").option("overwriteSchema", "true").saveAsTable("gold_temp_boost")
 
 # Sanity check: cold dishes should rise with temperature, hot soups should fall
 check = ["mul-naengmyeon", "milmyeon", "kongguksu", "samgyetang", "seolleongtang", "eomuk", "tteokguk", "kalguksu"]
@@ -164,7 +164,8 @@ display(spark.table("gold_temp_boost").filter(F.col("dish_id").isin(check))
 # MAGIC **Event lift** — for days like 복날 or 설날, an *event study*: each event day is compared with the
 # MAGIC **same weekday 1, 2 and 3 weeks before and after** (skipping baseline days that are themselves events).
 # MAGIC Same weekday removes the weekday effect; nearby weeks remove season and temperature. The lift is the
-# MAGIC median ratio across all event days 2016-2026, clipped to 0.5–3.0 (food days can be big).
+# MAGIC median ratio across all event days 2016-2026. Findings show the **true lift** (`event_lift_raw`);
+# MAGIC the score uses a copy clipped to 0.5–3.0, so one food day can't take over a whole list.
 # MAGIC
 # MAGIC Needs `calendar_kr.csv` (from `build_calendar.py`) in the `raw` volume.
 
@@ -172,7 +173,7 @@ display(spark.table("gold_temp_boost").filter(F.col("dish_id").isin(check))
 
 (spark.read.option("header", True).option("encoding", "UTF-8").csv(f"{VOL}/calendar_kr.csv")
  .withColumn("date", F.to_date("date"))
- .write.mode("overwrite").saveAsTable("bronze_calendar"))
+ .write.mode("overwrite").option("overwriteSchema", "true").saveAsTable("bronze_calendar"))
 cal = spark.table("bronze_calendar")
 g = spark.table("gold_dish_day")
 
@@ -184,7 +185,7 @@ weekend_lift = (cw.groupBy("dish_id", "month", "is_rainy").pivot("is_weekend", [
                 .withColumn("ratio", F.col("weekend") / F.col("weekday"))
                 .groupBy("dish_id").agg(F.expr("percentile_approx(ratio, 0.5)").alias("weekend_lift"))
                 .withColumn("weekend_lift", F.greatest(F.lit(0.5), F.least(F.lit(2.0), F.col("weekend_lift")))))
-weekend_lift.write.mode("overwrite").saveAsTable("gold_weekend_lift")
+weekend_lift.write.mode("overwrite").option("overwriteSchema", "true").saveAsTable("gold_weekend_lift")
 
 # event lift (event study against the same weekday in surrounding weeks)
 occ = cal.select("event", "date").distinct()
@@ -201,9 +202,10 @@ event_lift = (occ.join(values, "date")
               .filter(F.col("baseline") > 0)
               .withColumn("ratio", F.col("interest") / F.col("baseline"))
               .groupBy("dish_id", "event")
-              .agg(F.expr("percentile_approx(ratio, 0.5)").alias("event_lift"), F.count("*").alias("event_days"))
-              .withColumn("event_lift", F.greatest(F.lit(0.5), F.least(F.lit(3.0), F.col("event_lift")))))
-event_lift.write.mode("overwrite").saveAsTable("gold_event_lift")
+              .agg(F.expr("percentile_approx(ratio, 0.5)").alias("event_lift_raw"), F.count("*").alias("event_days"))
+              # raw = the true effect, for findings; event_lift = clipped, used only in the score
+              .withColumn("event_lift", F.greatest(F.lit(0.5), F.least(F.lit(3.0), F.col("event_lift_raw")))))
+event_lift.write.mode("overwrite").option("overwriteSchema", "true").saveAsTable("gold_event_lift")
 
 # COMMAND ----------
 
@@ -218,20 +220,21 @@ food_days = spark.createDataFrame([
     ("seollal",         "tteokguk",     "설날 → 떡국"),
     ("seollal",         "manduguk",     "설날 → 만둣국"),
     ("chuseok",         "kimchijeon",   "추석 → 전"),
-    ("christmas",       "fried-chicken", "크리스마스 → 치킨"),
+    ("christmas",       "chicken",      "크리스마스 → 치킨"),
     ("christmas",       "pizza",        "크리스마스 → 피자"),
     ("samgyeopsal_day", "samgyeopsal",  "삼겹살데이 → 삼겹살"),
     ("black_day",       "jjajangmyeon", "블랙데이 → 짜장면"),
 ], ["event", "dish_id", "link"])
 display(food_days.join(spark.table("gold_event_lift"), ["event", "dish_id"], "left")
-        .select("link", "event_lift", "event_days").orderBy(F.desc("event_lift")))
+        .select("link", F.round("event_lift_raw", 2).alias("true_lift"), "event_lift", "event_days")
+        .orderBy(F.desc("event_lift_raw")))
 
 # Top 5 dishes for every event — including ones nobody predicted
-rank_e = W.partitionBy("event").orderBy(F.desc("event_lift"))
+rank_e = W.partitionBy("event").orderBy(F.desc("event_lift_raw"))
 display(spark.table("gold_event_lift").join(menu.select("dish_id", "ko"), "dish_id")
         .withColumn("rank", F.row_number().over(rank_e)).filter(F.col("rank") <= 5)
         .groupBy("event").agg(F.concat_ws(", ", F.collect_list(
-            F.concat(F.col("ko"), F.lit(" ("), F.format_number("event_lift", 2), F.lit(")")))).alias("top_5"))
+            F.concat(F.col("ko"), F.lit(" ("), F.format_number("event_lift_raw", 2), F.lit(")")))).alias("top_5"))
         .orderBy("event"))
 
 # COMMAND ----------
@@ -252,7 +255,7 @@ display(spark.table("gold_event_lift").join(menu.select("dish_id", "ko"), "dish_
 # MAGIC   otherwise `OFF_MEAL` (0.3). Soft, not a filter: 삼겹살 at lunch is possible, just much less likely.
 # MAGIC   Naver data is daily, so this comes from the catalog, not from search data.
 # MAGIC - **calendar boost** — weekend lift on Saturdays and Sundays, times the event lift of any food day
-# MAGIC   on `DATE` (설날, 추석, 복날, 동지, 크리스마스, 수능, 삼겹살데이, 블랙데이).
+# MAGIC   on `DATE` (설날, 추석, 복날, 크리스마스, 수능, 삼겹살데이, 블랙데이).
 # MAGIC - **the 3 questions** filter the menu first: party size, hunger, budget.
 # MAGIC
 # MAGIC Change the inputs in the next cell and rerun it to see recommendations shift.

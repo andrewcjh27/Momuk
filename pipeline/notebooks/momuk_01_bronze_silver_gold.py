@@ -40,9 +40,9 @@ def read_csv(name):
     return (spark.read.option("header", True).option("inferSchema", True)
             .option("encoding", "UTF-8").csv(f"{VOL}/{name}"))
 
-read_csv("momuk-data.csv").write.mode("overwrite").saveAsTable("bronze_menu")
-read_csv("naver_trends_raw.csv").write.mode("overwrite").saveAsTable("bronze_naver_trends")
-read_csv("weather_raw.csv").write.mode("overwrite").saveAsTable("bronze_weather")
+read_csv("momuk-data.csv").write.mode("overwrite").option("overwriteSchema", "true").saveAsTable("bronze_menu")
+read_csv("naver_trends_raw.csv").write.mode("overwrite").option("overwriteSchema", "true").saveAsTable("bronze_naver_trends")
+read_csv("weather_raw.csv").write.mode("overwrite").option("overwriteSchema", "true").saveAsTable("bronze_weather")
 
 for t in ["bronze_menu", "bronze_naver_trends", "bronze_weather"]:
     print(t, spark.table(t).count())
@@ -87,7 +87,7 @@ silver_interest = (dishes.crossJoin(dates)
                    .withColumn("was_missing", F.col("interest").isNull())
                    .fillna({"interest": 0.0}))
 
-silver_interest.write.mode("overwrite").saveAsTable("silver_dish_interest")
+silver_interest.write.mode("overwrite").option("overwriteSchema", "true").saveAsTable("silver_dish_interest")
 
 # Data-quality check: dishes that are mostly zeros are too rare (or badly named) to model yet
 quality = (silver_interest.groupBy("dish_id")
@@ -125,13 +125,13 @@ def add_flags(df):
 
 # Province level
 silver_weather_province = add_flags(w)
-silver_weather_province.write.mode("overwrite").saveAsTable("silver_weather_province")
+silver_weather_province.write.mode("overwrite").option("overwriteSchema", "true").saveAsTable("silver_weather_province")
 
 # National level (population-weighted)
 weighted = w.groupBy("date").agg(
     *[(F.sum(F.col(c) * F.col("population_m")) / F.sum("population_m")).alias(c) for c in num_cols])
 silver_weather = add_flags(weighted)
-silver_weather.write.mode("overwrite").saveAsTable("silver_weather_daily")
+silver_weather.write.mode("overwrite").option("overwriteSchema", "true").saveAsTable("silver_weather_daily")
 
 print("provinces:", silver_weather_province.select("geo_code").distinct().count())
 display(silver_weather.orderBy(F.desc("date")).limit(10))
@@ -152,7 +152,7 @@ gold = (spark.table("silver_dish_interest")
         .withColumn("dow", F.dayofweek("date"))             # 1 = Sunday … 7 = Saturday
         .withColumn("is_weekend", F.col("dow").isin(1, 7).cast("int")))
 
-gold.write.mode("overwrite").saveAsTable("gold_dish_day")
+gold.write.mode("overwrite").option("overwriteSchema", "true").saveAsTable("gold_dish_day")
 print("gold_dish_day rows:", spark.table("gold_dish_day").count())
 
 # COMMAND ----------
