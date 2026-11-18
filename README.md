@@ -241,6 +241,19 @@ dishes produce noise, such as 부리토 topping Chungcheongbuk-do. Very large
 leans also partly reflect tourists searching before a trip, so the
 recommender clips regional leans to 0.5–2.0.
 
+**Locals or visitors?** A regional lean counts every search made *in* a
+province, so it could reflect tourists rather than local eating. A
+tourist-season test checked whether each dish's in-province share of searches
+rises in travel weeks (summer vacation, 설날, 추석). It doesn't, measurably:
+for the 8 dishes with enough data the ratio sits between ×0.99 and ×1.08, and
+every interval includes "no change" except 칼국수 in Daejeon, which barely
+excludes it (×1.08, 95% interval 1.00–1.16). 돼지국밥 in Busan is the clearest
+case of steady, local-looking demand. So seasonal tourism doesn't explain the
+regional leans, and they stay unadjusted. The test can't see weekend trips,
+which happen year-round, and four pairs — 대구탕 in Busan, 곰탕 in
+Jeollanam-do, 콩나물국밥 in Jeollabuk-do and the 김치찌개 control in Gangwon —
+had too few weekly searches to test.
+
 ## Roadmap
 
 - **Now:** data cleaning, with each choice recorded in `DECISIONS.md` (dish

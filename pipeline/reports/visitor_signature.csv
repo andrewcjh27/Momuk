@@ -1,0 +1,10 @@
+dish,dish_id,province,control,visitor_ratio,ci_low,ci_high,travel_weeks,other_weeks,zero_weeks_dropped,verdict
+칼국수,kalguksu,KR-30,False,1.076,1.001,1.162,33,220,7,unclear
+닭갈비,dakgalbi,KR-42,False,1.072,0.962,1.188,30,157,73,unclear
+평양냉면,pyeongyang-naengmyeon,KR-11,False,1.047,0.955,1.138,31,201,28,unclear
+어묵,eomuk,KR-26,False,1.041,0.968,1.123,29,203,28,unclear
+밀면,milmyeon,KR-26,False,1.037,0.96,1.121,32,183,45,unclear
+막국수,makguksu,KR-42,False,1.028,0.924,1.14,33,177,50,unclear
+찜닭,jjimdak,KR-47,False,0.997,0.872,1.148,5,66,189,unclear
+돼지국밥,dwaeji-gukbap,KR-26,False,0.995,0.912,1.083,33,222,5,steady (local)
+김치찌개,kimchi-jjigae,KR-26,True,1.029,0.943,1.136,12,140,108,unclear
