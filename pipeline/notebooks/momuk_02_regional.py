@@ -28,7 +28,7 @@ VOL = f"/Volumes/{CATALOG}/{SCHEMA}/raw"
 
 (spark.read.option("header", True).option("inferSchema", True).option("encoding", "UTF-8")
  .csv(f"{VOL}/google_region_raw.csv")
- .write.mode("overwrite").saveAsTable("bronze_google_region"))
+ .write.mode("overwrite").option("overwriteSchema", "true").saveAsTable("bronze_google_region"))
 
 print("rows:", spark.table("bronze_google_region").count(),
       "| dishes:", spark.table("bronze_google_region").select("dish_id").distinct().count())
@@ -58,7 +58,7 @@ lean = (reg
     .withColumn("lean_shrunk", F.lit(1.0) + F.col("reliability") * (F.col("lean") - 1))
     .withColumn("lean_shrunk", F.greatest(F.lit(0.5), F.least(F.lit(2.0), F.col("lean_shrunk")))))
 
-lean.write.mode("overwrite").saveAsTable("silver_region_lean")
+lean.write.mode("overwrite").option("overwriteSchema", "true").saveAsTable("silver_region_lean")
 
 # Data quality: dishes Google only sees in a few provinces (their leans are mostly shrunk away)
 display(lean.select("dish_id", "keyword", "n_regions").distinct().orderBy("n_regions"))
@@ -72,7 +72,7 @@ display(lean.select("dish_id", "keyword", "n_regions").distinct().orderBy("n_reg
 menu = spark.table("bronze_menu").withColumnRenamed("id", "dish_id")
 gold_lean = (spark.table("silver_region_lean")
              .join(menu.select("dish_id", "ko", "cuisine", "tags", "solo", "share", "speed"), "dish_id"))
-gold_lean.write.mode("overwrite").saveAsTable("gold_region_lean")
+gold_lean.write.mode("overwrite").option("overwriteSchema", "true").saveAsTable("gold_region_lean")
 
 # COMMAND ----------
 
@@ -145,7 +145,7 @@ temp_boost = (t.groupBy("dish_id", "temp_bin")
               .filter((F.col("overall_interest") > 0) & (F.col("days") >= MIN_DAYS))
               .withColumn("temp_boost", F.col("bin_interest") / F.col("overall_interest"))
               .withColumn("temp_boost", F.greatest(F.lit(0.5), F.least(F.lit(2.0), F.col("temp_boost")))))
-temp_boost.write.mode("overwrite").saveAsTable("gold_temp_boost")
+temp_boost.write.mode("overwrite").option("overwriteSchema", "true").saveAsTable("gold_temp_boost")
 
 # Sanity check: cold dishes should rise with temperature, hot soups should fall
 check = ["mul-naengmyeon", "milmyeon", "kongguksu", "samgyetang", "seolleongtang", "eomuk", "tteokguk", "kalguksu"]
@@ -173,7 +173,7 @@ display(spark.table("gold_temp_boost").filter(F.col("dish_id").isin(check))
 
 (spark.read.option("header", True).option("encoding", "UTF-8").csv(f"{VOL}/calendar_kr.csv")
  .withColumn("date", F.to_date("date"))
- .write.mode("overwrite").saveAsTable("bronze_calendar"))
+ .write.mode("overwrite").option("overwriteSchema", "true").saveAsTable("bronze_calendar"))
 cal = spark.table("bronze_calendar")
 g = spark.table("gold_dish_day")
 
@@ -185,7 +185,7 @@ weekend_lift = (cw.groupBy("dish_id", "month", "is_rainy").pivot("is_weekend", [
                 .withColumn("ratio", F.col("weekend") / F.col("weekday"))
                 .groupBy("dish_id").agg(F.expr("percentile_approx(ratio, 0.5)").alias("weekend_lift"))
                 .withColumn("weekend_lift", F.greatest(F.lit(0.5), F.least(F.lit(2.0), F.col("weekend_lift")))))
-weekend_lift.write.mode("overwrite").saveAsTable("gold_weekend_lift")
+weekend_lift.write.mode("overwrite").option("overwriteSchema", "true").saveAsTable("gold_weekend_lift")
 
 # event lift (event study against the same weekday in surrounding weeks)
 occ = cal.select("event", "date").distinct()
@@ -205,7 +205,7 @@ event_lift = (occ.join(values, "date")
               .agg(F.expr("percentile_approx(ratio, 0.5)").alias("event_lift_raw"), F.count("*").alias("event_days"))
               # raw = the true effect, for findings; event_lift = clipped, used only in the score
               .withColumn("event_lift", F.greatest(F.lit(0.5), F.least(F.lit(3.0), F.col("event_lift_raw")))))
-event_lift.write.mode("overwrite").saveAsTable("gold_event_lift")
+event_lift.write.mode("overwrite").option("overwriteSchema", "true").saveAsTable("gold_event_lift")
 
 # COMMAND ----------
 
