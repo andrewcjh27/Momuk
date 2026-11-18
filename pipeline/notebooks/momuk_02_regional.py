@@ -164,7 +164,8 @@ display(spark.table("gold_temp_boost").filter(F.col("dish_id").isin(check))
 # MAGIC **Event lift** — for days like 복날 or 설날, an *event study*: each event day is compared with the
 # MAGIC **same weekday 1, 2 and 3 weeks before and after** (skipping baseline days that are themselves events).
 # MAGIC Same weekday removes the weekday effect; nearby weeks remove season and temperature. The lift is the
-# MAGIC median ratio across all event days 2016-2026, clipped to 0.5–3.0 (food days can be big).
+# MAGIC median ratio across all event days 2016-2026. Findings show the **true lift** (`event_lift_raw`);
+# MAGIC the score uses a copy clipped to 0.5–3.0, so one food day can't take over a whole list.
 # MAGIC
 # MAGIC Needs `calendar_kr.csv` (from `build_calendar.py`) in the `raw` volume.
 
@@ -201,8 +202,9 @@ event_lift = (occ.join(values, "date")
               .filter(F.col("baseline") > 0)
               .withColumn("ratio", F.col("interest") / F.col("baseline"))
               .groupBy("dish_id", "event")
-              .agg(F.expr("percentile_approx(ratio, 0.5)").alias("event_lift"), F.count("*").alias("event_days"))
-              .withColumn("event_lift", F.greatest(F.lit(0.5), F.least(F.lit(3.0), F.col("event_lift")))))
+              .agg(F.expr("percentile_approx(ratio, 0.5)").alias("event_lift_raw"), F.count("*").alias("event_days"))
+              # raw = the true effect, for findings; event_lift = clipped, used only in the score
+              .withColumn("event_lift", F.greatest(F.lit(0.5), F.least(F.lit(3.0), F.col("event_lift_raw")))))
 event_lift.write.mode("overwrite").saveAsTable("gold_event_lift")
 
 # COMMAND ----------
@@ -224,14 +226,15 @@ food_days = spark.createDataFrame([
     ("black_day",       "jjajangmyeon", "블랙데이 → 짜장면"),
 ], ["event", "dish_id", "link"])
 display(food_days.join(spark.table("gold_event_lift"), ["event", "dish_id"], "left")
-        .select("link", "event_lift", "event_days").orderBy(F.desc("event_lift")))
+        .select("link", F.round("event_lift_raw", 2).alias("true_lift"), "event_lift", "event_days")
+        .orderBy(F.desc("event_lift_raw")))
 
 # Top 5 dishes for every event — including ones nobody predicted
-rank_e = W.partitionBy("event").orderBy(F.desc("event_lift"))
+rank_e = W.partitionBy("event").orderBy(F.desc("event_lift_raw"))
 display(spark.table("gold_event_lift").join(menu.select("dish_id", "ko"), "dish_id")
         .withColumn("rank", F.row_number().over(rank_e)).filter(F.col("rank") <= 5)
         .groupBy("event").agg(F.concat_ws(", ", F.collect_list(
-            F.concat(F.col("ko"), F.lit(" ("), F.format_number("event_lift", 2), F.lit(")")))).alias("top_5"))
+            F.concat(F.col("ko"), F.lit(" ("), F.format_number("event_lift_raw", 2), F.lit(")")))).alias("top_5"))
         .orderBy("event"))
 
 # COMMAND ----------
@@ -252,7 +255,7 @@ display(spark.table("gold_event_lift").join(menu.select("dish_id", "ko"), "dish_
 # MAGIC   otherwise `OFF_MEAL` (0.3). Soft, not a filter: 삼겹살 at lunch is possible, just much less likely.
 # MAGIC   Naver data is daily, so this comes from the catalog, not from search data.
 # MAGIC - **calendar boost** — weekend lift on Saturdays and Sundays, times the event lift of any food day
-# MAGIC   on `DATE` (설날, 추석, 복날, 동지, 크리스마스, 수능, 삼겹살데이, 블랙데이).
+# MAGIC   on `DATE` (설날, 추석, 복날, 크리스마스, 수능, 삼겹살데이, 블랙데이).
 # MAGIC - **the 3 questions** filter the menu first: party size, hunger, budget.
 # MAGIC
 # MAGIC Change the inputs in the next cell and rerun it to see recommendations shift.
