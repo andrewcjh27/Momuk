@@ -44,6 +44,7 @@ sources' terms apply to it. The scripts recreate it.
 | `notebooks/momuk_01_bronze_silver_gold.py` | Databricks: anchor rescaling, missing-day fill, weather (national + province, rainy day by population share), cleaning (start dates, spike caps, coarse flags), gold table, rain lift, weekend lift |
 | `notebooks/momuk_02_regional.py` | Databricks: regional lean with shrinkage, regional hypotheses, temperature boost, weekend and food-day lifts, recommender v0 |
 | `notebooks/momuk_03_checks.py` | Databricks: data checks run after 01 and 02 (catalog, interest, weather, lifts). Logs every result to `ops_run_log` and fails the run on errors |
+| `notebooks/momuk_04_export.py` | Databricks, last in the weekly job: exports popularity, rain/temperature/weekend/food-day lifts, regional leans, catalog and the food-day calendar to `momuk-model.json`, checks it, and commits it to GitHub for the website (needs the `momuk/github_token` secret) |
 | `reports/keyword_validation.csv` | Every keyword candidate with volume share, change correlation, string similarity, decision and reason |
 
 ## Run it
@@ -60,7 +61,7 @@ pip3 install holidays ephem && python3 build_calendar.py
 Upload `momuk-data.csv`, `calendar_kr.csv` and `raw/*.csv` to the Databricks volume
 `/Volumes/workspace/momuk/raw`, then run notebook 01, then 02, then 03 (checks).
 
-**Weekly updates** run in Databricks as one job: `00 ingest → 01 → 02 → 03 checks`
+**Weekly updates** run in Databricks as one job: `00 ingest → 01 → 02 → 03 checks → 04 export`
 (checks with the parameter `automated=true`, so stale data fails the run). The
 laptop scripts are only needed for the first full download and for Google Trends.
 
