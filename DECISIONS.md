@@ -58,6 +58,7 @@ bottom. Open questions are listed at the end, waiting for data or a decision.
 | 2026-11-21 | 냉면 (17× the searches, change correlation 0.74) had been merged into 물냉면's keywords | **Keep 냉면 in 물냉면.** When people say 냉면 they mostly mean 물냉면 |
 | 2026-11-21 | 카레 (4.1× the searches) had been merged into 카레라이스 — does it also cover Indian curry? | **Plain 카레 counts as 카레라이스; Indian curry stays separate.** In Korea, plain 카레 usually means the everyday Japanese/Korean-style curry rice, so 카레라이스 is searched as `카레\|일본카레\|카레라이스`, and 커리 (인도 카레) keeps its own `인도커리\|인도카레` |
 | 2026-11-21 | Should food days like 설날 and 추석, when many people eat at home, be handled differently? | **Leave as is.** People eating at home won't be looking at a recommendation anyway |
+| 2026-11-21 | Holiday foods missing from the catalog (송편, 모둠전) | **Not added.** 추석 → 김치전 stays as measured |
 | 2026-10-31 | 마라탕 and 로제떡볶이 sit near zero before their boom years | **Open** — see below |
 
 ## Personalization design
@@ -93,4 +94,4 @@ bottom. Open questions are listed at the end, waiting for data or a decision.
 - **Rainy-day definition:** national average rain ≥ 1 mm, or share of the population that got rain?
 - **Holidays and COVID (2020–2022):** flag, model, or exclude?
 - **Meal-time columns:** drafted by rule; review dish by dish.
-- **Holiday foods missing from the catalog:** 송편, 모둠전 / 동그랑땡, 팥죽. Add them so food days can recommend them?
+- **팥죽:** add it to the catalog and bring back 동지, applying its boost only to 팥죽?
