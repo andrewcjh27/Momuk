@@ -257,6 +257,7 @@ body {
 
 /* why chips — the product's whole argument, so they get the payoff timing */
 .why { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--s2); margin-top: var(--s4); }
+.why[hidden] { display: none; }
 .why li {
   list-style: none;
   font-size: 13px; font-weight: 700;

@@ -120,6 +120,9 @@
   var current = 'landing';
   var answered = 0;          // drives the bowl fill
   var DEBUG = /[?&]debug=1/.test(location.search);
+  // The reason chips under the dish are hidden for now (decided 2026-11-22). The engine still
+  // computes them; ?debug=1 shows the full breakdown, and flipping this brings them back.
+  var SHOW_REASONS = false;
 
   // ── screens ────────────────────────────────────────────
   function show(name) {
@@ -281,7 +284,8 @@
 
     var why = $('#why');
     why.innerHTML = '';
-    out.why.forEach(function (w, i) {
+    why.hidden = !SHOW_REASONS;
+    if (SHOW_REASONS) out.why.forEach(function (w, i) {
       var li = document.createElement('li');
       li.className = 'reveal' + (w.folklore ? ' is-folk' : '');
       li.style.setProperty('--i', 3 + i);
