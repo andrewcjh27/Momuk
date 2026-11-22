@@ -158,6 +158,15 @@
       f: function (d, c) { return { v: c.party >= 3 && !d.share ? -0.4 : 0 }; }   // solo is a filter, see rank()
     },
     {
+      // A group that says price doesn't matter leans toward a proper meal out: ×1.5 for ₩20k+ dishes,
+      // ×1.2 for ₩10–20k. Alone, 상관없어 means just that — no lean.
+      key: 'treat',
+      f: function (d, c) {
+        if (c.budget < 3 || c.party < 2) return { v: 0 };
+        return { v: d.price === 3 ? ln(1.5) : d.price === 2 ? ln(1.2) : 0 };
+      }
+    },
+    {
       key: 'dust', w: 0.9, folklore: true,
       f: function (d, c) {
         if (c.pm25 < 35 || d.tags.indexOf('미세먼지') < 0) return { v: 0 };
@@ -216,7 +225,8 @@
   function rank(ctx, model) {
     var out = [];
     model.dishes.forEach(function (d) {
-      if (d.price !== ctx.budget) return;              // the chosen price band only: under ₩10k / ₩10–20k / ₩20k+
+      // price: 1 = under ₩10k, 2 = ₩10–20k (exact bands); 3 = 상관없어 (any price)
+      if (ctx.budget < 3 && d.price !== ctx.budget) return;
       if (ctx.exclude.indexOf(d.id) > -1) return;      // already turned down this round
       // Early morning and late at night most restaurants are closed: only dishes marked for that time
       // (breakfast places, 24-hour places, delivery, 포차) can be had, so the others are left out

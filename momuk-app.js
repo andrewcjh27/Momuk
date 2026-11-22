@@ -14,14 +14,14 @@
     ko: {
       start: '시작하기', next: '다음', suggest: '추천받기', skip: '넘기기',
       q1: '몇 명이야?', q2: '얼마나 배고파?', q3: '가격 범위는?',
-      q2lo: '가볍게', q2hi: '든든하게', q3lo: '저렴하게', q3hi: '비싸도 OK',
+      q2lo: '가볍게', q2hi: '든든하게', q3lo: '저렴하게', q3hi: '상관없어',
       people: ['혼자', '둘이서', '셋이서', '넷 이상'],
       peopleSub: ['혼밥도 좋죠', '', '', '나눠 먹기 좋게'],
       hunger: function (v) {
         return v <= 2 ? '아주 가볍게' : v <= 4 ? '가볍게' : v <= 6 ? '적당히'
              : v <= 8 ? '든든하게' : '아주 든든하게';
       },
-      budget: ['₩10,000 이하', '₩10,000 – 20,000', '₩20,000 이상'],
+      budget: ['₩10,000 이하', '₩10,000 – 20,000', '상관없어'],
       lead: '내 추천은…', accept: '이걸로!', again: '음… 안 땡겨!',
       restart: '다시 고르기', doneNote: '맛있게 드세요',
       locating: '위치 확인 중…',
@@ -51,14 +51,14 @@
     en: {
       start: 'Start', next: 'Next', suggest: 'Suggest', skip: 'Skip',
       q1: 'How many people?', q2: 'How hungry?', q3: 'Price range?',
-      q2lo: 'Light', q2hi: 'Heavy', q3lo: 'Cheap', q3hi: 'Pricier',
+      q2lo: 'Light', q2hi: 'Heavy', q3lo: 'Cheap', q3hi: "Doesn't matter",
       people: ['Just me', 'Two', 'Three', 'Four or more'],
       peopleSub: ['Solo is good', '', '', 'Something to share'],
       hunger: function (v) {
         return v <= 2 ? 'Barely peckish' : v <= 4 ? 'Light' : v <= 6 ? 'Middling'
              : v <= 8 ? 'Properly hungry' : 'Starving';
       },
-      budget: ['Under ₩10,000', '₩10,000 – 20,000', '₩20,000 and up'],
+      budget: ['Under ₩10,000', '₩10,000 – 20,000', "Doesn't matter"],
       lead: 'How about…', accept: "Let's go", again: 'Eh… give me another',
       restart: 'Start over', doneNote: 'Enjoy',
       locating: 'Finding you…',
