@@ -32,8 +32,10 @@
       allShown: '맞는 메뉴는 다 보여드렸어요. 조건을 바꿔볼까요?',
       changeAnswers: '조건 바꾸기',
       relaxedPrice: '이 가격대는 다 봤어요 — 다른 가격대에서 골라봤어요',
+      dropAsk: '어떤 조건을 뺄까?', dropHint: '뺄 조건을 눌러줘',
+      resume: '이대로 다시 추천받기', startOver: '처음 질문부터 다시',
       askLoc: '시작하면 날씨를 보려고 위치를 물어볼게요',
-      refineLead: function (n) { return n + '개 다 별로였구나 — 좀 더 좁혀볼게'; },
+      refineLead: function (n) { return n + '개 다 별로였구나 — 좀 더 좁혀볼게'; },   // n = turned down so far
       refine: {
         spice:   { ask: '매운 거 땡겨?', options: [['hot', '맵게'], ['mild', '안 맵게']] },
         base:    { ask: '뭐가 땡겨?', options: [['rice', '밥'], ['noodle', '면'], ['bread', '빵'], ['meat', '고기']] },
@@ -70,6 +72,8 @@
       allShown: "That's every dish that fits. Change an answer?",
       changeAnswers: 'Change my answers',
       relaxedPrice: "That's every dish in your price range — here's one from another",
+      dropAsk: 'Which answers should I drop?', dropHint: 'Tap the ones to drop',
+      resume: 'Suggest again', startOver: 'Start the questions over',
       askLoc: "We'll ask for your location when you start, to check the weather",
       refineLead: function (n) { return 'None of those ' + n + ' — let me narrow it down'; },
       refine: {
@@ -304,7 +308,8 @@
   }
 
   // ── narrowing questions ────────────────────────────────
-  var REFINE = ['spice', 'base', 'novelty', 'soup', 'speed'];   // one per three "안 땡겨", in a random order each round
+  var REFINE = ['spice', 'base', 'novelty', 'soup', 'speed'];
+  var ASK_EVERY = 5;                            // a narrowing question after every 5 turned-down dishes   // one per three "안 땡겨", in a random order each round
   state.prefOrder = [];
 
   function shuffled(list) {
@@ -330,6 +335,8 @@
 
   function askRefine() {
     $('#refineSkip').hidden = false;
+    $('#refineSkip').textContent = t().skip;
+    state.refineMode = 'ask';
     var key = state.refineOrder[state.asked++];
     var q = t().refine[key];
     $('#refineLead').textContent = t().refineLead(state.rejected.length);
@@ -353,7 +360,11 @@
     think(suggest);
   }
 
-  $('#refineSkip').addEventListener('click', function () { answerRefine(null, null); });
+  // One link under the refine screen: "넘기기" while asking, "처음 질문부터 다시" while dropping answers.
+  $('#refineSkip').addEventListener('click', function () {
+    if (state.refineMode === 'drop') { setProgress(0); show('q1'); }
+    else answerRefine(null, null);
+  });
 
   // Nothing left that fits every answer: say so plainly, on the same screen as the questions,
   // and offer to change the answers (no answer is quietly loosened).
@@ -366,9 +377,58 @@
     b.className = 'pill enter';
     b.style.setProperty('--i', 1);
     b.innerHTML = '<span>' + t().changeAnswers + '</span>';
-    b.addEventListener('click', function () { setProgress(0); show('q1'); });
+    // With narrowing answers in play, 조건 바꾸기 lets the person drop some of them and carry on
+    // this round; without any, it goes back to the first question as before.
+    b.addEventListener('click', function () {
+      if (state.prefOrder.length) showDropAnswers(); else { setProgress(0); show('q1'); }
+    });
     box.appendChild(b);
     $('#refineSkip').hidden = true;
+    show('refine');
+  }
+
+  function prefLabel(key) {
+    var q = t().refine[key], v = state.prefs[key];
+    for (var i = 0; i < q.options.length; i++) if (q.options[i][0] === v) return q.options[i][1];
+    return v;
+  }
+
+  function showDropAnswers() {
+    var drop = {};
+    $('#refineLead').textContent = t().dropHint;
+    $('#refineAsk').textContent = t().dropAsk;
+    var box = $('#refineOptions');
+    box.innerHTML = '';
+    state.prefOrder.forEach(function (key, i) {
+      var b = document.createElement('button');
+      b.className = 'pill enter';
+      b.style.setProperty('--i', i + 1);
+      var paint = function () {
+        b.classList.toggle('is-chosen', !!drop[key]);
+        b.innerHTML = '<span>' + prefLabel(key) + (drop[key] ? ' ✕' : '') + '</span>';
+      };
+      b.addEventListener('click', function () { drop[key] = !drop[key]; paint(); });
+      paint();
+      box.appendChild(b);
+    });
+    var go = document.createElement('button');
+    go.className = 'cta enter';
+    go.style.setProperty('--i', state.prefOrder.length + 1);
+    go.textContent = t().resume;
+    go.addEventListener('click', function () {
+      // Drop the chosen answers and carry on with the same round: what was turned down stays out,
+      // and dropped questions aren't asked again.
+      state.prefOrder = state.prefOrder.filter(function (k) {
+        if (drop[k]) { delete state.prefs[k]; return false; }
+        return true;
+      });
+      show('thinking');
+      think(suggest);
+    });
+    box.appendChild(go);
+    state.refineMode = 'drop';
+    $('#refineSkip').hidden = false;
+    $('#refineSkip').textContent = t().startOver;
     show('refine');
   }
 
@@ -469,7 +529,7 @@
     if (state.last && state.last.picked) state.rejected.push(state.last.picked.dish.id);
     // After every third "안 땡겨", ask one narrowing question before the next pick
     // (only with the measured model, which knows spice, base and how common each dish is).
-    if (window.MOMUK_MODEL && state.rejected.length % 3 === 0 && nextRefine()) {
+    if (window.MOMUK_MODEL && state.rejected.length % ASK_EVERY === 0 && nextRefine()) {
       askRefine(); return;
     }
     show('thinking');
