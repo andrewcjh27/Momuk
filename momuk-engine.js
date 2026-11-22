@@ -224,7 +224,8 @@
     var out = [];
     for (var i = 0; i < dishes.length; i++) {
       var d = dishes[i];
-      if (ctx.budget < 3 && d.price !== ctx.budget) continue;   // exact band; 3 = 상관없어 (same as v2)
+      // up to ₩10k / ₩15k / ₩20k / any (v1 only knows bands: ₩15k counts as band 1)
+      if (ctx.budget < 4 && d.price > [1, 1, 2][ctx.budget - 1]) continue;
       if (ctx.exclude.indexOf(d.id) > -1) continue;     // already turned down this round
       var s = scoreDish(d, ctx);
       out.push({ dish: d, score: s.total, parts: s.parts });
