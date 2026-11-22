@@ -96,11 +96,11 @@ bottom. Open questions are listed at the end, waiting for data or a decision.
 | 2026-11-14 | Fried chicken never appears, even for a hungry group | Caused by the keyword issue below; settle that first |
 | 2026-11-14 | 파전 and 김치전 are hidden from solo diners (`solo = 0`), even on rainy days | **Keep them hidden from solo diners** (decided 2026-11-21): 전 is a sharing dish, so `solo` stays 0 |
 | 2026-11-22 | COVID years (2020–2022) might look unusual | **Keep them as ordinary data, no flag**: people still searched for and ordered food, and the searches are the signal the app cares about. Holidays are already handled by the food calendar |
+| 2026-11-22 | The national rainy-day flag used the population-weighted *average* rain ≥1 mm, so one heavy local storm (e.g. 15 mm in Busan and Gyeongnam only) could label the whole country rainy | **A day is rainy when ≥50% of the population's provinces got ≥1 mm** (`rain_share` ≥ 0.5). Considered: keeping the average; using the share as a continuous variable (more precise, but the result is a slope that's harder to explain); capital area only. The rain *boost* is measured nationally because Naver has no regions; the recommender applies it with the user's own province weather |
 
 ## Open questions
 
 - **Dish start dates:** from when should each newer dish (마라탕, 로제떡볶이, 마라샹궈…) count? Zeros before a boom aren't "low interest".
 - **Viral spikes:** keep, flag or remove — and how large a spike counts as an outlier?
 - **Coarse series:** below how many distinct values is a dish too coarse to model?
-- **Rainy-day definition:** national average rain ≥ 1 mm, or share of the population that got rain?
 - **Meal-time columns:** drafted by rule; review dish by dish.

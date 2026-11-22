@@ -104,6 +104,9 @@ display(quality)
 # MAGIC   `geo_code` Google Trends uses (KR-11 = Seoul …), so it joins straight onto regional search data later.
 # MAGIC - `silver_weather_daily`: one population-weighted "national" series to pair with Naver's national data,
 # MAGIC   so Seoul + Gyeonggi count most (that's where most searches come from).
+# MAGIC - **A national day is rainy when at least half the population's provinces got ≥1 mm of rain**
+# MAGIC   (`rain_share` ≥ 0.5), not when the national *average* reaches 1 mm: an average lets one heavy local
+# MAGIC   storm label the whole country rainy while most people had a dry day.
 
 # COMMAND ----------
 
@@ -128,9 +131,15 @@ silver_weather_province = add_flags(w)
 silver_weather_province.write.mode("overwrite").option("overwriteSchema", "true").saveAsTable("silver_weather_province")
 
 # National level (population-weighted)
+RAIN_SHARE_MIN = 0.5   # a day is rainy nationally when ≥50% of people's provinces got ≥1 mm
+
 weighted = w.groupBy("date").agg(
     *[(F.sum(F.col(c) * F.col("population_m")) / F.sum("population_m")).alias(c) for c in num_cols])
-silver_weather = add_flags(weighted)
+rain_share = silver_weather_province.groupBy("date").agg(
+    (F.sum(F.col("is_rainy") * F.col("population_m")) / F.sum("population_m")).alias("rain_share"))
+silver_weather = (add_flags(weighted)
+                  .join(rain_share, "date")
+                  .withColumn("is_rainy", (F.col("rain_share") >= RAIN_SHARE_MIN).cast("int")))
 silver_weather.write.mode("overwrite").option("overwriteSchema", "true").saveAsTable("silver_weather_daily")
 
 print("provinces:", silver_weather_province.select("geo_code").distinct().count())
