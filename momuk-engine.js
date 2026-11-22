@@ -272,7 +272,7 @@
     var ctx = buildContext(input);
     var ranked = rank(ctx, global.MOMUK_DATA || []);
     if (!ranked.length) return { ctx: ctx, ranked: [], picked: null, why: [] };
-    var s = sample(ranked, opts.tau, opts.poolSize);
+    var s = sample(ranked, opts.tau, opts.poolSize || 10);   // top 10, like v2
     return {
       ctx: ctx,
       ranked: ranked,

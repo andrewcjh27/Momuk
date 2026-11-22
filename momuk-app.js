@@ -31,6 +31,7 @@
       empty: '조건에 맞는 게 없어요. 가격대를 바꿔볼까요?',
       allShown: '맞는 메뉴는 다 보여드렸어요. 조건을 바꿔볼까요?',
       changeAnswers: '조건 바꾸기',
+      relaxedPrice: '이 가격대는 다 봤어요 — 다른 가격대에서 골라봤어요',
       askLoc: '시작하면 날씨를 보려고 위치를 물어볼게요',
       refineLead: function (n) { return n + '개 다 별로였구나 — 좀 더 좁혀볼게'; },
       refine: {
@@ -68,6 +69,7 @@
       empty: 'Nothing fits. Try another price range?',
       allShown: "That's every dish that fits. Change an answer?",
       changeAnswers: 'Change my answers',
+      relaxedPrice: "That's every dish in your price range — here's one from another",
       askLoc: "We'll ask for your location when you start, to check the weather",
       refineLead: function (n) { return 'None of those ' + n + ' — let me narrow it down'; },
       refine: {
@@ -273,7 +275,7 @@
     state.last = out;
 
     var d = out.picked.dish;
-    $('#answerLead').textContent = t().lead;
+    $('#answerLead').textContent = out.relaxed === 'price' ? t().relaxedPrice : t().lead;
     $('#dish').textContent = lang === 'en' ? d.en : d.ko;
     $('#dishEn').textContent = lang === 'en' ? d.ko : d.en;
 
