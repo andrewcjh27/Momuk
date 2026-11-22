@@ -40,6 +40,7 @@ bottom. Open questions are listed at the end, waiting for data or a decision.
 | 2026-11-21 | **Automate inside Databricks** (scheduled Jobs): ingestion moves from the laptop into notebooks | Tested from a Free Edition notebook: Open-Meteo (archive and forecast), Naver API HUB and Google Trends are all reachable, so the earlier "collect on the laptop" constraint no longer holds. GitHub Actions kept as the fallback |
 | 2026-11-21 | Refresh cadence: Naver and weather weekly, Google regional monthly, calendar yearly; the recommender reads live weather from the Open-Meteo forecast | Search trends move week to week; regional lean is slow-moving and Google rate-limits hard |
 | 2026-11-22 | Naver keys stored in a Databricks secret scope (`momuk`), created with the Databricks CLI | Keys never appear in notebooks or git; a test request from a notebook returned data (HTTP 200) |
+| 2026-11-22 | **New-dish discovery every two weeks, human-approved**: the job pulls rising food searches from Google Trends, drops dishes already in the catalog, and writes a candidate list; Junho approves dishes and fills in price/solo/hunger/meal by hand. Fading dishes are flagged for review, never auto-removed | Fads appear less often than weekly; rising searches include celebrities, brands and memes, and the recommender's filters need hand-made attributes, so full automation would add junk |
 
 ## Data quality and cleaning
 
