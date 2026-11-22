@@ -201,6 +201,9 @@
     if (p.spice === 'hot' && !(d.spice >= 2)) return false;
     if (p.spice === 'mild' && !(d.spice != null && d.spice <= 1)) return false;
     if (p.base && d.base !== p.base) return false;
+    if (p.soup === 'yes' && !(d.soup >= 2)) return false;                   // a proper broth (catalog soup 2-3)
+    if (p.soup === 'no' && !(d.soup != null && d.soup <= 1)) return false;
+    if (p.speed && d.speed !== (p.speed === 'fast' ? 'fast' : 'sit')) return false;
     if (p.novelty) {
       if (d.ubiq == null || !d.popularity) return false;
       if ((p.novelty === 'familiar') !== isFamiliar(d, model)) return false;
@@ -209,7 +212,7 @@
   }
 
   // Which narrowing questions this model can answer (older model files lack spice, base, ubiq).
-  var NEEDS = { spice: 'spice', base: 'base', novelty: 'ubiq' };
+  var NEEDS = { spice: 'spice', base: 'base', novelty: 'ubiq', soup: 'soup', speed: 'speed' };
   function canAsk(key, model) {
     return model.dishes.some(function (d) { return d[NEEDS[key]] != null; });
   }
