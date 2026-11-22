@@ -39,6 +39,7 @@ bottom. Open questions are listed at the end, waiting for data or a decision.
 | 2026-10-31 | Save each weather province as soon as it downloads; resume on rerun | One 10-year request counts as ~280 API calls, so the hourly limit was hit and 14 provinces were lost on the first attempt |
 | 2026-11-21 | **Automate inside Databricks** (scheduled Jobs): ingestion moves from the laptop into notebooks | Tested from a Free Edition notebook: Open-Meteo (archive and forecast), Naver API HUB and Google Trends are all reachable, so the earlier "collect on the laptop" constraint no longer holds. GitHub Actions kept as the fallback |
 | 2026-11-21 | Refresh cadence: Naver and weather weekly, Google regional monthly, calendar yearly; the recommender reads live weather from the Open-Meteo forecast | Search trends move week to week; regional lean is slow-moving and Google rate-limits hard |
+| 2026-11-22 | Naver keys stored in a Databricks secret scope (`momuk`), created with the Databricks CLI | Keys never appear in notebooks or git; a test request from a notebook returned data (HTTP 200) |
 
 ## Data quality and cleaning
 
