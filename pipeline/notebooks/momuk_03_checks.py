@@ -19,8 +19,11 @@ from pyspark.sql import functions as F
 
 spark.sql("USE workspace.momuk")
 
-# Freshness becomes an error once the weekly job is running; until then the data is a one-off pull.
-AUTOMATED = False
+# The weekly job passes automated=true, which turns freshness and weather-lag warnings into errors.
+# Run by hand, they stay warnings.
+dbutils.widgets.text("automated", "false")
+AUTOMATED = dbutils.widgets.get("automated").strip().lower() == "true"
+print("automated run:", AUTOMATED)
 MAX_DATA_AGE_DAYS = 10     # Naver lags ~1 day; a weekly job should never be more than ~10 days behind
 MAX_WEATHER_LAG_DAYS = 7  # the weather archive runs a few days behind; more than a week means a download failed
 MAX_SPIKE_SHARE = 0.02     # if more than 2% of days are "spikes", the rule is too aggressive

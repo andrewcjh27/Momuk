@@ -23,6 +23,7 @@
 # COMMAND ----------
 
 from pyspark.sql import functions as F
+from pyspark.sql import Window
 
 CATALOG = "workspace"   # Free Edition's default catalog; change if yours differs
 SCHEMA = "momuk"
@@ -78,10 +79,24 @@ ref = anchor_tot.agg(F.avg("anchor_sum")).first()[0]
 scaled = (raw.join(anchor_tot, "batch")
           .withColumn("interest", F.col("ratio") * F.lit(ref) / F.col("anchor_sum"))
           # the anchor appears in every batch; average its (near-identical) rescaled copies
-          .groupBy("dish_id", "date").agg(F.avg("interest").alias("interest")))
+          .groupBy("dish_id", "date").agg(F.avg("interest").alias("interest"))
+          .withColumn("pull_id", F.lit("0-history")))
+
+# Weekly updates from notebook 00 arrive with their own scale factor (anchor matched on the overlap
+# with stored data). For any dish and day, the newest download wins.
+if spark.catalog.tableExists(f"{CATALOG}.{SCHEMA}.bronze_naver_updates"):
+    updates = (spark.table("bronze_naver_updates")
+               .withColumn("date", F.to_date("date"))
+               .withColumn("interest", F.col("ratio") * F.col("factor"))
+               .groupBy("pull_id", "dish_id", "date").agg(F.avg("interest").alias("interest")))
+    newest_first = Window.partitionBy("dish_id", "date").orderBy(F.desc("pull_id"))
+    scaled = (scaled.unionByName(updates)
+              .withColumn("rank", F.row_number().over(newest_first))
+              .filter(F.col("rank") == 1).drop("rank"))
+scaled = scaled.drop("pull_id")
 
 # Naver can omit days with no measurable searches -> fill the full dish x date grid with 0
-bounds = raw.agg(F.min("date").alias("lo"), F.max("date").alias("hi")).first()
+bounds = scaled.agg(F.min("date").alias("lo"), F.max("date").alias("hi")).first()
 dates = spark.sql(
     f"SELECT explode(sequence(to_date('{bounds.lo}'), to_date('{bounds.hi}'), interval 1 day)) AS date")
 dishes = spark.table("bronze_menu").select(F.col("id").alias("dish_id"))
@@ -115,6 +130,15 @@ display(quality)
 # COMMAND ----------
 
 w = spark.table("bronze_weather").withColumn("date", F.to_date("date"))
+# weekly weather updates from notebook 00: the newest download wins for any province and day
+if spark.catalog.tableExists(f"{CATALOG}.{SCHEMA}.bronze_weather_updates"):
+    cols = w.columns
+    upd = spark.table("bronze_weather_updates").withColumn("date", F.to_date("date"))
+    newest_first = Window.partitionBy("geo_code", "date").orderBy(F.desc("pull_id"))
+    w = (w.withColumn("pull_id", F.lit("0-history"))
+         .unionByName(upd.select(*cols, "pull_id"))
+         .withColumn("rank", F.row_number().over(newest_first))
+         .filter(F.col("rank") == 1).select(*cols))
 num_cols = [c for c in w.columns if c not in ("city", "geo_code", "population_m", "date")]
 
 # Rain and snow are flagged separately (rain_sum excludes snow), so 전-on-rainy-days
@@ -167,8 +191,6 @@ display(silver_weather.orderBy(F.desc("date")).limit(10))
 # MAGIC    how many there are.
 
 # COMMAND ----------
-
-from pyspark.sql import Window
 
 START_SHARE = 0.25        # a dish exists once weekly interest stays ≥ 25% of its usual level… (was 10%: 마라탕 started in 2016)
 START_RUN_WEEKS = 4       # …for 4 weeks in a row
