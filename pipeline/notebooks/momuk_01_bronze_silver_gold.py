@@ -156,7 +156,7 @@ display(silver_weather.orderBy(F.desc("date")).limit(10))
 # MAGIC
 # MAGIC 1. **Start dates.** A newer dish (마라탕, 로제떡볶이…) shows near-zero interest before it took off. Those days
 # MAGIC    mean "didn't exist yet", not "nobody wanted it", so they are **removed** rather than kept as zeros.
-# MAGIC    A dish starts in the first week from which its weekly interest stays at or above `START_SHARE` (10%)
+# MAGIC    A dish starts in the first week from which its weekly interest stays at or above `START_SHARE` (25%)
 # MAGIC    of its usual level (median week over the last 52 weeks) for `START_RUN_WEEKS` (4) weeks in a row.
 # MAGIC 2. **Viral spikes.** A day above `SPIKE_X` (3×) the median of the surrounding month (±14 days) is flagged
 # MAGIC    `is_spike` and capped at 3× for every lift. The raw value stays in `interest_raw`. Food days in
@@ -170,7 +170,7 @@ display(silver_weather.orderBy(F.desc("date")).limit(10))
 
 from pyspark.sql import Window
 
-START_SHARE = 0.10        # a dish exists once weekly interest stays ≥ 10% of its usual level…
+START_SHARE = 0.25        # a dish exists once weekly interest stays ≥ 25% of its usual level… (was 10%: 마라탕 started in 2016)
 START_RUN_WEEKS = 4       # …for 4 weeks in a row
 SPIKE_X = 3.0             # a day > 3× the median of its surrounding month is a spike
 COARSE_MIN_DISTINCT = 50  # fewer distinct daily values than this = coarse
