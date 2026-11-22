@@ -216,7 +216,7 @@
   function rank(ctx, model) {
     var out = [];
     model.dishes.forEach(function (d) {
-      if (d.price > ctx.budget) return;                // budget is a hard filter
+      if (d.price !== ctx.budget) return;              // the chosen price band only: under ₩10k / ₩10–20k / ₩20k+
       if (ctx.exclude.indexOf(d.id) > -1) return;      // already turned down this round
       // Early morning and late at night most restaurants are closed: only dishes marked for that time
       // (breakfast places, 24-hour places, delivery, 포차) can be had, so the others are left out

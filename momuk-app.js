@@ -14,21 +14,21 @@
     ko: {
       start: '시작하기', next: '다음', suggest: '추천받기', skip: '넘기기',
       q1: '몇 명이야?', q2: '얼마나 배고파?', q3: '가격 범위는?',
-      q2lo: '가볍게', q2hi: '든든하게', q3lo: '저렴한거', q3hi: '상관없어',
+      q2lo: '가볍게', q2hi: '든든하게', q3lo: '저렴하게', q3hi: '비싸도 OK',
       people: ['혼자', '둘이서', '셋이서', '넷 이상'],
       peopleSub: ['혼밥도 좋죠', '', '', '나눠 먹기 좋게'],
       hunger: function (v) {
         return v <= 2 ? '아주 가볍게' : v <= 4 ? '가볍게' : v <= 6 ? '적당히'
              : v <= 8 ? '든든하게' : '아주 든든하게';
       },
-      budget: ['₩10,000 이하', '₩10,000 – 20,000', '상관없어'],
+      budget: ['₩10,000 이하', '₩10,000 – 20,000', '₩20,000 이상'],
       lead: '내 추천은…', accept: '이걸로!', again: '음… 안 땡겨!',
       restart: '다시 고르기', doneNote: '맛있게 드세요',
       locating: '위치 확인 중…',
       weather: function (t, p, where) { return (where ? '<b>' + where + '</b> · ' : '') + '체감 <b>' + t + '°C</b> · 미세먼지 <b>' + p + '</b>'; },
       noloc: '위치 없이 전국 기준으로 고를게요',
       skipLoc: '위치 없이 고르기', useLoc: '내 위치 쓰기',
-      empty: '조건에 맞는 게 없어요. 예산을 올려볼까요?',
+      empty: '조건에 맞는 게 없어요. 가격대를 바꿔볼까요?',
       allShown: '맞는 메뉴는 다 보여드렸어요. 조건을 바꿔볼까요?',
       changeAnswers: '조건 바꾸기',
       askLoc: '시작하면 날씨를 보려고 위치를 물어볼게요',
@@ -51,21 +51,21 @@
     en: {
       start: 'Start', next: 'Next', suggest: 'Suggest', skip: 'Skip',
       q1: 'How many people?', q2: 'How hungry?', q3: 'Price range?',
-      q2lo: 'Light', q2hi: 'Heavy', q3lo: 'Cheap', q3hi: "Doesn't matter",
+      q2lo: 'Light', q2hi: 'Heavy', q3lo: 'Cheap', q3hi: 'Pricier',
       people: ['Just me', 'Two', 'Three', 'Four or more'],
       peopleSub: ['Solo is good', '', '', 'Something to share'],
       hunger: function (v) {
         return v <= 2 ? 'Barely peckish' : v <= 4 ? 'Light' : v <= 6 ? 'Middling'
              : v <= 8 ? 'Properly hungry' : 'Starving';
       },
-      budget: ['Under ₩10,000', '₩10,000 – 20,000', "Doesn't matter"],
+      budget: ['Under ₩10,000', '₩10,000 – 20,000', '₩20,000 and up'],
       lead: 'How about…', accept: "Let's go", again: 'Eh… give me another',
       restart: 'Start over', doneNote: 'Enjoy',
       locating: 'Finding you…',
       weather: function (t, p, where) { return (where ? '<b>' + where + '</b> · ' : '') + 'Feels <b>' + t + '°C</b> · PM2.5 <b>' + p + '</b>'; },
       noloc: 'No location — going on nationwide patterns',
       skipLoc: 'Skip location', useLoc: 'Use my location',
-      empty: 'Nothing fits. Try raising the budget?',
+      empty: 'Nothing fits. Try another price range?',
       allShown: "That's every dish that fits. Change an answer?",
       changeAnswers: 'Change my answers',
       askLoc: "We'll ask for your location when you start, to check the weather",
