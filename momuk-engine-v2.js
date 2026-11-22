@@ -211,9 +211,10 @@
     model.dishes.forEach(function (d) {
       if (d.price > ctx.budget) return;                // budget is a hard filter
       if (ctx.exclude.indexOf(d.id) > -1) return;      // already turned down this round
-      // Late at night most restaurants are closed: only dishes marked as late-night food (24-hour
-      // places, delivery, 포차) can be had, so the others are left out rather than just scored down.
-      if (ctx.meal === 'late' && !(d.meal.late > 0)) return;
+      // Early morning and late at night most restaurants are closed: only dishes marked for that time
+      // (breakfast places, 24-hour places, delivery, 포차) can be had, so the others are left out
+      // rather than scored down — a dish you can't get isn't "less likely", it's unavailable.
+      if ((ctx.meal === 'late' || ctx.meal === 'morning') && !(d.meal[ctx.meal] > 0)) return;
       if (!matchesPrefs(d, ctx.prefs, model)) return;
       if (ctx.party === 1 && !d.solo) return;          // so is eating alone (파전 stays a sharing dish)
       var s = scoreDish(d, ctx, model);
