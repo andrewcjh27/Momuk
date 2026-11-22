@@ -37,6 +37,8 @@ bottom. Open questions are listed at the end, waiting for data or a decision.
 | 2026-10-31 | Medallion layout: bronze (raw) → silver (cleaned) → gold (analysis-ready) | Standard, easy to rebuild from raw when a cleaning step changes |
 | 2026-10-31 | Population-weighted national weather, plus per-province weather kept separately | Naver is national, so it needs a national weather series; Google is per province, so it needs per-province weather |
 | 2026-10-31 | Save each weather province as soon as it downloads; resume on rerun | One 10-year request counts as ~280 API calls, so the hourly limit was hit and 14 provinces were lost on the first attempt |
+| 2026-11-21 | **Automate inside Databricks** (scheduled Jobs): ingestion moves from the laptop into notebooks | Tested from a Free Edition notebook: Open-Meteo (archive and forecast), Naver API HUB and Google Trends are all reachable, so the earlier "collect on the laptop" constraint no longer holds. GitHub Actions kept as the fallback |
+| 2026-11-21 | Refresh cadence: Naver and weather weekly, Google regional monthly, calendar yearly; the recommender reads live weather from the Open-Meteo forecast | Search trends move week to week; regional lean is slow-moving and Google rate-limits hard |
 
 ## Data quality and cleaning
 
