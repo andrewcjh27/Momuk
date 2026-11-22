@@ -194,16 +194,24 @@
     return { total: total, parts: parts };
   }
 
-  // Narrowing questions, asked after every three "안 땡겨". A dish missing the attribute is kept.
+  // Narrowing questions, asked after every three "안 땡겨". Strict: once answered, only dishes that
+  // match are eligible — a dish whose attribute is unknown doesn't match.
   function isFamiliar(d, model) { return d.ubiq >= 2 && d.popularity >= model.medianPopularity; }
   function matchesPrefs(d, p, model) {
-    if (p.spice === 'hot' && d.spice != null && d.spice < 2) return false;
-    if (p.spice === 'mild' && d.spice != null && d.spice > 1) return false;
-    if (p.base && d.base && d.base !== p.base) return false;
-    if (p.novelty && d.ubiq != null && d.popularity) {
+    if (p.spice === 'hot' && !(d.spice >= 2)) return false;
+    if (p.spice === 'mild' && !(d.spice != null && d.spice <= 1)) return false;
+    if (p.base && d.base !== p.base) return false;
+    if (p.novelty) {
+      if (d.ubiq == null || !d.popularity) return false;
       if ((p.novelty === 'familiar') !== isFamiliar(d, model)) return false;
     }
     return true;
+  }
+
+  // Which narrowing questions this model can answer (older model files lack spice, base, ubiq).
+  var NEEDS = { spice: 'spice', base: 'base', novelty: 'ubiq' };
+  function canAsk(key, model) {
+    return model.dishes.some(function (d) { return d[NEEDS[key]] != null; });
   }
 
   function rank(ctx, model) {
@@ -211,9 +219,10 @@
     model.dishes.forEach(function (d) {
       if (d.price > ctx.budget) return;                // budget is a hard filter
       if (ctx.exclude.indexOf(d.id) > -1) return;      // already turned down this round
-      // Late at night most restaurants are closed: only dishes marked as late-night food (24-hour
-      // places, delivery, 포차) can be had, so the others are left out rather than just scored down.
-      if (ctx.meal === 'late' && !(d.meal.late > 0)) return;
+      // Early morning and late at night most restaurants are closed: only dishes marked for that time
+      // (breakfast places, 24-hour places, delivery, 포차) can be had, so the others are left out
+      // rather than scored down — a dish you can't get isn't "less likely", it's unavailable.
+      if ((ctx.meal === 'late' || ctx.meal === 'morning') && !(d.meal[ctx.meal] > 0)) return;
       if (!matchesPrefs(d, ctx.prefs, model)) return;
       if (ctx.party === 1 && !d.solo) return;          // so is eating alone (파전 stays a sharing dish)
       var s = scoreDish(d, ctx, model);
@@ -265,6 +274,7 @@
   global.MomukV2 = {
     buildContext: function (input) { return buildContext(input, prepare(global.MOMUK_MODEL)); },
     nearestProvince: nearestProvince,
+    canAsk: function (key) { return canAsk(key, global.MOMUK_MODEL); },
     scoreDish: scoreDish, rank: rank, sample: sample, explain: explain, suggest: suggest,
     TERMS: TERMS
   };

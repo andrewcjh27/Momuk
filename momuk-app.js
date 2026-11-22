@@ -30,6 +30,7 @@
       skipLoc: '위치 없이 고르기', useLoc: '내 위치 쓰기',
       empty: '조건에 맞는 게 없어요. 예산을 올려볼까요?',
       allShown: '맞는 메뉴는 다 보여드렸어요. 조건을 바꿔볼까요?',
+      changeAnswers: '조건 바꾸기',
       askLoc: '시작하면 날씨를 보려고 위치를 물어볼게요',
       refineLead: function (n) { return n + '개 다 별로였구나 — 좀 더 좁혀볼게'; },
       refine: {
@@ -64,6 +65,7 @@
       skipLoc: 'Skip location', useLoc: 'Use my location',
       empty: 'Nothing fits. Try raising the budget?',
       allShown: "That's every dish that fits. Change an answer?",
+      changeAnswers: 'Change my answers',
       askLoc: "We'll ask for your location when you start, to check the weather",
       refineLead: function (n) { return 'None of those ' + n + ' — let me narrow it down'; },
       refine: {
@@ -263,15 +265,7 @@
 
   function suggest() {
     var out = engine().suggest(inputs(), { lang: lang });
-    // If a narrowing answer leaves nothing, loosen the most recent one rather than give up.
-    while (!out.picked && state.prefOrder.length) {
-      delete state.prefs[state.prefOrder.pop()];
-      out = engine().suggest(inputs(), { lang: lang });
-    }
-    if (!out.picked) {
-      $('#status').textContent = state.rejected.length ? t().allShown : t().empty;
-      show('q3'); return;
-    }
+    if (!out.picked) { showExhausted(state.rejected.length ? t().allShown : t().empty); return; }
     state.last = out;
 
     var d = out.picked.dish;
@@ -307,7 +301,14 @@
     state.rejected = []; state.prefs = {}; state.prefOrder = []; state.asked = 0;
   }
 
+  // The next question this round that the data can answer (skips ones the model file can't).
+  function nextRefine() {
+    while (state.asked < REFINE.length && !window.MomukV2.canAsk(REFINE[state.asked])) state.asked++;
+    return state.asked < REFINE.length;
+  }
+
   function askRefine() {
+    $('#refineSkip').hidden = false;
     var key = REFINE[state.asked++];
     var q = t().refine[key];
     $('#refineLead').textContent = t().refineLead(state.rejected.length);
@@ -332,6 +333,23 @@
   }
 
   $('#refineSkip').addEventListener('click', function () { answerRefine(null, null); });
+
+  // Nothing left that fits every answer: say so plainly, on the same screen as the questions,
+  // and offer to change the answers (no answer is quietly loosened).
+  function showExhausted(message) {
+    $('#refineLead').textContent = '';
+    $('#refineAsk').textContent = message;
+    var box = $('#refineOptions');
+    box.innerHTML = '';
+    var b = document.createElement('button');
+    b.className = 'pill enter';
+    b.style.setProperty('--i', 1);
+    b.innerHTML = '<span>' + t().changeAnswers + '</span>';
+    b.addEventListener('click', function () { setProgress(0); show('q1'); });
+    box.appendChild(b);
+    $('#refineSkip').hidden = true;
+    show('refine');
+  }
 
   // ── wiring ─────────────────────────────────────────────
   function buildOptions() {
@@ -430,7 +448,7 @@
     if (state.last && state.last.picked) state.rejected.push(state.last.picked.dish.id);
     // After every third "안 땡겨", ask one narrowing question before the next pick
     // (only with the measured model, which knows spice, base and how common each dish is).
-    if (window.MOMUK_MODEL && state.rejected.length % 3 === 0 && state.asked < REFINE.length) {
+    if (window.MOMUK_MODEL && state.rejected.length % 3 === 0 && nextRefine()) {
       askRefine(); return;
     }
     show('thinking');
