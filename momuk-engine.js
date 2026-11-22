@@ -224,7 +224,7 @@
     var out = [];
     for (var i = 0; i < dishes.length; i++) {
       var d = dishes[i];
-      if (d.price !== ctx.budget) continue;             // the chosen price band only (same as v2)
+      if (ctx.budget < 3 && d.price !== ctx.budget) continue;   // exact band; 3 = 상관없어 (same as v2)
       if (ctx.exclude.indexOf(d.id) > -1) continue;     // already turned down this round
       var s = scoreDish(d, ctx);
       out.push({ dish: d, score: s.total, parts: s.parts });
