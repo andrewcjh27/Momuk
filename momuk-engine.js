@@ -224,7 +224,7 @@
     var out = [];
     for (var i = 0; i < dishes.length; i++) {
       var d = dishes[i];
-      if (d.price > ctx.budget) continue;               // budget is a hard filter
+      if (d.price !== ctx.budget) continue;             // the chosen price band only (same as v2)
       if (ctx.exclude.indexOf(d.id) > -1) continue;     // already turned down this round
       var s = scoreDish(d, ctx);
       out.push({ dish: d, score: s.total, parts: s.parts });
