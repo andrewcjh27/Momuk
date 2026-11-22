@@ -230,6 +230,12 @@ food_days = spark.createDataFrame([
     ("chuseok",         "kimchijeon",   "추석 → 전"),
     ("christmas",       "chicken",      "크리스마스 → 치킨"),
     ("christmas",       "pizza",        "크리스마스 → 피자"),
+    ("christmas",       "steak",        "크리스마스 → 스테이크"),
+    ("christmas",       "carbonara",    "크리스마스 → 까르보나라"),
+    ("christmas",       "rose-pasta",   "크리스마스 → 로제파스타"),
+    ("christmas",       "tomato-pasta", "크리스마스 → 토마토파스타"),
+    ("christmas",       "aglio-olio",   "크리스마스 → 알리오올리오"),
+    ("christmas",       "vongole",      "크리스마스 → 봉골레"),
     ("samgyeopsal_day", "samgyeopsal",  "삼겹살데이 → 삼겹살"),
     ("black_day",       "jjajangmyeon", "블랙데이 → 짜장면"),
 ], ["event", "dish_id", "link"])

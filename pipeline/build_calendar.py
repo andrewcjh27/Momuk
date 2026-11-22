@@ -9,7 +9,7 @@ dish's "holiday lift" the same way it measures rain lift.
   chuseok          추석 전날 / 당일 / 다음날              전, 송편 (not in catalog)
   boknal           초복 / 중복 / 말복                     삼계탕
   dongji           동지 (winter solstice, KST)            팥죽 (boost applies to 팥죽 only)
-  christmas        12/24 and 12/25                        치킨, 피자
+  christmas        12/24 and 12/25                        치킨, 피자, 스테이크, 파스타
   suneung          수능 day                               (exam-day meals, celebrations after)
   samgyeopsal_day  3/3 삼겹살데이                         삼겹살
   black_day        4/14 블랙데이                           짜장면
