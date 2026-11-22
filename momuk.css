@@ -241,7 +241,6 @@ body {
   width: 38px; height: 22px; background: var(--card);
   clip-path: polygon(0 0, 100% 0, 0 100%);
 }
-.answer + * { margin-top: var(--s2); }
 .answer__lead { align-self: flex-start; font-size: 19px; font-weight: 800; color: var(--ink-soft); }
 
 .answer__dish {
@@ -320,6 +319,10 @@ body {
 /* ── layout helpers ──────────────────────────────────── */
 .spacer { flex: 1 1 auto; min-height: var(--s4); }
 .stack  { width: 100%; display: flex; flex-direction: column; gap: var(--s5); }
+.stack > * { margin: 0; }
+.stack > .bubble { margin-bottom: 14px; }          /* clears the 14px tail */
+.stack > .answer { margin-bottom: 18px; }          /* clears the card's 18px tail */
+.stack > .cta + .status { margin-top: calc(var(--s3) - var(--s5)); }   /* caption sits close under its button */
 .center { display: flex; flex-direction: column; align-items: center; }
 
 /* ── status line (weather / errors) ──────────────────── */
@@ -405,7 +408,41 @@ body {
   transition: bottom var(--dur-slow) var(--ease), transform var(--dur-slow) var(--ease);
 }
 .bowl-dock.is-centred {
-  bottom: 38%;
-  transform: translate(-50%, 50%) scale(1.2);
+  bottom: var(--bowl-bottom, 38%);          /* set from the landing's #bowlSlot by placeBowl() */
+  transform: translateX(-50%) scale(1.2);
+  transform-origin: 50% 100%;
 }
+.bowl-slot { flex: 0 0 auto; width: 130px; height: 101px; }   /* the bowl at 1.2× */
 .screen { padding-bottom: calc(96px + max(env(safe-area-inset-bottom), 16px)); }
+
+/* ── short screens (iPhone SE, small Android, short laptop windows) ── */
+@media (max-height: 760px) {
+  .screen { padding-top: max(env(safe-area-inset-top), var(--s4)); }
+  .wordmark--sm { font-size: 26px; }
+  .jamo--sm { font-size: 30px; }
+  .wordmark--lg { font-size: 40px; }
+  .jamo--lg { font-size: 50px; }
+  .stack { gap: var(--s4); }
+  .options { gap: 10px; }
+  .pill { min-height: 52px; font-size: 18px; }
+  .bubble { font-size: 18px; padding: var(--s3) var(--s4); }
+  .cta { min-height: 52px; font-size: 18px; }
+  .spacer { min-height: var(--s2); }
+  .stack > .cta + .status { margin-top: calc(var(--s3) - var(--s4)); }
+}
+@media (max-height: 680px) {
+  .jamo--sm { display: none; }                      /* the wordmark alone carries the header */
+  .pill { min-height: 48px; }
+  .pill__sub { font-size: 13px; }
+}
+
+/* ── wide screens: the app as a framed card, not a strip down the middle ── */
+@media (min-width: 640px) and (min-height: 820px) {
+  body { display: grid; place-items: center; background: var(--ground-deep); }
+  .app {
+    height: min(calc(100dvh - 64px), 900px);
+    border-radius: 32px;
+    background: var(--ground);
+    box-shadow: 0 24px 64px rgba(72,60,50,0.16), 0 0 0 1px var(--hairline);
+  }
+}
