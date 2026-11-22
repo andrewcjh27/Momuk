@@ -23,7 +23,7 @@ data-driven recommender. Every tool and source is free.
 | [Naver search trends](https://guide.ncloud-docs.com/docs/apihub-overview) (NAVER API HUB) | Relative search interest, 0–100 per request | National, daily, 2016 → | Free tier, key required |
 | [Google Trends](https://trends.google.com) via [trendspyg](https://pypi.org/project/trendspyg/) | Interest by province, last 5 years | 16–17 provinces | Free, no key, strict rate limits |
 | [Open-Meteo historical](https://open-meteo.com/en/docs/historical-weather-api) (ERA5 reanalysis) | 9 daily weather variables | 17 provinces, daily | Free, no key, non-commercial |
-| `momuk-data.csv` | 143 dishes with hand-made attributes and tags | — | Hand-written, see the main README |
+| `momuk-data.csv` | 142 dishes with hand-made attributes and tags | — | Hand-written, see the main README |
 
 Raw data is not committed (`raw/` is git-ignored): it is large, and the
 sources' terms apply to it. The scripts recreate it.
@@ -34,7 +34,7 @@ sources' terms apply to it. The scripts recreate it.
 |---|---|
 | `ingest_local.py` | Naver trends in batches of 4 dishes + the 김치찌개 anchor, and province weather. `--naver-only`, `--weather-only`; weather resumes after rate limits |
 | `validate_keywords.py` | Keyword entity resolution: keeps a candidate keyword only if it behaves like the dish in search data. Writes `search_keyword` into `momuk-data.csv` |
-| `keyword_candidates.csv` | 234 hand-listed candidates (spellings, spacing, synonyms, generic, ambiguous) |
+| `keyword_candidates.csv` | 232 hand-listed candidates (spellings, spacing, synonyms, generic, ambiguous) |
 | `merge_chicken.py` | One-off: merges 후라이드치킨 / 양념치킨 / 간장치킨 into one dish, 치킨 (see DECISIONS.md) |
 | `ingest_tourism_trends.py` | Locals or visitors? Compares each regional dish's in-province share of searches in travel weeks (summer vacation, 설날, 추석) vs other weeks, with 김치찌개 as a control. Writes `reports/visitor_signature.csv` |
 | `build_calendar.py` → `calendar_kr.csv` | Korean food calendar 2016–2027: 설날, 추석, 복날, 동지 (팥죽 only), 크리스마스, 수능, 삼겹살데이, 블랙데이 |
@@ -63,7 +63,7 @@ Upload `momuk-data.csv`, `calendar_kr.csv` and `raw/*.csv` to the Databricks vol
 
 - **Anchor rescaling.** Naver scales each request to its own peak. 김치찌개 is
   in every request; each batch is multiplied by
-  `mean anchor total / this batch's anchor total`, which puts all 143 dishes
+  `mean anchor total / this batch's anchor total`, which puts all 142 dishes
   on one scale without distorting day-to-day movement.
 - **Keyword entity resolution.** Two signals per candidate: jamo-level
   Levenshtein similarity (spelled like the dish?) and correlation of
