@@ -95,6 +95,7 @@ bottom. Open questions are listed at the end, waiting for data or a decision.
 | 2026-11-18 | 추석 → 김치전 came out ×0.76 | Not a failure of the folklore so much as a catalog gap: 명절 전 are 동그랑땡, 동태전, 모둠전. See open questions |
 | 2026-11-14 | Fried chicken never appears, even for a hungry group | Caused by the keyword issue below; settle that first |
 | 2026-11-14 | 파전 and 김치전 are hidden from solo diners (`solo = 0`), even on rainy days | **Keep them hidden from solo diners** (decided 2026-11-21): 전 is a sharing dish, so `solo` stays 0 |
+| 2026-11-22 | COVID years (2020–2022) might look unusual | **Keep them as ordinary data, no flag**: people still searched for and ordered food, and the searches are the signal the app cares about. Holidays are already handled by the food calendar |
 
 ## Open questions
 
@@ -102,5 +103,4 @@ bottom. Open questions are listed at the end, waiting for data or a decision.
 - **Viral spikes:** keep, flag or remove — and how large a spike counts as an outlier?
 - **Coarse series:** below how many distinct values is a dish too coarse to model?
 - **Rainy-day definition:** national average rain ≥ 1 mm, or share of the population that got rain?
-- **Holidays and COVID (2020–2022):** flag, model, or exclude?
 - **Meal-time columns:** drafted by rule; review dish by dish.
