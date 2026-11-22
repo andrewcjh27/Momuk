@@ -83,7 +83,7 @@ bottom. Open questions are listed at the end, waiting for data or a decision.
 | 2026-11-18 | 동지's top dishes were 스테이크 and pasta: as Dec 21–22 it picked up Christmas-dinner searches, and its own food (팥죽) isn't in the catalog | **Dropped 동지** from the calendar rather than patching its baseline — it carried only Christmas noise |
 | 2026-11-18 | 추석 → 김치전 came out ×0.76 | Not a failure of the folklore so much as a catalog gap: 명절 전 are 동그랑땡, 동태전, 모둠전. See open questions |
 | 2026-11-14 | Fried chicken never appears, even for a hungry group | Caused by the keyword issue below; settle that first |
-| 2026-11-14 | 파전 and 김치전 are hidden from solo diners (`solo = 0`), even on rainy days | **Open** — review `solo` for 전 dishes |
+| 2026-11-14 | 파전 and 김치전 are hidden from solo diners (`solo = 0`), even on rainy days | **Keep them hidden from solo diners** (decided 2026-11-21): 전 is a sharing dish, so `solo` stays 0 |
 
 ## Open questions
 
