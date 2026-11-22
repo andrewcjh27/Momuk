@@ -145,8 +145,11 @@
     {
       key: 'hunger', w: 2.2,
       f: function (d, c) {
+        // In log space like the measured terms: each step of heaviness away from what you asked for
+        // costs ×0.6. (v1's weight of 2.2 on its own scale meant up to ×80 here and drowned out
+        // everything else — a group at 배고픔 5/10 never saw 갈비 or 스테이크.)
         var want = (c.hunger - 1) / 9 * 3;
-        var v = 2.2 * (1 - 2 * Math.abs(d.heavy - want) / 3);
+        var v = -0.5 * Math.abs(d.heavy - want);
         var reason = c.hunger >= 7 ? { ko: '배고픔 ' + c.hunger + '/10 — 든든하게', en: 'Hunger ' + c.hunger + '/10 — go big' }
                    : c.hunger <= 3 ? { ko: '배고픔 ' + c.hunger + '/10 — 가볍게', en: 'Hunger ' + c.hunger + '/10 — keep it light' }
                    : { ko: '배고픔 ' + c.hunger + '/10 — 적당히', en: 'Hunger ' + c.hunger + '/10 — middle of the road' };
@@ -154,8 +157,13 @@
       }
     },
     {
-      key: 'party', w: 2.0,
-      f: function (d, c) { return { v: c.party >= 3 && !d.share ? -0.4 : 0 }; }   // solo is a filter, see rank()
+      key: 'party',
+      // Groups lean toward dishes made for sharing (고기구이, 찜, 전골): ×1.3; 3+ people away from
+      // dishes that aren't: ×0.7. Eating alone is a filter, see rank().
+      f: function (d, c) {
+        if (c.party < 2) return { v: 0 };
+        return { v: d.share ? ln(1.3) : c.party >= 3 ? ln(0.7) : 0 };
+      }
     },
     {
       // A group that says price doesn't matter leans toward a proper meal out: ×1.5 for ₩20k+ dishes,
