@@ -31,6 +31,7 @@
       empty: '조건에 맞는 게 없어요. 가격대를 바꿔볼까요?',
       allShown: '맞는 메뉴는 다 보여드렸어요. 조건을 바꿔볼까요?',
       changeAnswers: '조건 바꾸기',
+      relaxedPrice: '이 가격대는 다 봤어요 — 다른 가격대에서 골라봤어요',
       askLoc: '시작하면 날씨를 보려고 위치를 물어볼게요',
       refineLead: function (n) { return n + '개 다 별로였구나 — 좀 더 좁혀볼게'; },
       refine: {
@@ -68,6 +69,7 @@
       empty: 'Nothing fits. Try another price range?',
       allShown: "That's every dish that fits. Change an answer?",
       changeAnswers: 'Change my answers',
+      relaxedPrice: "That's every dish in your price range — here's one from another",
       askLoc: "We'll ask for your location when you start, to check the weather",
       refineLead: function (n) { return 'None of those ' + n + ' — let me narrow it down'; },
       refine: {
@@ -118,6 +120,9 @@
   var current = 'landing';
   var answered = 0;          // drives the bowl fill
   var DEBUG = /[?&]debug=1/.test(location.search);
+  // The reason chips under the dish are hidden for now (decided 2026-11-22). The engine still
+  // computes them; ?debug=1 shows the full breakdown, and flipping this brings them back.
+  var SHOW_REASONS = false;
 
   // ── screens ────────────────────────────────────────────
   function show(name) {
@@ -273,13 +278,14 @@
     state.last = out;
 
     var d = out.picked.dish;
-    $('#answerLead').textContent = t().lead;
+    $('#answerLead').textContent = out.relaxed === 'price' ? t().relaxedPrice : t().lead;
     $('#dish').textContent = lang === 'en' ? d.en : d.ko;
     $('#dishEn').textContent = lang === 'en' ? d.ko : d.en;
 
     var why = $('#why');
     why.innerHTML = '';
-    out.why.forEach(function (w, i) {
+    why.hidden = !SHOW_REASONS;
+    if (SHOW_REASONS) out.why.forEach(function (w, i) {
       var li = document.createElement('li');
       li.className = 'reveal' + (w.folklore ? ' is-folk' : '');
       li.style.setProperty('--i', 3 + i);

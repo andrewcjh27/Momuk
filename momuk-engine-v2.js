@@ -170,7 +170,7 @@
       // ×1.2 for ₩10–20k. Alone, 상관없어 means just that — no lean.
       key: 'treat',
       f: function (d, c) {
-        if (c.budget < 3 || c.party < 2) return { v: 0 };
+        if (c.budget < 3 || c.party < 2 || c.priceWidened) return { v: 0 };   // not when 상관없어 was our widening
         return { v: d.price === 3 ? ln(1.5) : d.price === 2 ? ln(1.2) : 0 };
       }
     },
@@ -249,18 +249,13 @@
     return out;
   }
 
-  function sample(ranked, tau, poolSize) {
-    var pool = ranked.slice(0, poolSize || 25);
+  // Every suggestion re-ranks everything still eligible (rejected dishes are already out),
+  // takes the top 10 and picks one of them at random, each equally likely.
+  var POOL = 10;
+  function sample(ranked) {
+    var pool = ranked.slice(0, POOL);
     if (!pool.length) return null;
-    var top = pool[0].score;
-    var weights = pool.map(function (r) { return Math.exp((r.score - top) / (tau || 0.7)); });
-    var sum = weights.reduce(function (a, b) { return a + b; }, 0);
-    var r = Math.random() * sum;
-    for (var i = 0; i < pool.length; i++) {
-      r -= weights[i];
-      if (r <= 0) return { pick: pool[i], p: weights[i] / sum };
-    }
-    return { pick: pool[pool.length - 1], p: weights[weights.length - 1] / sum };
+    return { pick: pool[Math.floor(Math.random() * pool.length)], p: 1 / pool.length };
   }
 
   // Reasons: measured effects first (they carry real numbers), then the kept heuristics.
@@ -282,10 +277,20 @@
     opts = opts || {};
     var model = prepare(global.MOMUK_MODEL);
     var ctx = buildContext(input, model);
-    var ranked = rank(ctx, model);
+    var ranked = rank(ctx, model), relaxed = null;
+    // Price is the most flexible answer: when every dish in the chosen band has been turned down
+    // (or none exists — e.g. ₩10–20k alone late at night), widen to any price instead of stopping.
+    // Meal-time availability and the narrowing answers are never relaxed.
+    if (!ranked.length && ctx.budget < 3) {
+      ctx = buildContext(Object.assign({}, input, { budget: 3 }), model);
+      ctx.priceWidened = true;
+      ranked = rank(ctx, model);
+      relaxed = ranked.length ? 'price' : null;
+    }
     if (!ranked.length) return { ctx: ctx, ranked: [], picked: null, why: [] };
-    var s = sample(ranked, opts.tau, opts.poolSize);
-    return { ctx: ctx, ranked: ranked, picked: s.pick, p: s.p, why: explain(s.pick, opts.lang || 'ko', 3) };
+    var s = sample(ranked);
+    return { ctx: ctx, ranked: ranked, picked: s.pick, p: s.p, relaxed: relaxed,
+             why: explain(s.pick, opts.lang || 'ko', 3) };
   }
 
   global.MomukV2 = {
