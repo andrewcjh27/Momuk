@@ -14,7 +14,11 @@
 # MAGIC | Silver | `silver_dish_interest` | Naver batches rescaled onto one scale, missing days filled |
 # MAGIC | Silver | `silver_weather_province` | Each province's own daily weather + flags (KR-xx codes) |
 # MAGIC | Silver | `silver_weather_daily` | Population-weighted national weather + flags |
-# MAGIC | Gold | `gold_dish_day` | One row per dish per day: interest + weather + calendar + menu attributes |
+# MAGIC | Silver | `silver_dish_interest_clean` | Cleaned interest: days before each dish existed removed, viral spikes capped |
+# MAGIC | Silver | `silver_dish_quality` | One row per dish: start date, usual level, spike count, coarse flag |
+# MAGIC | Gold | `gold_dish_day` | One row per dish per day: cleaned interest + weather + calendar + menu attributes |
+# MAGIC
+# MAGIC Also needs `calendar_kr.csv` in the volume (the spike rule leaves food days alone).
 
 # COMMAND ----------
 
@@ -147,14 +151,127 @@ display(silver_weather.orderBy(F.desc("date")).limit(10))
 
 # COMMAND ----------
 
+# MAGIC %md
+# MAGIC ## Silver 3 — cleaning (decided 2026-11-22, see DECISIONS.md)
+# MAGIC
+# MAGIC 1. **Start dates.** A newer dish (마라탕, 로제떡볶이…) shows near-zero interest before it took off. Those days
+# MAGIC    mean "didn't exist yet", not "nobody wanted it", so they are **removed** rather than kept as zeros.
+# MAGIC    A dish starts in the first week from which its weekly interest stays at or above `START_SHARE` (10%)
+# MAGIC    of its usual level (median week over the last 52 weeks) for `START_RUN_WEEKS` (4) weeks in a row.
+# MAGIC 2. **Viral spikes.** A day above `SPIKE_X` (3×) the median of the surrounding month (±14 days) is flagged
+# MAGIC    `is_spike` and capped at 3× for every lift. The raw value stays in `interest_raw`. Food days in
+# MAGIC    `calendar_kr.csv` are never capped — 동지 → 팥죽 is a spike on purpose, and the event study measures it.
+# MAGIC 3. **Coarse series.** Dishes with fewer than `COARSE_MIN_DISTINCT` distinct daily values move in visible steps
+# MAGIC    (too few searches for Naver's rounding). They are flagged `is_coarse` and skipped by the spike rule (a jump
+# MAGIC    from 1 to 4 is rounding, not a viral moment). How they're measured weekly is decided once this run shows
+# MAGIC    how many there are.
+
+# COMMAND ----------
+
+from pyspark.sql import Window
+
+START_SHARE = 0.10        # a dish exists once weekly interest stays ≥ 10% of its usual level…
+START_RUN_WEEKS = 4       # …for 4 weeks in a row
+SPIKE_X = 3.0             # a day > 3× the median of its surrounding month is a spike
+COARSE_MIN_DISTINCT = 50  # fewer distinct daily values than this = coarse
+
+si = spark.table("silver_dish_interest")
+first_date, last_date = si.agg(F.min("date"), F.max("date")).first()
+
+# 1. start dates
+weekly = (si.withColumn("week", F.date_trunc("week", "date").cast("date"))
+          .groupBy("dish_id", "week").agg(F.avg("interest").alias("wk")))
+usual = (weekly.filter(F.col("week") >= F.date_sub(F.lit(last_date), 364))
+         .groupBy("dish_id").agg(F.expr("percentile_approx(wk, 0.5)").alias("usual")))
+by_week = Window.partitionBy("dish_id").orderBy("week").rowsBetween(0, START_RUN_WEEKS - 1)
+start = (weekly.join(usual, "dish_id")
+         .withColumn("above", (F.col("wk") >= START_SHARE * F.col("usual")).cast("int"))
+         .withColumn("run", F.sum("above").over(by_week))
+         .filter(F.col("run") == START_RUN_WEEKS)
+         .groupBy("dish_id").agg(F.min("week").alias("start_week")))
+
+# 2. spikes (food days exempt)
+event_days = (spark.read.option("header", True).option("encoding", "UTF-8").csv(f"{VOL}/calendar_kr.csv")
+              .select(F.to_date("date").alias("date")).distinct().withColumn("is_event_day", F.lit(True)))
+month_around = Window.partitionBy("dish_id").orderBy("date").rowsBetween(-14, 14)
+
+trimmed = (si.join(usual, "dish_id", "left").join(start, "dish_id", "left")
+           .withColumn("start_date", F.greatest(F.coalesce("start_week", F.lit(first_date)), F.lit(first_date)))
+           .filter(F.col("date") >= F.col("start_date")))
+
+# 3. coarse series — found before spikes: in a coarse series a jump from 1 to 4 is rounding, not a spike
+coarse = (trimmed.groupBy("dish_id")
+          .agg(F.countDistinct(F.round("interest", 4)).alias("distinct_values"))
+          .withColumn("is_coarse", F.col("distinct_values") < COARSE_MIN_DISTINCT))
+
+clean = (trimmed.join(coarse, "dish_id")
+         .withColumn("local_median", F.percentile_approx("interest", 0.5).over(month_around))
+         # floor: a dish at its seasonal low (팥죽 in July) shouldn't call every small bump a spike
+         .withColumn("spike_ceiling", F.lit(SPIKE_X) * F.greatest("local_median", F.lit(START_SHARE) * F.col("usual")))
+         .join(event_days, "date", "left").fillna({"is_event_day": False})
+         .withColumn("is_spike", (F.col("interest") > F.col("spike_ceiling")) & ~F.col("is_event_day") & ~F.col("is_coarse"))
+         .withColumn("interest_raw", F.col("interest"))
+         .withColumn("interest", F.when(F.col("is_spike"), F.col("spike_ceiling")).otherwise(F.col("interest")))
+         .select("dish_id", "date", "interest", "interest_raw", "is_spike", "is_event_day", "was_missing"))
+clean.write.mode("overwrite").option("overwriteSchema", "true").saveAsTable("silver_dish_interest_clean")
+
+# one quality row per dish
+c = spark.table("silver_dish_interest_clean")
+quality = (c.groupBy("dish_id").agg(
+               F.min("date").alias("start_date"),
+               F.avg((F.col("interest_raw") == 0).cast("int")).alias("share_zero_days"),
+               F.sum(F.col("is_spike").cast("int")).alias("spike_days"))
+           .join(usual, "dish_id", "left")
+           .join(coarse, "dish_id", "left"))
+quality.write.mode("overwrite").option("overwriteSchema", "true").saveAsTable("silver_dish_quality")
+
+q = spark.table("silver_dish_quality").join(
+    spark.table("bronze_menu").select(F.col("id").alias("dish_id"), "ko"), "dish_id")
+print(f"rows before cleaning: {si.count():,}  after: {c.count():,}")
+print("spike days:", c.filter("is_spike").count(), "of", c.count())
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ### Review 1 — start dates
+# MAGIC Dishes whose data now starts after the first day. Do these match when each dish took off?
+# MAGIC If too many established dishes appear, lower `START_SHARE`; if booms start too early, raise it.
+
+# COMMAND ----------
+
+display(q.filter(F.col("start_date") > F.lit(first_date))
+         .select("ko", "dish_id", "start_date", "usual").orderBy("start_date"))
+
+# COMMAND ----------
+
+# MAGIC %md ### Review 2 — the largest spikes that were capped
+
+# COMMAND ----------
+
+display(c.filter("is_spike").join(q.select("dish_id", "ko"), "dish_id")
+         .withColumn("x_month_median", F.round(F.col("interest_raw") / F.col("interest") * SPIKE_X, 1))
+         .select("ko", "date", "interest_raw", "interest", "x_month_median")
+         .orderBy(F.desc("x_month_median")).limit(30))
+
+# COMMAND ----------
+
+# MAGIC %md ### Review 3 — coarse dishes
+
+# COMMAND ----------
+
+display(q.select("ko", "dish_id", "distinct_values", "share_zero_days", "is_coarse").orderBy("distinct_values").limit(30))
+
+# COMMAND ----------
+
 # MAGIC %md ## Gold — one row per dish per day
 
 # COMMAND ----------
 
 menu = spark.table("bronze_menu").withColumnRenamed("id", "dish_id")
 
-gold = (spark.table("silver_dish_interest")
+gold = (spark.table("silver_dish_interest_clean")
         .join(spark.table("silver_weather_daily"), "date")
+        .join(spark.table("silver_dish_quality").select("dish_id", "is_coarse"), "dish_id")
         .join(menu, "dish_id")
         .withColumn("year", F.year("date"))
         .withColumn("month", F.month("date"))

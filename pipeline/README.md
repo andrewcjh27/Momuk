@@ -40,8 +40,9 @@ sources' terms apply to it. The scripts recreate it.
 | `build_calendar.py` → `calendar_kr.csv` | Korean food calendar 2016–2027: 설날, 추석, 복날, 동지 (팥죽 only), 크리스마스, 수능, 삼겹살데이, 블랙데이 |
 | `ingest_google_trends.py` | Province profile for each dish's top keyword. Resumable; re-fetches dishes whose keyword changed |
 | `momuk-data.csv` | Pipeline copy of the catalog: the app's 14 columns plus `meal_*` time-of-day columns and `search_keyword` |
-| `notebooks/momuk_01_bronze_silver_gold.py` | Databricks: anchor rescaling, missing-day fill, weather (national + province), gold table, rain lift, weekend lift |
+| `notebooks/momuk_01_bronze_silver_gold.py` | Databricks: anchor rescaling, missing-day fill, weather (national + province, rainy day by population share), cleaning (start dates, spike caps, coarse flags), gold table, rain lift, weekend lift |
 | `notebooks/momuk_02_regional.py` | Databricks: regional lean with shrinkage, regional hypotheses, temperature boost, weekend and food-day lifts, recommender v0 |
+| `notebooks/momuk_03_checks.py` | Databricks: data checks run after 01 and 02 (catalog, interest, weather, lifts). Logs every result to `ops_run_log` and fails the run on errors |
 | `reports/keyword_validation.csv` | Every keyword candidate with volume share, change correlation, string similarity, decision and reason |
 
 ## Run it
@@ -56,7 +57,7 @@ pip3 install holidays ephem && python3 build_calendar.py
 ```
 
 Upload `momuk-data.csv`, `calendar_kr.csv` and `raw/*.csv` to the Databricks volume
-`/Volumes/workspace/momuk/raw`, then run notebook 01, then 02.
+`/Volumes/workspace/momuk/raw`, then run notebook 01, then 02, then 03 (checks).
 
 ## Methods in brief
 
@@ -84,5 +85,6 @@ Upload `momuk-data.csv`, `calendar_kr.csv` and `raw/*.csv` to the Databricks vol
 - Naver is national only; regional differences come from Google, which is used
   less in Korea and is noisier.
 - Search interest is relative, so absolute demand can't be estimated.
-- The cleaning decisions listed as open in [`DECISIONS.md`](../DECISIONS.md)
-  are not applied yet; the first findings in the main README are provisional.
+- The first findings in the main README were measured before the cleaning step
+  (start dates, spike caps, population-share rainy days) and will be updated
+  from the cleaned run.
