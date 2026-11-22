@@ -194,16 +194,24 @@
     return { total: total, parts: parts };
   }
 
-  // Narrowing questions, asked after every three "안 땡겨". A dish missing the attribute is kept.
+  // Narrowing questions, asked after every three "안 땡겨". Strict: once answered, only dishes that
+  // match are eligible — a dish whose attribute is unknown doesn't match.
   function isFamiliar(d, model) { return d.ubiq >= 2 && d.popularity >= model.medianPopularity; }
   function matchesPrefs(d, p, model) {
-    if (p.spice === 'hot' && d.spice != null && d.spice < 2) return false;
-    if (p.spice === 'mild' && d.spice != null && d.spice > 1) return false;
-    if (p.base && d.base && d.base !== p.base) return false;
-    if (p.novelty && d.ubiq != null && d.popularity) {
+    if (p.spice === 'hot' && !(d.spice >= 2)) return false;
+    if (p.spice === 'mild' && !(d.spice != null && d.spice <= 1)) return false;
+    if (p.base && d.base !== p.base) return false;
+    if (p.novelty) {
+      if (d.ubiq == null || !d.popularity) return false;
       if ((p.novelty === 'familiar') !== isFamiliar(d, model)) return false;
     }
     return true;
+  }
+
+  // Which narrowing questions this model can answer (older model files lack spice, base, ubiq).
+  var NEEDS = { spice: 'spice', base: 'base', novelty: 'ubiq' };
+  function canAsk(key, model) {
+    return model.dishes.some(function (d) { return d[NEEDS[key]] != null; });
   }
 
   function rank(ctx, model) {
@@ -266,6 +274,7 @@
   global.MomukV2 = {
     buildContext: function (input) { return buildContext(input, prepare(global.MOMUK_MODEL)); },
     nearestProvince: nearestProvince,
+    canAsk: function (key) { return canAsk(key, global.MOMUK_MODEL); },
     scoreDish: scoreDish, rank: rank, sample: sample, explain: explain, suggest: suggest,
     TERMS: TERMS
   };
