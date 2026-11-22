@@ -84,6 +84,7 @@ malatang,마라탕,Malatang,중식,hot,3,3,2,2,fast,1,0,3,국물|면,0,1,1,0,마
 mala-xiangguo,마라샹궈,Mala xiang guo,중식,hot,0,3,3,2,sit,0,1,2,술안주,0,0,1,1,마라샹궈
 huoguo,훠궈,Hot pot,중식,hot,3,3,3,3,sit,0,1,1,국물|겨울,0,0,1,0,훠궈
 guobaorou,꿔바로우,Guo bao rou,중식,hot,0,0,3,2,sit,0,1,2,고기,0,0,1,0,꿔바로우
+yanggochi,양꼬치,Lamb skewers,중식,hot,0,1,2,2,sit,0,1,2,술안주|야식|고기,0,0,1,1,양꼬치
 dimsum,딤섬,Dim sum,중식,hot,0,0,1,2,sit,0,1,1,,0,0,1,0,딤섬
 chobap,초밥,Sushi,일식,cold,0,0,1,3,sit,1,1,2,다이어트,0,1,1,0,초밥|스시
 hoe,회,Sashimi,일식,cold,0,0,1,3,sit,0,1,2,술안주|다이어트,0,0,1,1,횟집
@@ -112,6 +113,7 @@ pizza,피자,Pizza,양식,hot,0,0,3,2,sit,0,1,3,야식,0,0,1,1,피자
 hamburger,햄버거,Burger,양식,hot,0,0,3,1,fast,1,0,3,혼밥,0,1,1,1,햄버거|버거
 sujebeoger,수제버거,Craft burger,양식,hot,0,0,3,2,sit,1,0,2,,0,1,1,0,수제버거
 steak,스테이크,Steak,양식,hot,0,0,3,3,sit,0,1,2,고기,0,0,1,0,스테이크
+yanggogi,양고기,Grilled lamb (양갈비),양식,hot,0,0,3,3,sit,0,1,1,고기|술안주,0,0,1,0,양고기
 risotto,리조또,Risotto,양식,hot,1,0,2,2,sit,1,0,2,밥,0,1,1,0,리조또|리조토
 salad,샐러드,Salad,양식,cold,0,0,0,2,fast,1,0,2,다이어트|혼밥,0,1,0,0,샐러드
 sandwich,샌드위치,Sandwich,양식,room,0,0,1,1,fast,1,0,3,혼밥|다이어트,1,1,0,0,샌드위치
