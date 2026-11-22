@@ -29,6 +29,8 @@ MAX_WEATHER_LAG_DAYS = 7  # the weather archive runs a few days behind; more tha
 MAX_SPIKE_SHARE = 0.02     # if more than 2% of days are "spikes", the rule is too aggressive
 N_PROVINCES = 17
 REGION_CAP = 1.5           # must match notebook 02
+ANCHOR_ID = "kimchi-jjigae"  # must match notebooks 00 and 01
+MAX_ANCHOR_SPREAD = 1.05    # the anchor's rescaled copies in one download should agree within 5% on every day
 
 results = []
 
@@ -84,6 +86,19 @@ check("interest: no negative or empty values", bad_vals == 0, f"{bad_vals} rows"
 n_rows = clean.count()
 spike_share = clean.filter("is_spike").count() / max(n_rows, 1)
 check("interest: spikes are rare", spike_share <= MAX_SPIKE_SHARE, f"{spike_share:.2%} of days", level="warn")
+
+# Every request in a weekly download contains the anchor. After rescaling, all its copies describe the same
+# searches, so on each day they should agree. Disagreement means a request was scaled wrongly.
+if spark.catalog.tableExists("workspace.momuk.bronze_naver_updates"):
+    upd = spark.table("bronze_naver_updates")
+    newest = upd.agg(F.max("pull_id")).first()[0]
+    worst = (upd.filter((F.col("pull_id") == newest) & (F.col("dish_id") == ANCHOR_ID))
+             .withColumn("scaled", F.col("ratio") * F.col("factor")).filter(F.col("scaled") > 0)
+             .groupBy("date").agg((F.max("scaled") / F.min("scaled")).alias("spread"))
+             .agg(F.max("spread")).first()[0])
+    check("updates: the anchor's copies agree after rescaling", worst is not None and worst <= MAX_ANCHOR_SPREAD,
+          f"download {newest}: largest day-to-day disagreement ×{worst:.3f}" if worst else "no anchor rows",
+          level="warn")
 
 last = clean.agg(F.max("date")).first()[0]
 age = (dt.date.today() - last).days
