@@ -60,8 +60,8 @@ sogogi-gui,소고기구이,main,0
 sogogi-gui,소고기,generic,0
 sogogi-gui,한우,generic,0
 gopchang,곱창,main,0
-gopchang,막창,synonym,0
-gopchang,대창,synonym,0
+makchang,막창,main,0
+daechang,대창,main,0
 dakgalbi,닭갈비,main,0
 jjimdak,찜닭,main,0
 jjimdak,안동찜닭,regional,0
