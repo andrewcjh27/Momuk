@@ -73,6 +73,17 @@ milmyeon,밀면,Busan wheat cold noodles,한식,cold,2,2,1,1,fast,1,0,1,여름|�
 kongguksu,콩국수,Chilled soybean noodles,한식,cold,2,0,2,2,sit,1,0,2,여름|면,0,1,1,0,콩국수
 chogye-guksu,초계국수,Chilled chicken noodles,한식,cold,2,1,1,2,sit,1,0,1,여름|면|다이어트,0,1,1,0,초계국수
 makguksu,막국수,Buckwheat cold noodles,한식,cold,1,2,1,2,sit,1,0,1,여름|면,0,1,1,0,막국수
+dakbal,닭발,Spicy chicken feet,한식,hot,0,3,2,2,sit,0,1,3,야식|술안주,0,0,1,1,닭발
+agujjim,아구찜,Braised spicy monkfish,한식,hot,1,3,2,3,sit,0,1,2,술안주,0,0,1,0,아구찜
+kimchijjim,김치찜,Braised kimchi with pork,한식,hot,2,2,2,2,sit,1,1,3,밥|국물,0,1,1,0,김치찜
+juk,죽,Rice porridge (전복죽 etc.),한식,hot,2,0,1,1,fast,1,0,3,다이어트|해장,1,1,1,0,전복죽
+yukhoe,육회,Beef tartare,한식,cold,0,1,1,3,sit,0,1,2,고기|술안주,0,0,1,1,육회
+ori,오리고기,Roast or smoked duck,한식,hot,0,0,3,3,sit,0,1,2,고기|보양,0,0,1,0,오리고기
+dakhanmari,닭한마리,Whole chicken hot pot,한식,hot,3,0,3,2,sit,0,1,1,국물|겨울|보양,0,0,1,0,닭한마리
+baeksuk,백숙,Whole boiled chicken,한식,hot,3,0,3,3,sit,0,1,2,보양|여름|국물,0,1,1,0,백숙
+jangeo,장어구이,Grilled eel,한식,hot,0,0,2,3,sit,0,1,2,보양|여름,0,0,1,0,장어구이
+nakgopsae,낙곱새,"Octopus, tripe and shrimp stew",한식,hot,2,3,3,2,sit,0,1,1,밥|국물,0,1,1,0,낙곱새
+jogaegui,조개구이,Grilled shellfish,한식,hot,0,0,2,3,sit,0,1,1,술안주,0,0,1,1,조개구이
 naeng-momil,냉모밀,Chilled soba,일식,cold,1,0,1,1,fast,1,0,2,여름|면|다이어트,0,1,1,0,냉모밀|모밀|냉메밀
 jjajangmyeon,짜장면,Jjajangmyeon,중식,hot,0,0,2,1,fast,1,0,3,면,0,1,1,0,짜장면|자장면
 jjamppong,짬뽕,Spicy seafood noodles,중식,hot,3,3,2,1,fast,1,0,3,국물|면|해장,1,1,1,0,짬뽕
@@ -104,6 +115,7 @@ okonomiyaki,오코노미야키,Okonomiyaki,일식,hot,0,0,2,2,sit,0,1,1,비오�
 takoyaki,타코야키,Takoyaki,일식,hot,0,0,1,1,fast,1,1,2,분식|야식,0,1,1,1,타코야키|다코야끼
 curry-rice,카레라이스,Japanese curry rice,일식,hot,1,1,2,1,fast,1,0,2,밥|혼밥,0,1,1,0,카레|일본카레|카레라이스
 nabe,나베,Nabe hot pot,일식,hot,3,1,2,3,sit,0,1,1,국물|겨울,0,0,1,0,나베
+shabu,샤브샤브,Shabu-shabu hot pot,일식,hot,3,0,2,3,sit,0,1,2,국물|겨울,0,1,1,0,샤브샤브
 carbonara,까르보나라,Carbonara,양식,hot,0,0,3,2,sit,1,0,3,면,0,1,1,0,까르보나라|카르보나라
 aglio-olio,알리오올리오,Aglio e olio,양식,hot,0,1,2,2,sit,1,0,2,면,0,1,1,0,알리오올리오|알리오 올리오
 rose-pasta,로제파스타,Rosé pasta,양식,hot,0,1,3,2,sit,1,0,3,면,0,1,1,0,로제파스타
@@ -119,6 +131,9 @@ salad,샐러드,Salad,양식,cold,0,0,0,2,fast,1,0,2,다이어트|혼밥,0,1,0,0
 sandwich,샌드위치,Sandwich,양식,room,0,0,1,1,fast,1,0,3,혼밥|다이어트,1,1,0,0,샌드위치
 brunch,브런치,Brunch plate,양식,hot,0,0,2,3,sit,0,1,2,,1,1,0,0,브런치카페|브런치맛집
 chicken,치킨,Korean fried chicken,양식,hot,0,1,3,2,sit,0,1,3,야식|술안주,0,0,1,1,치킨|후라이드치킨|양념치킨|간장치킨
+omurice,오므라이스,Omurice,양식,hot,0,0,2,1,fast,1,0,2,밥|혼밥,0,1,1,0,오므라이스
+hamburg-steak,함박스테이크,Hamburg steak,양식,hot,0,0,2,2,fast,1,0,2,고기|밥,0,1,1,0,함박스테이크
+poke,포케,Poke bowl,양식,cold,0,0,1,2,fast,1,0,2,다이어트|혼밥,0,1,1,0,포케
 pho,쌀국수,Pho,아시안,hot,3,0,1,2,fast,1,0,3,국물|면|해장|다이어트,1,1,1,0,쌀국수|베트남쌀국수
 buncha,분짜,Bun cha,아시안,room,1,1,2,2,sit,1,0,1,면,0,1,1,0,분짜
 padthai,팟타이,Pad thai,아시안,hot,0,1,2,2,fast,1,0,2,면,0,1,1,0,팟타이
