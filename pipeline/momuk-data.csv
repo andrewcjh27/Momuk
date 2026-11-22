@@ -15,7 +15,7 @@ kongnamul-gukbap,콩나물국밥,Bean sprout soup rice,한식,hot,3,1,1,1,fast,1
 sundae-gukbap,순대국밥,Blood sausage soup,한식,hot,3,1,2,1,fast,1,0,3,해장|국물,1,1,1,1,순대국|순대국밥|순댓국
 dwaeji-gukbap,돼지국밥,Pork soup rice,한식,hot,3,1,2,1,fast,1,0,2,해장|국물,1,1,1,0,돼지국밥
 chueotang,추어탕,Loach soup,한식,hot,3,2,2,2,sit,1,0,1,보양|국물,0,1,1,0,추어탕
-maeuntang,매운탕,Spicy fish stew,한식,hot,3,3,2,2,sit,0,1,2,국물|술안주,0,0.5,1,1,매운탕
+maeuntang,매운탕,Spicy fish stew,한식,hot,3,3,2,2,sit,0,1,2,국물|술안주,0,0.7,1,1,매운탕
 daegutang,대구탕,Cod soup,한식,hot,3,1,1,2,sit,1,0,1,해장|국물|다이어트,1,1,1,0,대구탕|대구지리
 tteokguk,떡국,Rice cake soup,한식,hot,3,0,1,1,fast,1,0,2,국물|겨울,1,1,1,0,떡국|떡만둣국
 manduguk,만둣국,Dumpling soup,한식,hot,3,0,1,1,fast,1,0,2,국물|겨울,0,1,1,0,만두국|만둣국
@@ -120,7 +120,7 @@ aglio-olio,알리오올리오,Aglio e olio,양식,hot,0,1,2,2,sit,1,0,2,면,0,1,
 rose-pasta,로제파스타,Rosé pasta,양식,hot,0,1,3,2,sit,1,0,3,면,0,1,1,0,로제파스타
 vongole,봉골레,Vongole,양식,hot,1,0,1,2,sit,1,0,2,면|다이어트,0,1,1,0,봉골레파스타|봉골레
 tomato-pasta,토마토파스타,Tomato pasta,양식,hot,0,1,2,2,sit,1,0,3,면,0,1,1,0,토마토파스타
-pizza,피자,Pizza,양식,hot,0,0,3,2,sit,0,1,3,야식,0,0.5,1,1,피자
+pizza,피자,Pizza,양식,hot,0,0,3,2,sit,0,1,3,야식,0,0.7,1,1,피자
 hamburger,햄버거,Burger,양식,hot,0,0,3,1,fast,1,0,3,혼밥,0,1,1,1,햄버거|버거
 sujebeoger,수제버거,Craft burger,양식,hot,0,0,3,2,sit,1,0,2,,0,1,1,0,수제버거
 steak,스테이크,Steak,양식,hot,0,0,3,3,sit,0,1,2,고기,0,0,1,0,스테이크
