@@ -151,9 +151,10 @@ precipitation and humidity; its air-quality endpoint for PM2.5. Both are free,
 keyless and CORS-enabled, so they're called directly from the browser — which
 is why this needs no server. Free tier is non-commercial.
 
-Location comes from the browser's geolocation API. When it's denied or
-unavailable, the page falls back to manually entered context rather than
-failing.
+Location comes from the browser's geolocation API, asked when the person taps
+시작하기. They can choose 위치 없이 고르기 instead; without location the
+recommendation uses only nationwide signals (popularity, meal time, weekend,
+food days), with no local weather or regional lean.
 
 ## Deploy
 

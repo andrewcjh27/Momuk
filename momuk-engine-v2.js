@@ -67,7 +67,9 @@
       hunger: input.hunger != null ? input.hunger : 5,   // 1-10
       budget: input.budget != null ? input.budget : 2,   // 1-3
       party: input.party != null ? input.party : 1,
-      recent: input.recent || []
+      recent: input.recent || [],
+      exclude: input.exclude || [],       // turned down with "안 땡겨" this round — never shown again
+      prefs: input.prefs || {}            // answers to the narrowing questions: spice, base, novelty
     };
   }
 
@@ -192,10 +194,27 @@
     return { total: total, parts: parts };
   }
 
+  // Narrowing questions, asked after every three "안 땡겨". A dish missing the attribute is kept.
+  function isFamiliar(d, model) { return d.ubiq >= 2 && d.popularity >= model.medianPopularity; }
+  function matchesPrefs(d, p, model) {
+    if (p.spice === 'hot' && d.spice != null && d.spice < 2) return false;
+    if (p.spice === 'mild' && d.spice != null && d.spice > 1) return false;
+    if (p.base && d.base && d.base !== p.base) return false;
+    if (p.novelty && d.ubiq != null && d.popularity) {
+      if ((p.novelty === 'familiar') !== isFamiliar(d, model)) return false;
+    }
+    return true;
+  }
+
   function rank(ctx, model) {
     var out = [];
     model.dishes.forEach(function (d) {
       if (d.price > ctx.budget) return;                // budget is a hard filter
+      if (ctx.exclude.indexOf(d.id) > -1) return;      // already turned down this round
+      // Late at night most restaurants are closed: only dishes marked as late-night food (24-hour
+      // places, delivery, 포차) can be had, so the others are left out rather than just scored down.
+      if (ctx.meal === 'late' && !(d.meal.late > 0)) return;
+      if (!matchesPrefs(d, ctx.prefs, model)) return;
       if (ctx.party === 1 && !d.solo) return;          // so is eating alone (파전 stays a sharing dish)
       var s = scoreDish(d, ctx, model);
       out.push({ dish: d, score: s.total, parts: s.parts });

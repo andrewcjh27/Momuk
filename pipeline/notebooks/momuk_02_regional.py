@@ -335,7 +335,10 @@ event_today = (spark.table("gold_event_lift").filter(F.col("event").isin(events_
 hunger_ok = {1: F.col("heavy") <= 1, 2: F.col("heavy").between(1, 2), 3: F.col("heavy") >= 2}[HUNGER]
 party_ok = (F.col("solo") == 1) if PEOPLE == 1 else (F.col("share") == 1)
 
-recs = (menu.filter(party_ok & hunger_ok & (F.col("price") <= MAX_PRICE))
+# late at night only dishes you can actually get (marked meal_late_night) are eligible — same rule as the website
+open_now = (F.col("meal_late_night") > 0) if MEAL_COL == "meal_late_night" else F.lit(True)
+
+recs = (menu.filter(party_ok & hunger_ok & (F.col("price") <= MAX_PRICE) & open_now)
         .join(popularity, "dish_id")
         .join(rain_lift, "dish_id", "left")
         .join(region, "dish_id", "left")

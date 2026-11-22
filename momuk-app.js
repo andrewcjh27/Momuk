@@ -26,10 +26,20 @@
       restart: '다시 고르기', doneNote: '맛있게 드세요',
       locating: '위치 확인 중…',
       weather: function (t, p, where) { return (where ? '<b>' + where + '</b> · ' : '') + '체감 <b>' + t + '°C</b> · 미세먼지 <b>' + p + '</b>'; },
-      noloc: '위치 없이 시간대만 보고 고를게요',
+      noloc: '위치 없이 전국 기준으로 고를게요',
+      skipLoc: '위치 없이 고르기', useLoc: '내 위치 쓰기',
       empty: '조건에 맞는 게 없어요. 예산을 올려볼까요?',
+      allShown: '맞는 메뉴는 다 보여드렸어요. 조건을 바꿔볼까요?',
+      askLoc: '시작하면 날씨를 보려고 위치를 물어볼게요',
+      refineLead: function (n) { return n + '개 다 별로였구나 — 좀 더 좁혀볼게'; },
+      refine: {
+        spice:   { ask: '매운 거 땡겨?', options: [['hot', '맵게'], ['mild', '안 맵게']] },
+        base:    { ask: '뭐가 땡겨?', options: [['rice', '밥'], ['noodle', '면'], ['bread', '빵'], ['meat', '고기']] },
+        novelty: { ask: '새로운 거, 익숙한 거?', options: [['new', '새로운 거'], ['familiar', '익숙한 거']] },
+        any: '상관없어'
+      },
       think: {
-        loc: '지금 날씨를 보는 중…',
+        loc: '지금 날씨를 보는 중…', national: '전국 기준으로 보는 중…',
         weather: function (t, r) { return '체감 ' + t + '°C' + (r > 0.2 ? ', 비가 오네요' : ''); },
         slot: { breakfast: '아침 메뉴 중에서', lunch: '점심 메뉴 중에서', dinner: '저녁 메뉴 중에서', late: '야식 중에서' },
         count: function (n) { return n + '개를 추려보는 중…'; }
@@ -50,10 +60,20 @@
       restart: 'Start over', doneNote: 'Enjoy',
       locating: 'Finding you…',
       weather: function (t, p, where) { return (where ? '<b>' + where + '</b> · ' : '') + 'Feels <b>' + t + '°C</b> · PM2.5 <b>' + p + '</b>'; },
-      noloc: "No location — going on time of day alone",
+      noloc: 'No location — going on nationwide patterns',
+      skipLoc: 'Skip location', useLoc: 'Use my location',
       empty: 'Nothing fits. Try raising the budget?',
+      allShown: "That's every dish that fits. Change an answer?",
+      askLoc: "We'll ask for your location when you start, to check the weather",
+      refineLead: function (n) { return 'None of those ' + n + ' — let me narrow it down'; },
+      refine: {
+        spice:   { ask: 'Spicy?', options: [['hot', 'Spicy'], ['mild', 'Not spicy']] },
+        base:    { ask: 'What kind?', options: [['rice', 'Rice'], ['noodle', 'Noodles'], ['bread', 'Bread'], ['meat', 'Meat']] },
+        novelty: { ask: 'Something new, or something familiar?', options: [['new', 'Something new'], ['familiar', 'Something familiar']] },
+        any: "Doesn't matter"
+      },
       think: {
-        loc: 'Checking the weather…',
+        loc: 'Checking the weather…', national: 'Going on nationwide patterns…',
         weather: function (t, r) { return 'Feels ' + t + '°C' + (r > 0.2 ? ', and raining' : ''); },
         slot: { breakfast: 'Among breakfast dishes', lunch: 'Among lunch dishes', dinner: 'Among dinner dishes', late: 'Among late-night dishes' },
         count: function (n) { return 'Narrowing ' + n + ' down…'; }
@@ -78,7 +98,13 @@
   var state = {
     party: 1, hunger: 5, budget: 2,
     weather: { hasWeather: false },
+    useLocation: true,         // false once the person picks "위치 없이 고르기"
+    locating: false,
     recent: JSON.parse(localStorage.getItem('momuk.recent') || '[]'),
+    rejected: [],              // dishes turned down with "안 땡겨" since the last answers
+    prefs: {},                 // answers to the narrowing questions this round
+    asked: 0,                  // how many narrowing questions this round
+    locAsked: false,
     last: null
   };
 
@@ -127,19 +153,45 @@
     } else if (kind) {
       el.textContent = t()[kind];
     }
+    // The person can always choose: skip location while it's being found, or turn it back on.
+    var action = kind === 'locating' || kind === 'askLoc' ? 'skipLoc'
+               : kind === 'noloc' && navigator.geolocation ? 'useLoc' : null;
+    if (action) {
+      var b = document.createElement('button');
+      b.className = 'linkbtn status__act';
+      b.textContent = t()[action];
+      b.addEventListener('click', action === 'skipLoc' ? skipLocation : function () {
+        state.useLocation = true; loadWeather();
+      });
+      el.appendChild(document.createTextNode(' · '));
+      el.appendChild(b);
+    }
   }
 
+  // Without location the engine uses only nationwide signals — popularity, meal time, weekend,
+  // food days. No local weather and no regional lean (v2 leaves both out when there's no position).
+  function skipLocation() {
+    state.useLocation = false;
+    state.locating = false;
+    state.weather = { hasWeather: false };
+    renderStatus('noloc');
+  }
+
+  var locRun = 0;
   function loadWeather() {
     if (!navigator.geolocation) { renderStatus('noloc'); return; }
+    var run = ++locRun;                    // a later run, or "위치 없이 고르기", makes this one stale
+    var live = function () { return run === locRun && state.useLocation; };
+    state.locating = true;
     renderStatus('locating');
 
     var settled = false;
     var giveUp = setTimeout(function () {
-      if (!settled) { settled = true; renderStatus('noloc'); }
+      if (!settled && live()) { settled = true; state.locating = false; renderStatus('noloc'); }
     }, 9000);
     var done = function (kind) {
-      if (settled) return;
-      settled = true; clearTimeout(giveUp); renderStatus(kind);
+      if (settled || !live()) return;
+      settled = true; clearTimeout(giveUp); state.locating = false; renderStatus(kind);
     };
 
     navigator.geolocation.getCurrentPosition(function (pos) {
@@ -153,6 +205,7 @@
               '&longitude=' + lo + '&current=pm2_5')
           .then(function (r) { return r.json(); }).catch(function () { return null; })
       ]).then(function (res) {
+        if (!live()) return;               // they chose to go without location meanwhile
         var c = res[0].current, day = res[0].daily || {};
         state.weather = {
           hasWeather: true,
@@ -179,7 +232,8 @@
     var w = state.weather;
     var ctx = engine().buildContext(inputs());
     var lines = [
-      w.hasWeather ? t().think.weather(Math.round(w.feelsC), w.rainMm) : t().think.loc,
+      w.hasWeather ? t().think.weather(Math.round(w.feelsC), w.rainMm)
+                   : state.locating ? t().think.loc : t().think.national,
       t().think.slot[ctx.slot],
       t().think.count(dishCount())
     ];
@@ -201,13 +255,23 @@
       tempMeanC: w.tempMeanC, rainTodayMm: w.rainTodayMm, lat: w.lat, lon: w.lon,
       humidity: w.humidity, pm25: w.pm25, hasWeather: w.hasWeather,
       hunger: state.hunger, budget: state.budget, party: state.party,
-      recent: state.recent
+      recent: state.recent,
+      exclude: state.rejected,
+      prefs: state.prefs
     };
   }
 
   function suggest() {
     var out = engine().suggest(inputs(), { lang: lang });
-    if (!out.picked) { $('#status').textContent = t().empty; show('q3'); return; }
+    // If a narrowing answer leaves nothing, loosen the most recent one rather than give up.
+    while (!out.picked && state.prefOrder.length) {
+      delete state.prefs[state.prefOrder.pop()];
+      out = engine().suggest(inputs(), { lang: lang });
+    }
+    if (!out.picked) {
+      $('#status').textContent = state.rejected.length ? t().allShown : t().empty;
+      show('q3'); return;
+    }
     state.last = out;
 
     var d = out.picked.dish;
@@ -234,6 +298,40 @@
     if (DEBUG) renderDebug(out);
     show('response');
   }
+
+  // ── narrowing questions ────────────────────────────────
+  var REFINE = ['spice', 'base', 'novelty'];   // asked in this order, one per three "안 땡겨"
+  state.prefOrder = [];
+
+  function newRound() {
+    state.rejected = []; state.prefs = {}; state.prefOrder = []; state.asked = 0;
+  }
+
+  function askRefine() {
+    var key = REFINE[state.asked++];
+    var q = t().refine[key];
+    $('#refineLead').textContent = t().refineLead(state.rejected.length);
+    $('#refineAsk').textContent = q.ask;
+    var box = $('#refineOptions');
+    box.innerHTML = '';
+    q.options.concat([[null, t().refine.any]]).forEach(function (opt, i) {
+      var b = document.createElement('button');
+      b.className = 'pill enter';
+      b.style.setProperty('--i', i + 1);
+      b.innerHTML = '<span>' + opt[1] + '</span>';
+      b.addEventListener('click', function () { answerRefine(key, opt[0]); });
+      box.appendChild(b);
+    });
+    show('refine');
+  }
+
+  function answerRefine(key, value) {
+    if (value) { state.prefs[key] = value; state.prefOrder.push(key); }
+    show('thinking');
+    think(suggest);
+  }
+
+  $('#refineSkip').addEventListener('click', function () { answerRefine(null, null); });
 
   // ── wiring ─────────────────────────────────────────────
   function buildOptions() {
@@ -278,6 +376,7 @@
     $('#again').textContent = t().again;
     $('#restart').textContent = t().restart;
     $$('[data-skip]').forEach(function (b) { b.textContent = t().skip; });
+    $('#refineSkip').textContent = t().skip;
     $('#s-q2 [data-next]').textContent = t().next;
     $('#s-q3 [data-next]').textContent = t().suggest;
     buildOptions(); readHunger(); readBudget();
@@ -288,7 +387,10 @@
   $('#langKo').addEventListener('click', function () { lang = 'ko'; applyLang(); });
   $('#langEn').addEventListener('click', function () { lang = 'en'; applyLang(); });
 
-  $('#start').addEventListener('click', function () { show('q1'); });
+  $('#start').addEventListener('click', function () {
+    if (!state.locAsked && state.useLocation) { state.locAsked = true; loadWeather(); }
+    show('q1');
+  });
 
   $('#hunger').addEventListener('input', function () {
     state.hunger = +this.value; readHunger();
@@ -301,6 +403,7 @@
     setProgress(2); show('q3');
   });
   $('#s-q3 [data-next]').addEventListener('click', function () {
+    newRound();
     setProgress(3); show('thinking'); think(suggest);
   });
 
@@ -308,7 +411,7 @@
     b.addEventListener('click', function () {
       var i = ORDER.indexOf(current);
       setProgress(i);                       // skipping still advances the bowl
-      if (current === 'q3') { show('thinking'); think(suggest); }
+      if (current === 'q3') { newRound(); show('thinking'); think(suggest); }
       else show(ORDER[i + 1]);
     });
   });
@@ -323,6 +426,13 @@
   });
 
   $('#again').addEventListener('click', function () {
+    // "음… 안 땡겨!" — that dish is out for the rest of this round, so the next pick is always new.
+    if (state.last && state.last.picked) state.rejected.push(state.last.picked.dish.id);
+    // After every third "안 땡겨", ask one narrowing question before the next pick
+    // (only with the measured model, which knows spice, base and how common each dish is).
+    if (window.MOMUK_MODEL && state.rejected.length % 3 === 0 && state.asked < REFINE.length) {
+      askRefine(); return;
+    }
     show('thinking');
     think(suggest);
   });
@@ -370,5 +480,5 @@
   // ── go ─────────────────────────────────────────────────
   applyLang();
   setProgress(0);
-  loadWeather();
+  renderStatus(navigator.geolocation ? 'askLoc' : 'noloc');
 })();

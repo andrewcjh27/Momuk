@@ -46,7 +46,8 @@
       hunger: input.hunger != null ? input.hunger : 5,   // 1-10
       budget: input.budget != null ? input.budget : 2,   // 1-3
       party:  input.party  != null ? input.party  : 1,
-      recent: input.recent || []                          // array of dish ids
+      recent: input.recent || [],                         // array of dish ids
+      exclude: input.exclude || []                        // turned down this round — never shown again
     };
   }
 
@@ -224,6 +225,7 @@
     for (var i = 0; i < dishes.length; i++) {
       var d = dishes[i];
       if (d.price > ctx.budget) continue;               // budget is a hard filter
+      if (ctx.exclude.indexOf(d.id) > -1) continue;     // already turned down this round
       var s = scoreDish(d, ctx);
       out.push({ dish: d, score: s.total, parts: s.parts });
     }
