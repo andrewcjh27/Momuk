@@ -294,22 +294,33 @@
   }
 
   // ── narrowing questions ────────────────────────────────
-  var REFINE = ['spice', 'base', 'novelty'];   // asked in this order, one per three "안 땡겨"
+  var REFINE = ['spice', 'base', 'novelty'];   // one per three "안 땡겨", in a random order each round
   state.prefOrder = [];
+
+  function shuffled(list) {
+    var a = list.slice();
+    for (var i = a.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1)), tmp = a[i]; a[i] = a[j]; a[j] = tmp;
+    }
+    return a;
+  }
 
   function newRound() {
     state.rejected = []; state.prefs = {}; state.prefOrder = []; state.asked = 0;
+    state.refineOrder = shuffled(REFINE);
   }
+  newRound();
 
   // The next question this round that the data can answer (skips ones the model file can't).
   function nextRefine() {
-    while (state.asked < REFINE.length && !window.MomukV2.canAsk(REFINE[state.asked])) state.asked++;
-    return state.asked < REFINE.length;
+    var order = state.refineOrder;
+    while (state.asked < order.length && !window.MomukV2.canAsk(order[state.asked])) state.asked++;
+    return state.asked < order.length;
   }
 
   function askRefine() {
     $('#refineSkip').hidden = false;
-    var key = REFINE[state.asked++];
+    var key = state.refineOrder[state.asked++];
     var q = t().refine[key];
     $('#refineLead').textContent = t().refineLead(state.rejected.length);
     $('#refineAsk').textContent = q.ask;
