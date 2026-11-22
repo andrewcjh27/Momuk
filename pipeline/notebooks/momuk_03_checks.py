@@ -22,6 +22,7 @@ spark.sql("USE workspace.momuk")
 # Freshness becomes an error once the weekly job is running; until then the data is a one-off pull.
 AUTOMATED = False
 MAX_DATA_AGE_DAYS = 10     # Naver lags ~1 day; a weekly job should never be more than ~10 days behind
+MAX_WEATHER_LAG_DAYS = 7  # the weather archive runs a few days behind; more than a week means a download failed
 MAX_SPIKE_SHARE = 0.02     # if more than 2% of days are "spikes", the rule is too aggressive
 N_PROVINCES = 17
 REGION_CAP = 1.5           # must match notebook 02
@@ -104,7 +105,17 @@ wd = spark.table("silver_weather_daily")
 bad_share = wd.filter(F.col("rain_share").isNull() | (F.col("rain_share") < 0) | (F.col("rain_share") > 1)).count()
 check("weather: rain_share is between 0 and 1", bad_share == 0, f"{bad_share} rows")
 
-check("gold: every cleaned row found its weather", gold.count() == n_rows, f"gold {gold.count():,} vs clean {n_rows:,}")
+# Weather can lag behind Naver (the ERA5 archive is a few days behind, and the two were downloaded at
+# different times). Days at the END without weather are a lag; days in the MIDDLE without weather are holes.
+last_weather = wd.agg(F.max("date")).first()[0]
+no_weather = (clean.select("date").distinct()
+              .join(wd.select("date"), "date", "left_anti"))
+holes = no_weather.filter(F.col("date") <= F.lit(last_weather)).count()
+lag_days = no_weather.filter(F.col("date") > F.lit(last_weather)).count()
+check("gold: no days missing weather in the middle", holes == 0, f"{holes} days")
+check("gold: weather keeps up with search data", lag_days <= MAX_WEATHER_LAG_DAYS,
+      f"last {lag_days} days of search data have no weather yet (latest weather {last_weather})",
+      level="error" if AUTOMATED else "warn")
 
 # COMMAND ----------
 
