@@ -41,7 +41,7 @@ print("rows:", spark.table("bronze_google_region").count(),
 # MAGIC   searches. Treating them as 0 would invent strong negative leans for small provinces.
 # MAGIC - **Shrinkage:** a dish seen in only a few provinces gets its lean pulled toward 1 (no adjustment),
 # MAGIC   because its numbers are noisy. Same idea as trusting the crowd until you know the individual.
-# MAGIC - **Clipping** to 0.5–2.0 so one province can never more than halve or double a recommendation.
+# MAGIC - **Clipping** to 0.67–1.5 (`REGION_CAP`), so region can change a dish's score by at most 50%.
 
 # COMMAND ----------
 
@@ -50,13 +50,15 @@ reg = (spark.table("bronze_google_region")
        .filter(F.col("geo_code").startswith("KR-") & (F.col("value") > 0)))
 
 by_dish = W.partitionBy("dish_id")
+REGION_CAP = 1.5   # decided 2026-11-21; was 2.0, which let region outweigh popularity and weather
+
 lean = (reg
     .withColumn("n_regions", F.count("*").over(by_dish))
     .withColumn("dish_mean", F.avg("value").over(by_dish))
     .withColumn("lean", F.col("value") / F.col("dish_mean"))
     .withColumn("reliability", F.least(F.lit(1.0), F.col("n_regions") / F.lit(16.0)))
     .withColumn("lean_shrunk", F.lit(1.0) + F.col("reliability") * (F.col("lean") - 1))
-    .withColumn("lean_shrunk", F.greatest(F.lit(0.5), F.least(F.lit(2.0), F.col("lean_shrunk")))))
+    .withColumn("lean_shrunk", F.greatest(F.lit(1 / REGION_CAP), F.least(F.lit(REGION_CAP), F.col("lean_shrunk")))))
 
 lean.write.mode("overwrite").option("overwriteSchema", "true").saveAsTable("silver_region_lean")
 
@@ -124,7 +126,7 @@ display(hypotheses.join(spark.table("gold_region_lean"), ["dish_id", "geo_code"]
 # MAGIC
 # MAGIC So `temp_boost = 1.8` at 25–30 °C means the dish gets 80% more interest on such days than usual.
 # MAGIC - Bins with fewer than 30 days are treated as unknown (boost 1), so rare extremes can't create noise.
-# MAGIC - Clipped to 0.5–2.0, like the regional lean.
+# MAGIC - Clipped to 0.5–2.0.
 # MAGIC - This is **predictive, not causal**: temperature and season move together, so the boost captures both
 # MAGIC   ("hot days" are also summer). That's what a recommender needs; separating the two is a causal question
 # MAGIC   for later. It doesn't double count rain: rain lift is measured within the same month.

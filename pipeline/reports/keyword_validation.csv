@@ -15,14 +15,14 @@ cheonggukjang,청국장찌개,synonym,0,0.237,0.522,0.692,keep,searched the same
 galbitang,갈비탕,main,0,1.0,1.0,1.0,keep,reference (most searched specific name)
 seolleongtang,설렁탕,main,0,1.0,1.0,1.0,keep,reference (most searched specific name)
 seolleongtang,설농탕,spelling,0,0.06,0.769,0.778,keep,searched the same way
-gomtang,곰탕,main,0,0.796,0.264,1.0,drop,behaves differently
-gomtang,나주곰탕,synonym,0,1.0,1.0,0.6,keep,reference (most searched specific name)
+gomtang,곰탕,main,0,1.0,1.0,1.0,keep,reference (most searched specific name)
+gomtang,나주곰탕,regional,0,1.257,0.264,0.6,drop,generic/ambiguous/regional term: strict bar
 samgyetang,삼계탕,main,0,1.0,1.0,1.0,keep,reference (most searched specific name)
 yukgaejang,육개장,main,0,1.0,1.0,1.0,keep,reference (most searched specific name)
 yukgaejang,육계장,spelling,0,0.214,0.617,0.875,keep,searched the same way
 gamjatang,감자탕,main,0,1.0,1.0,1.0,keep,reference (most searched specific name)
 haejangguk,뼈해장국,main,0,1.0,1.0,1.0,keep,reference (most searched specific name)
-haejangguk,해장국,generic,0,2.026,0.445,0.8,drop,generic/ambiguous term: strict bar
+haejangguk,해장국,generic,0,2.026,0.445,0.8,drop,generic/ambiguous/regional term: strict bar
 kongnamul-gukbap,콩나물국밥,main,0,1.0,1.0,1.0,keep,reference (most searched specific name)
 sundae-gukbap,순대국밥,main,0,0.526,0.799,1.0,keep,searched the same way
 sundae-gukbap,순댓국,synonym,0,0.169,0.724,0.636,keep,searched the same way
@@ -50,20 +50,20 @@ dolsot-bibimbap,돌솥비빔밥,main,0,1.0,1.0,1.0,keep,reference (most searched
 jeyuk-bokkeum,제육볶음,main,0,1.0,1.0,1.0,keep,reference (most searched specific name)
 jeyuk-bokkeum,제육,synonym,0,0.076,0.293,0.455,drop,behaves differently
 bulgogi,불고기,main,0,1.0,1.0,1.0,keep,reference (most searched specific name)
-galbi,갈비,main,1,0.511,0.687,1.0,drop,generic/ambiguous term: strict bar
+galbi,갈비,main,1,0.511,0.687,1.0,drop,generic/ambiguous/regional term: strict bar
 galbi,돼지갈비,synonym,0,1.0,1.0,0.556,keep,reference (most searched specific name)
 galbi,소갈비,synonym,0,0.315,0.739,0.714,keep,searched the same way
 samgyeopsal,삼겹살,main,0,1.0,1.0,1.0,keep,reference (most searched specific name)
 moksal,목살,main,0,1.0,1.0,1.0,keep,reference (most searched specific name)
 sogogi-gui,소고기구이,main,0,1.0,1.0,1.0,keep,reference (most searched specific name)
-sogogi-gui,소고기,generic,0,15.461,0.583,0.6,drop,generic/ambiguous term: strict bar
-sogogi-gui,한우,generic,0,11.874,0.452,0.1,drop,generic/ambiguous term: strict bar
+sogogi-gui,소고기,generic,0,15.461,0.583,0.6,drop,generic/ambiguous/regional term: strict bar
+sogogi-gui,한우,generic,0,11.874,0.452,0.1,drop,generic/ambiguous/regional term: strict bar
 gopchang,곱창,main,0,1.0,1.0,1.0,keep,reference (most searched specific name)
 gopchang,막창,synonym,0,0.625,0.328,0.5,drop,behaves differently
 gopchang,대창,synonym,0,0.661,0.135,0.5,drop,behaves differently
 dakgalbi,닭갈비,main,0,1.0,1.0,1.0,keep,reference (most searched specific name)
 jjimdak,찜닭,main,0,1.0,1.0,1.0,keep,reference (most searched specific name)
-jjimdak,안동찜닭,synonym,0,0.629,0.526,0.5,keep,searched the same way
+jjimdak,안동찜닭,regional,0,0.629,0.526,0.5,drop,generic/ambiguous/regional term: strict bar
 dakbokkeumtang,닭볶음탕,main,0,1.0,1.0,1.0,keep,reference (most searched specific name)
 dakbokkeumtang,닭도리탕,synonym,0,0.474,0.792,0.583,keep,searched the same way
 bossam,보쌈,main,0,1.0,1.0,1.0,keep,reference (most searched specific name)
@@ -76,7 +76,7 @@ jjukkumi,주꾸미,spelling,0,0.227,0.848,0.417,keep,searched the same way
 ojingeo-bokkeum,오징어볶음,main,0,1.0,1.0,1.0,keep,reference (most searched specific name)
 godeungeo-gui,고등어구이,main,0,1.0,1.0,1.0,keep,reference (most searched specific name)
 galchi-gui,갈치구이,main,0,1.0,1.0,1.0,keep,reference (most searched specific name)
-galchi-gui,갈치,generic,0,1.898,0.411,0.556,drop,generic/ambiguous term: strict bar
+galchi-gui,갈치,generic,0,1.898,0.411,0.556,drop,generic/ambiguous/regional term: strict bar
 saengseon-baekban,생선구이백반,main,0,0.009,0.309,1.0,drop,too few searches to matter
 saengseon-baekban,생선구이,synonym,0,1.0,1.0,0.625,keep,reference (most searched specific name)
 ganjang-gejang,간장게장,main,0,1.0,1.0,1.0,keep,reference (most searched specific name)
@@ -96,7 +96,7 @@ janchi-guksu,잔치국수,main,0,1.0,1.0,1.0,keep,reference (most searched speci
 bibim-guksu,비빔국수,main,0,1.0,1.0,1.0,keep,reference (most searched specific name)
 udon,우동,main,0,1.0,1.0,1.0,keep,reference (most searched specific name)
 sundae,순대,main,0,1.0,1.0,1.0,keep,reference (most searched specific name)
-twigim,튀김,main,1,92.915,0.068,1.0,drop,generic/ambiguous term: strict bar
+twigim,튀김,main,1,92.915,0.068,1.0,drop,generic/ambiguous/regional term: strict bar
 twigim,분식튀김,synonym,0,1.0,1.0,0.455,keep,reference (most searched specific name)
 mandu,만두,main,0,1.0,1.0,1.0,keep,reference (most searched specific name)
 eomuk,어묵,main,0,1.0,1.0,1.0,keep,reference (most searched specific name)
@@ -104,7 +104,7 @@ eomuk,오뎅,synonym,0,0.656,0.696,0.2,keep,searched the same way
 toast,토스트,main,0,1.0,1.0,1.0,keep,reference (most searched specific name)
 toast,길거리토스트,synonym,0,0.204,0.551,0.462,keep,searched the same way
 mul-naengmyeon,물냉면,main,0,1.0,1.0,1.0,keep,reference (most searched specific name)
-mul-naengmyeon,냉면,generic,0,16.929,0.736,0.667,keep,generic/ambiguous term: strict bar
+mul-naengmyeon,냉면,generic,0,16.929,0.736,0.667,keep,generic/ambiguous/regional term: strict bar
 bibim-naengmyeon,비빔냉면,main,0,1.0,1.0,1.0,keep,reference (most searched specific name)
 pyeongyang-naengmyeon,평양냉면,main,0,1.0,1.0,1.0,keep,reference (most searched specific name)
 pyeongyang-naengmyeon,평냉,synonym,0,0.005,0.286,0.5,drop,too few searches to matter
@@ -119,7 +119,7 @@ jjajangmyeon,짜장면,main,0,1.0,1.0,1.0,keep,reference (most searched specific
 jjajangmyeon,자장면,spelling,0,0.2,0.837,0.875,keep,searched the same way
 jjamppong,짬뽕,main,0,1.0,1.0,1.0,keep,reference (most searched specific name)
 junghwa-bokkeumbap,중화볶음밥,main,0,1.0,1.0,1.0,keep,reference (most searched specific name)
-junghwa-bokkeumbap,볶음밥,generic,1,67.57,0.274,0.643,drop,generic/ambiguous term: strict bar
+junghwa-bokkeumbap,볶음밥,generic,1,67.57,0.274,0.643,drop,generic/ambiguous/regional term: strict bar
 tangsuyuk,탕수육,main,0,1.0,1.0,1.0,keep,reference (most searched specific name)
 mapa-dubu,마파두부,main,0,1.0,1.0,1.0,keep,reference (most searched specific name)
 kkanpunggi,깐풍기,main,0,1.0,1.0,1.0,keep,reference (most searched specific name)
@@ -131,7 +131,7 @@ guobaorou,궈바로우,spelling,0,0.019,0.384,0.875,drop,too few searches to mat
 dimsum,딤섬,main,0,1.0,1.0,1.0,keep,reference (most searched specific name)
 chobap,초밥,main,0,1.0,1.0,1.0,keep,reference (most searched specific name)
 chobap,스시,synonym,0,0.447,0.822,0.0,keep,searched the same way
-hoe,회,main,1,0.388,0.61,1.0,drop,generic/ambiguous term: strict bar
+hoe,회,main,1,0.388,0.61,1.0,drop,generic/ambiguous/regional term: strict bar
 hoe,모둠회,synonym,0,0.01,0.053,0.286,drop,too few searches to matter
 hoe,광어회,synonym,0,0.106,0.256,0.286,drop,behaves differently
 hoe,횟집,synonym,0,1.0,1.0,0.333,keep,reference (most searched specific name)
@@ -158,7 +158,7 @@ okonomiyaki,오코노미야키,main,0,1.0,1.0,1.0,keep,reference (most searched 
 takoyaki,타코야키,main,0,1.0,1.0,1.0,keep,reference (most searched specific name)
 takoyaki,다코야끼,spelling,0,0.766,0.549,0.75,keep,searched the same way
 curry-rice,카레라이스,main,0,0.434,0.72,1.0,keep,searched the same way
-curry-rice,카레,generic,1,4.144,0.839,0.4,keep,generic/ambiguous term: strict bar
+curry-rice,카레,generic,1,4.144,0.839,0.4,keep,generic/ambiguous/regional term: strict bar
 curry-rice,일본카레,synonym,0,1.0,1.0,0.0,keep,reference (most searched specific name)
 nabe,나베,main,0,1.0,1.0,1.0,keep,reference (most searched specific name)
 carbonara,까르보나라,main,0,1.0,1.0,1.0,keep,reference (most searched specific name)
@@ -178,13 +178,13 @@ risotto,리조또,main,0,1.0,1.0,1.0,keep,reference (most searched specific name
 risotto,리조토,spelling,0,0.05,0.605,0.833,keep,searched the same way
 salad,샐러드,main,0,1.0,1.0,1.0,keep,reference (most searched specific name)
 sandwich,샌드위치,main,0,1.0,1.0,1.0,keep,reference (most searched specific name)
-brunch,브런치,main,1,1.366,0.474,1.0,drop,generic/ambiguous term: strict bar
+brunch,브런치,main,1,1.366,0.474,1.0,drop,generic/ambiguous/regional term: strict bar
 brunch,브런치카페,synonym,0,1.0,1.0,0.636,keep,reference (most searched specific name)
 brunch,브런치맛집,synonym,0,0.22,0.666,0.538,keep,searched the same way
 fried-chicken,후라이드치킨,main,0,1.0,1.0,1.0,keep,reference (most searched specific name)
 fried-chicken,후라이드,synonym,0,0.272,0.193,0.615,drop,behaves differently
 fried-chicken,프라이드치킨,spelling,0,0.11,0.289,0.846,drop,behaves differently
-fried-chicken,치킨,generic,0,36.216,0.233,0.385,drop,generic/ambiguous term: strict bar
+fried-chicken,치킨,generic,0,36.216,0.233,0.385,drop,generic/ambiguous/regional term: strict bar
 yangnyeom-chicken,양념치킨,main,0,1.0,1.0,1.0,keep,reference (most searched specific name)
 ganjang-chicken,간장치킨,main,0,1.0,1.0,1.0,keep,reference (most searched specific name)
 pho,쌀국수,main,0,1.0,1.0,1.0,keep,reference (most searched specific name)
@@ -195,7 +195,7 @@ banhmi,반미,main,0,1.0,1.0,1.0,keep,reference (most searched specific name)
 tomyum,똠얌꿍,main,0,0.122,0.692,1.0,keep,searched the same way
 tomyum,똠양꿍,spelling,0,1.0,1.0,0.889,keep,reference (most searched specific name)
 curry-indian,인도커리,main,0,1.0,1.0,1.0,keep,reference (most searched specific name)
-curry-indian,커리,generic,1,3.766,0.161,0.444,drop,generic/ambiguous term: strict bar
+curry-indian,커리,generic,1,3.766,0.161,0.444,drop,generic/ambiguous/regional term: strict bar
 curry-indian,인도카레,synonym,0,0.811,0.614,0.778,keep,searched the same way
 kebab,케밥,main,0,1.0,1.0,1.0,keep,reference (most searched specific name)
 burrito,부리또,main,0,1.0,1.0,1.0,keep,reference (most searched specific name)

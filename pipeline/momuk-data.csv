@@ -6,7 +6,7 @@ budae-jjigae,부대찌개,Army stew,한식,hot,3,2,3,2,sit,0,1,3,국물|술안�
 cheonggukjang,청국장,Rich fermented stew,한식,hot,3,1,2,2,sit,1,1,1,국물|밥,0,1,1,0,청국장|청국장찌개
 galbitang,갈비탕,Short rib soup,한식,hot,3,0,2,3,sit,1,1,2,국물|보양,0,1,1,0,갈비탕
 seolleongtang,설렁탕,Ox bone soup,한식,hot,3,0,2,2,fast,1,0,3,국물|해장|겨울,1,1,1,0,설렁탕|설농탕
-gomtang,곰탕,Beef bone soup,한식,hot,3,0,2,2,fast,1,0,2,국물|해장,1,1,1,0,나주곰탕
+gomtang,곰탕,Beef bone soup,한식,hot,3,0,2,2,fast,1,0,2,국물|해장,1,1,1,0,곰탕
 samgyetang,삼계탕,Ginseng chicken soup,한식,hot,3,0,3,3,sit,1,0,2,보양|여름|국물,0,1,1,0,삼계탕
 yukgaejang,육개장,Spicy beef soup,한식,hot,3,3,2,2,fast,1,0,3,국물|해장,1,1,1,0,육개장|육계장
 gamjatang,감자탕,Pork bone stew,한식,hot,3,2,3,2,sit,0,1,3,국물|해장|술안주,1,0,1,1,감자탕
@@ -35,7 +35,7 @@ moksal,목살,Pork shoulder,한식,hot,0,0,3,3,sit,0,1,3,고기|술안주|미세
 sogogi-gui,소고기구이,Grilled beef,한식,hot,0,0,3,3,sit,0,1,2,고기|술안주,0,0,1,1,소고기구이
 gopchang,곱창,Grilled intestines,한식,hot,0,1,3,3,sit,0,1,2,고기|술안주|야식,0,0,1,1,곱창
 dakgalbi,닭갈비,Spicy stir-fried chicken,한식,hot,0,3,2,2,sit,0,1,2,고기|술안주,0,0,1,1,닭갈비
-jjimdak,찜닭,Braised chicken,한식,hot,1,2,2,2,sit,0,1,2,고기|밥,0,0,1,0,찜닭|안동찜닭
+jjimdak,찜닭,Braised chicken,한식,hot,1,2,2,2,sit,0,1,2,고기|밥,0,0,1,0,찜닭
 dakbokkeumtang,닭볶음탕,Spicy chicken stew,한식,hot,2,3,2,2,sit,0,1,2,고기|국물,0,0,1,0,닭볶음탕|닭도리탕
 bossam,보쌈,Boiled pork wraps,한식,room,0,0,3,3,sit,0,1,2,고기|술안주,0,0,1,1,보쌈
 jokbal,족발,Braised pig trotters,한식,room,0,0,3,3,sit,0,1,3,고기|술안주|야식,0,0,1,1,족발
@@ -98,7 +98,7 @@ tsukemen,츠케멘,Tsukemen,일식,hot,2,1,3,2,sit,1,0,1,면,0,1,1,0,츠케멘
 yakitori,야키토리,Yakitori,일식,hot,0,0,2,2,sit,0,1,1,술안주|고기|야식,0,0,1,1,야키토리
 okonomiyaki,오코노미야키,Okonomiyaki,일식,hot,0,0,2,2,sit,0,1,1,비오는날|술안주,0,0,1,1,오코노미야키
 takoyaki,타코야키,Takoyaki,일식,hot,0,0,1,1,fast,1,1,2,분식|야식,0,1,1,1,타코야키|다코야끼
-curry-rice,카레라이스,Japanese curry rice,일식,hot,1,1,2,1,fast,1,0,2,밥|혼밥,0,1,1,0,카레|일본카레|카레라이스
+curry-rice,카레라이스,Japanese curry rice,일식,hot,1,1,2,1,fast,1,0,2,밥|혼밥,0,1,1,0,일본카레|카레라이스
 nabe,나베,Nabe hot pot,일식,hot,3,1,2,3,sit,0,1,1,국물|겨울,0,0,1,0,나베
 carbonara,까르보나라,Carbonara,양식,hot,0,0,3,2,sit,1,0,3,면,0,1,1,0,까르보나라|카르보나라
 aglio-olio,알리오올리오,Aglio e olio,양식,hot,0,1,2,2,sit,1,0,2,면,0,1,1,0,알리오올리오|알리오 올리오

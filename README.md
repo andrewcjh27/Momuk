@@ -239,7 +239,7 @@ Two limits are visible as well. Province data dilutes city specialties —
 추어탕, famous in Namwon, leans only ×1.31 in Jeollabuk-do — and low-volume
 dishes produce noise, such as 부리토 topping Chungcheongbuk-do. Very large
 leans also partly reflect tourists searching before a trip, so the
-recommender clips regional leans to 0.5–2.0.
+recommender limits regional leans to ×0.67–1.5.
 
 **Locals or visitors?** A regional lean counts every search made *in* a
 province, so it could reflect tourists rather than local eating. A

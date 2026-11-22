@@ -72,7 +72,7 @@ Upload `momuk-data.csv`, `calendar_kr.csv` and `raw/*.csv` to the Databricks vol
   within the same month × weekday (and weekend vs weekday within the same
   month × rain state), so season and weekday don't masquerade as weather.
 - **Regional lean.** Province value ÷ the dish's average across provinces,
-  shrunk toward 1 when few provinces have data, and clipped to 0.5–2.
+  shrunk toward 1 when few provinces have data, and clipped to 0.67–1.5.
 - **Food-day lift.** Event study: each event day vs the same weekday 1–3 weeks
   before and after, median across years.
 - **Recommender v0.** `score = √popularity × rain × temperature × regional lean
