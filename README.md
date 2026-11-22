@@ -226,6 +226,13 @@ any regional facts, the data recovered Korea's well-known local specialties:
 | 평양냉면 | Seoul | ×2.27 | Seoul's 평양냉면 culture |
 | 찜닭 | Daegu / Gyeongsangbuk-do | ×2.29 / ×2.11 | 안동찜닭 |
 | 칼국수 | Daejeon | ×1.75 | Daejeon's 칼국수 |
+| 막창 | Daegu | ×2.84 | 대구 막창 |
+| 닭한마리 | Seoul | ×2.45 | 동대문 닭한마리 |
+
+Dishes added later fit the same pattern: 막창 leans toward Daegu and its
+neighbours (Gyeongsangbuk-do ×1.50, Ulsan ×1.42), 조개구이 toward the coast
+(Busan ×1.59, Incheon ×1.42), and 팥죽 toward the Jeolla region (Jeollanam-do
+×1.66, Gwangju ×1.48, Jeollabuk-do ×1.47).
 
 Clusters show up too: the southeast (Busan, Ulsan, Gyeongsangnam-do) leans
 toward 밀면 and 돼지국밥, and the capital region (Seoul, Gyeonggi, Incheon)
@@ -239,7 +246,7 @@ Two limits are visible as well. Province data dilutes city specialties —
 추어탕, famous in Namwon, leans only ×1.31 in Jeollabuk-do — and low-volume
 dishes produce noise, such as 부리토 topping Chungcheongbuk-do. Very large
 leans also partly reflect tourists searching before a trip, so the
-recommender clips regional leans to 0.5–2.0.
+recommender limits regional leans to ×0.67–1.5.
 
 **Locals or visitors?** A regional lean counts every search made *in* a
 province, so it could reflect tourists rather than local eating. A
@@ -259,27 +266,28 @@ and after (removing weekday and season effects), across 2016–2026:
 
 | Link | Lift |
 |---|---|
+| 동지 → 팥죽 | **×66** |
 | 복날 → 삼계탕 | **×9.73** |
-| 설날 → 떡국 | **×8.16** |
+| 설날 → 떡국 | **×7.76** |
 | 삼겹살데이 → 삼겹살 | **×4.01** |
-| 블랙데이 → 짜장면 | ×2.14 |
+| 블랙데이 → 짜장면 | ×2.17 |
 | 크리스마스 → 피자 | ×1.65 |
-| 설날 → 만둣국 | ×1.58 |
-| 크리스마스 → 치킨 | ×1.18 — chicken is under-measured (keyword issue) |
-| 추석 → 김치전 | ×0.76 — not confirmed |
+| 설날 → 만둣국 | ×1.48 |
+| 크리스마스 → 치킨 | ×1.35 (×1.18 before the three chicken dishes were merged into 치킨) |
+| 추석 → 김치전 | ×0.75 — not confirmed |
 
 These are true sizes. The recommender caps food-day boosts at ×3 so one day
 can't take over a whole list, but the findings report the uncapped effect.
 
 The surprises were more interesting than the folklore:
 
-- **복날 is a chicken day, not just a 삼계탕 day:** 닭칼국수 ×2.65, 초계국수
-  ×2.55, 닭볶음탕 ×1.82, 찜닭 ×1.73.
+- **복날 is a chicken day, not just a 삼계탕 day:** 백숙 ×4.95, 닭한마리 ×3.02,
+  닭칼국수 ×2.65 and 초계국수 ×2.55 follow 삼계탕.
 - **Christmas is a date-night holiday:** 스테이크 ×3.59 and four pastas
   (×1.95–2.62) top the list, above 치킨 and 피자.
-- **Holidays bring travel food:** on 설날 and 추석, 막국수, 매운탕 and 밀면 rise —
-  the same outing foods that rise on weekends. On 추석, pizza (×1.84) suggests
-  families ordering in rather than cooking.
+- **Holidays bring family-gathering and travel food:** on 설날 and 추석, 회
+  (×2.07–2.16) and 아구찜 (×1.72–1.90) rise alongside outing foods like 막국수
+  and 매운탕. On 추석, pizza (×1.84) suggests families ordering in rather than cooking.
 - **블랙데이 lifts Chinese food in general** (꿔바로우, 중화볶음밥), and **수능 barely
   moves food searches** (all about ×1.1).
 - **추석 → 전 failed** probably because 명절 전 are 동그랑땡, 동태전 and 모둠전, not the

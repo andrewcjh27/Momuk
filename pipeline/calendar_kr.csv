@@ -11,6 +11,7 @@ date,event,label
 2016-09-15,chuseok,추석
 2016-09-16,chuseok,추석 다음날
 2016-11-17,suneung,수능
+2016-12-21,dongji,동지
 2016-12-24,christmas,크리스마스 이브
 2016-12-25,christmas,크리스마스
 2017-01-27,seollal,설날 전날
@@ -25,6 +26,7 @@ date,event,label
 2017-10-04,chuseok,추석
 2017-10-05,chuseok,추석 다음날
 2017-11-23,suneung,수능
+2017-12-22,dongji,동지
 2017-12-24,christmas,크리스마스 이브
 2017-12-25,christmas,크리스마스
 2018-02-15,seollal,설날 전날
@@ -39,6 +41,7 @@ date,event,label
 2018-09-24,chuseok,추석
 2018-09-25,chuseok,추석 다음날
 2018-11-15,suneung,수능
+2018-12-22,dongji,동지
 2018-12-24,christmas,크리스마스 이브
 2018-12-25,christmas,크리스마스
 2019-02-04,seollal,설날 전날
@@ -53,6 +56,7 @@ date,event,label
 2019-09-13,chuseok,추석
 2019-09-14,chuseok,추석 다음날
 2019-11-14,suneung,수능
+2019-12-22,dongji,동지
 2019-12-24,christmas,크리스마스 이브
 2019-12-25,christmas,크리스마스
 2020-01-24,seollal,설날 전날
@@ -67,6 +71,7 @@ date,event,label
 2020-10-01,chuseok,추석
 2020-10-02,chuseok,추석 다음날
 2020-12-03,suneung,수능
+2020-12-21,dongji,동지
 2020-12-24,christmas,크리스마스 이브
 2020-12-25,christmas,크리스마스
 2021-02-11,seollal,설날 전날
@@ -81,6 +86,7 @@ date,event,label
 2021-09-21,chuseok,추석
 2021-09-22,chuseok,추석 다음날
 2021-11-18,suneung,수능
+2021-12-22,dongji,동지
 2021-12-24,christmas,크리스마스 이브
 2021-12-25,christmas,크리스마스
 2022-01-31,seollal,설날 전날
@@ -95,6 +101,7 @@ date,event,label
 2022-09-10,chuseok,추석
 2022-09-11,chuseok,추석 다음날
 2022-11-17,suneung,수능
+2022-12-22,dongji,동지
 2022-12-24,christmas,크리스마스 이브
 2022-12-25,christmas,크리스마스
 2023-01-21,seollal,설날 전날
@@ -109,6 +116,7 @@ date,event,label
 2023-09-29,chuseok,추석
 2023-09-30,chuseok,추석 다음날
 2023-11-16,suneung,수능
+2023-12-22,dongji,동지
 2023-12-24,christmas,크리스마스 이브
 2023-12-25,christmas,크리스마스
 2024-02-09,seollal,설날 전날
@@ -123,6 +131,7 @@ date,event,label
 2024-09-17,chuseok,추석
 2024-09-18,chuseok,추석 다음날
 2024-11-14,suneung,수능
+2024-12-21,dongji,동지
 2024-12-24,christmas,크리스마스 이브
 2024-12-25,christmas,크리스마스
 2025-01-28,seollal,설날 전날
@@ -137,6 +146,7 @@ date,event,label
 2025-10-06,chuseok,추석
 2025-10-07,chuseok,추석 다음날
 2025-11-13,suneung,수능
+2025-12-22,dongji,동지
 2025-12-24,christmas,크리스마스 이브
 2025-12-25,christmas,크리스마스
 2026-02-16,seollal,설날 전날
@@ -151,6 +161,7 @@ date,event,label
 2026-09-25,chuseok,추석
 2026-09-26,chuseok,추석 다음날
 2026-11-19,suneung,수능
+2026-12-22,dongji,동지
 2026-12-24,christmas,크리스마스 이브
 2026-12-25,christmas,크리스마스
 2027-02-06,seollal,설날 전날
@@ -164,6 +175,7 @@ date,event,label
 2027-09-14,chuseok,추석 전날
 2027-09-15,chuseok,추석
 2027-09-16,chuseok,추석 다음날
+2027-12-22,dongji,동지
 2027-12-24,christmas,크리스마스 이브
 2027-12-25,christmas,크리스마스
 2028-01-26,seollal,설날 전날
@@ -177,5 +189,6 @@ date,event,label
 2028-10-02,chuseok,추석 전날
 2028-10-03,chuseok,추석
 2028-10-04,chuseok,추석 다음날
+2028-12-21,dongji,동지
 2028-12-24,christmas,크리스마스 이브
 2028-12-25,christmas,크리스마스

@@ -8,6 +8,7 @@ dish's "holiday lift" the same way it measures rain lift.
   seollal          설날 전날 / 당일 / 다음날              떡국, 만둣국
   chuseok          추석 전날 / 당일 / 다음날              전, 송편 (not in catalog)
   boknal           초복 / 중복 / 말복                     삼계탕
+  dongji           동지 (winter solstice, KST)            팥죽 (boost applies to 팥죽 only)
   christmas        12/24 and 12/25                        치킨, 피자
   suneung          수능 day                               (exam-day meals, celebrations after)
   samgyeopsal_day  3/3 삼겹살데이                         삼겹살
@@ -20,14 +21,16 @@ How the varying dates are found
     입추. Solar terms come from `ephem` (sun's longitude 90° and 135°, in KST);
     the day's heavenly stem from a fixed reference (2000-01-07 was a 甲子 day).
     Checked against published dates for 2023-2025.
+  - 동지: winter solstice date in KST, from `ephem`.
   - 수능: published exam dates, added by hand (2017: postponed a week after the Pohang earthquake;
     2020: moved to December because of COVID-19).
 
 Every date except 수능 is calculated, so rerunning this script extends the calendar
 automatically. 수능 dates are added by hand to SUNEUNG when announced.
 
-동지 was removed: its food (팥죽) is not in the catalog, and as Dec 21-22 it only picked
-up Christmas-dinner searches (스테이크, pasta).
+동지 (Dec 21-22) sits just before Christmas, so on that day many dishes pick up
+Christmas-dinner searches (스테이크, pasta). The notebook therefore applies 동지's
+boost only to 팥죽.
 
 Run      pip3 install holidays ephem && python3 build_calendar.py
 Output   calendar_kr.csv   (date, event, label) — upload to the Databricks volume
@@ -64,8 +67,12 @@ KNOWN_BOKNAL = {
 
 # ---------------------------------------------------------------- astronomy
 def sun_longitude(t: ephem.Date) -> float:
+    """Apparent geocentric longitude of the sun (equinox of date) — the definition solar
+    terms use. (Using the J2000 position instead was up to 15 minutes off, enough to put
+    2025's 동지 on the wrong side of midnight KST.)"""
     sun = ephem.Sun(t)
-    return math.degrees(ephem.Ecliptic(sun, epoch=t).lon)
+    apparent = ephem.Equatorial(sun.g_ra, sun.g_dec, epoch=t)
+    return math.degrees(ephem.Ecliptic(apparent, epoch=t).lon)
 
 
 def solar_term_kst(year: int, longitude: float, start_month: int) -> dt.date:
@@ -123,6 +130,7 @@ def build() -> pd.DataFrame:
 
         for d, label in zip(boknal(y), ("초복", "중복", "말복")):
             add(d, "boknal", label)
+        add(solar_term_kst(y, 270, 12), "dongji", "동지")
         add(f"{y}-12-24", "christmas", "크리스마스 이브")
         add(f"{y}-12-25", "christmas", "크리스마스")
         add(f"{y}-03-03", "samgyeopsal_day", "삼겹살데이")
@@ -143,7 +151,7 @@ def check(cal: pd.DataFrame) -> None:
         assert got == expected, f"복날 {y}: computed {got}, published {expected}"
     per_year = cal.groupby([pd.to_datetime(cal.date).dt.year, "event"]).size().unstack()
     assert (per_year["seollal"] == 3).all() and (per_year["chuseok"] == 3).all()
-    assert (per_year["boknal"] == 3).all()
+    assert (per_year["boknal"] == 3).all() and (per_year["dongji"] == 1).all()
 
 
 if __name__ == "__main__":

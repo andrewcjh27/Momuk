@@ -41,7 +41,7 @@ print("rows:", spark.table("bronze_google_region").count(),
 # MAGIC   searches. Treating them as 0 would invent strong negative leans for small provinces.
 # MAGIC - **Shrinkage:** a dish seen in only a few provinces gets its lean pulled toward 1 (no adjustment),
 # MAGIC   because its numbers are noisy. Same idea as trusting the crowd until you know the individual.
-# MAGIC - **Clipping** to 0.5–2.0 so one province can never more than halve or double a recommendation.
+# MAGIC - **Clipping** to 0.67–1.5 (`REGION_CAP`), so region can change a dish's score by at most 50%.
 
 # COMMAND ----------
 
@@ -50,13 +50,15 @@ reg = (spark.table("bronze_google_region")
        .filter(F.col("geo_code").startswith("KR-") & (F.col("value") > 0)))
 
 by_dish = W.partitionBy("dish_id")
+REGION_CAP = 1.5   # decided 2026-11-21; was 2.0, which let region outweigh popularity and weather
+
 lean = (reg
     .withColumn("n_regions", F.count("*").over(by_dish))
     .withColumn("dish_mean", F.avg("value").over(by_dish))
     .withColumn("lean", F.col("value") / F.col("dish_mean"))
     .withColumn("reliability", F.least(F.lit(1.0), F.col("n_regions") / F.lit(16.0)))
     .withColumn("lean_shrunk", F.lit(1.0) + F.col("reliability") * (F.col("lean") - 1))
-    .withColumn("lean_shrunk", F.greatest(F.lit(0.5), F.least(F.lit(2.0), F.col("lean_shrunk")))))
+    .withColumn("lean_shrunk", F.greatest(F.lit(1 / REGION_CAP), F.least(F.lit(REGION_CAP), F.col("lean_shrunk")))))
 
 lean.write.mode("overwrite").option("overwriteSchema", "true").saveAsTable("silver_region_lean")
 
@@ -124,7 +126,7 @@ display(hypotheses.join(spark.table("gold_region_lean"), ["dish_id", "geo_code"]
 # MAGIC
 # MAGIC So `temp_boost = 1.8` at 25–30 °C means the dish gets 80% more interest on such days than usual.
 # MAGIC - Bins with fewer than 30 days are treated as unknown (boost 1), so rare extremes can't create noise.
-# MAGIC - Clipped to 0.5–2.0, like the regional lean.
+# MAGIC - Clipped to 0.5–2.0.
 # MAGIC - This is **predictive, not causal**: temperature and season move together, so the boost captures both
 # MAGIC   ("hot days" are also summer). That's what a recommender needs; separating the two is a causal question
 # MAGIC   for later. It doesn't double count rain: rain lift is measured within the same month.
@@ -205,6 +207,11 @@ event_lift = (occ.join(values, "date")
               .agg(F.expr("percentile_approx(ratio, 0.5)").alias("event_lift_raw"), F.count("*").alias("event_days"))
               # raw = the true effect, for findings; event_lift = clipped, used only in the score
               .withColumn("event_lift", F.greatest(F.lit(0.5), F.least(F.lit(3.0), F.col("event_lift_raw")))))
+# Some food days only make sense for their own dish. 동지 falls just before Christmas, so on that
+# day many dishes rise from Christmas-dinner searches; its boost applies to 팥죽 alone.
+EVENT_ONLY = {"dongji": ["patjuk"]}
+for ev, allowed in EVENT_ONLY.items():
+    event_lift = event_lift.filter((F.col("event") != ev) | F.col("dish_id").isin(allowed))
 event_lift.write.mode("overwrite").option("overwriteSchema", "true").saveAsTable("gold_event_lift")
 
 # COMMAND ----------
@@ -219,6 +226,7 @@ food_days = spark.createDataFrame([
     ("boknal",          "samgyetang",   "복날 → 삼계탕"),
     ("seollal",         "tteokguk",     "설날 → 떡국"),
     ("seollal",         "manduguk",     "설날 → 만둣국"),
+    ("dongji",          "patjuk",       "동지 → 팥죽"),
     ("chuseok",         "kimchijeon",   "추석 → 전"),
     ("christmas",       "chicken",      "크리스마스 → 치킨"),
     ("christmas",       "pizza",        "크리스마스 → 피자"),
@@ -251,11 +259,12 @@ display(spark.table("gold_event_lift").join(menu.select("dish_id", "ko"), "dish_
 # MAGIC - **weather boost** — each dish's rain lift (from notebook 01's method) when it's rainy, times its
 # MAGIC   temperature boost for today's temperature.
 # MAGIC - **regional lean** — the shrunk, clipped lean for the user's province (Google).
-# MAGIC - **time-of-day fit** — from the catalog's `meal_*` columns: 1.0 if the dish fits the current meal,
-# MAGIC   otherwise `OFF_MEAL` (0.3). Soft, not a filter: 삼겹살 at lunch is possible, just much less likely.
+# MAGIC - **time-of-day fit** — from the catalog's `meal_*` columns, which run from 0 (doesn't fit) to 1 (fits):
+# MAGIC   `OFF_MEAL + (1 − OFF_MEAL) × value`, so 1 → 1.0, 0 → `OFF_MEAL` (0.3), and a partial fit such as
+# MAGIC   부대찌개 at lunch (0.8) → 0.86. Soft, not a filter: 삼겹살 at lunch is possible, just much less likely.
 # MAGIC   Naver data is daily, so this comes from the catalog, not from search data.
 # MAGIC - **calendar boost** — weekend lift on Saturdays and Sundays, times the event lift of any food day
-# MAGIC   on `DATE` (설날, 추석, 복날, 크리스마스, 수능, 삼겹살데이, 블랙데이).
+# MAGIC   on `DATE` (설날, 추석, 복날, 동지 — 팥죽 only, 크리스마스, 수능, 삼겹살데이, 블랙데이).
 # MAGIC - **the 3 questions** filter the menu first: party size, hunger, budget.
 # MAGIC
 # MAGIC Change the inputs in the next cell and rerun it to see recommendations shift.
@@ -331,7 +340,7 @@ recs = (menu.filter(party_ok & hunger_ok & (F.col("price") <= MAX_PRICE))
                  "weekend_boost": 1.0, "event_boost": 1.0})
         .withColumn("rain_boost", F.col("rain_lift") if IS_RAINY else F.lit(1.0))
         .withColumn("weather_boost", F.col("rain_boost") * F.col("temp_boost"))
-        .withColumn("meal_fit", F.when(F.col(MEAL_COL) == 1, F.lit(1.0)).otherwise(F.lit(OFF_MEAL)))
+        .withColumn("meal_fit", F.lit(OFF_MEAL) + F.lit(1 - OFF_MEAL) * F.col(MEAL_COL).cast("double"))
         .withColumn("calendar_boost", F.col("weekend_boost") * F.col("event_boost"))
         .withColumn("score", F.sqrt("popularity") * F.col("weather_boost")
                     * F.col("regional_lean") * F.col("meal_fit") * F.col("calendar_boost"))
