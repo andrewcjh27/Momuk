@@ -44,6 +44,16 @@ bottom. Open questions are listed at the end, waiting for data or a decision.
 | 2026-11-22 | New Naver requests are put on the stored scale by the anchor on the overlap: `factor = stored anchor total ÷ new anchor total` over ≥14 overlapping days (skipping the newest 3 stored days, which Naver may still revise). Dishes new to the catalog get their full history the same way. For any dish and day the newest download wins | Naver rescales each request to its own peak; the anchor is in every request, so the overlap pins the scale. Tested on synthetic data: history and update land on one scale exactly |
 | 2026-11-22 | **New-dish discovery every two weeks, human-approved**: the job pulls rising food searches from Google Trends, drops dishes already in the catalog, and writes a candidate list; Junho approves dishes and fills in price/solo/hunger/meal by hand. Candidates go to a `discovery_candidates` table and reach him **by email** (a Databricks alert on new candidates) rather than a GitHub issue, which would need a GitHub token in secrets. Fading dishes are flagged for review, never auto-removed | Fads appear less often than weekly; rising searches include celebrities, brands and memes, and the recommender's filters need hand-made attributes, so full automation would add junk |
 
+## Website (engine v2)
+
+| Date | Decision | Why |
+|---|---|---|
+| 2026-11-22 | **Keep the app's design and flow; replace the guessed rules with measured ones.** Popularity, rain, temperature, region, meal time, weekend and food days come from the pipeline; the 3 questions, "avoid what you just had", random sampling and fine dust are kept from v1. Payday, season, soup and ubiquity rules are dropped | The guessed rules are exactly what the pipeline measured; the kept ones are user choices or not yet testable (fine dust) |
+| 2026-11-22 | Score in log space: `log(product of measured multipliers) + v1's kept terms` | Turns the pipeline's multipliers into additive terms, so the reason chips stay real attribution and can quote real numbers |
+| 2026-11-22 | The weekly job exports one JSON file and commits it to GitHub; the site is static (GitHub Pages) and calls Open-Meteo from the browser | $0, nothing to keep running, and no Databricks credentials on a public site. A site querying Databricks live would need a paid server and warehouse |
+| 2026-11-22 | Reasons show the **true** food-day lift (동지 → 팥죽 ×66) while the score uses the clipped one (×3) | Honest explanation without letting one day take over the list |
+| 2026-11-22 | If the model file fails to load, the site falls back to v1 | The page always answers |
+
 ## Data quality and cleaning
 
 | Date | Observation | Decision |

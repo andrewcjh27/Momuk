@@ -23,6 +23,27 @@ Open `index.html` in a browser. That's it — no build step, no server.
 
 ## How it works
 
+> **v2 — the measured engine (`momuk-engine-v2.js`).** The hand-set weights
+> below were the first version. v2 replaces every guessed rule with what the
+> [data pipeline](pipeline/) measured from ten years of Naver searches and
+> weather, published weekly as `data/momuk-model.json`:
+>
+> ```
+> score(dish) = log( √popularity × rain lift × temperature boost × regional lean
+>                    × meal-time fit × weekend lift × food-day lift )   ← measured
+>             + hunger + sharing + fine dust + recently eaten           ← kept from v1
+> ```
+>
+> Working in log space keeps v1's design: every factor is an additive term, so
+> the reason chips are still real attribution, now quoting real numbers
+> ("비 오는 날 검색 ×1.5", "동지 — 평소의 ×66"). Budget and eating alone are
+> filters. Sampling (softmax over the top 25) is unchanged. Your province comes
+> from the nearest of the 17 weather points. If the model file can't load, the
+> page falls back to v1. Fine dust stays a flagged folk heuristic until the
+> pipeline tests it.
+>
+> The v1 description follows.
+
 The model is a transparent weighted sum, deliberately not machine learning.
 There is no usage data yet, and a learned model with no data is just a worse
 rules engine that cannot explain itself.
@@ -59,7 +80,9 @@ are exactly the ones worth testing against real decisions later.
 | `momuk.css` | Design tokens and components |
 | `momuk-app.js` | Flow controller: screens, inputs, weather, rendering |
 | `momuk-data.js` | 126 hand-tagged dishes |
-| `momuk-engine.js` | Context builder, scoring terms, sampling, explanations |
+| `momuk-engine.js` | v1: hand-weighted context builder, scoring terms, sampling, explanations (fallback) |
+| `momuk-engine-v2.js` | v2: the same flow scored on the pipeline's measured effects |
+| `data/momuk-model.json` | The measured model, written and committed weekly by the Databricks job (notebook 04) |
 | `momuk-data.csv` | The same dishes, for editing in a spreadsheet |
 | `tools/sync-data.js` | Round-trips the dataset between the two |
 | `pipeline/` | Data collection scripts and Databricks notebooks — see its [README](pipeline/README.md) |

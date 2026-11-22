@@ -25,7 +25,7 @@
       lead: '내 추천은…', accept: '이걸로!', again: '음… 안 땡겨!',
       restart: '다시 고르기', doneNote: '맛있게 드세요',
       locating: '위치 확인 중…',
-      weather: function (t, p) { return '체감 <b>' + t + '°C</b> · 미세먼지 <b>' + p + '</b>'; },
+      weather: function (t, p, where) { return (where ? '<b>' + where + '</b> · ' : '') + '체감 <b>' + t + '°C</b> · 미세먼지 <b>' + p + '</b>'; },
       noloc: '위치 없이 시간대만 보고 고를게요',
       empty: '조건에 맞는 게 없어요. 예산을 올려볼까요?',
       think: {
@@ -49,7 +49,7 @@
       lead: 'How about…', accept: "Let's go", again: 'Eh… give me another',
       restart: 'Start over', doneNote: 'Enjoy',
       locating: 'Finding you…',
-      weather: function (t, p) { return 'Feels <b>' + t + '°C</b> · PM2.5 <b>' + p + '</b>'; },
+      weather: function (t, p, where) { return (where ? '<b>' + where + '</b> · ' : '') + 'Feels <b>' + t + '°C</b> · PM2.5 <b>' + p + '</b>'; },
       noloc: "No location — going on time of day alone",
       empty: 'Nothing fits. Try raising the budget?',
       think: {
@@ -62,6 +62,16 @@
   };
 
   var lang = (localStorage.getItem('momuk.lang') || 'ko');
+
+  // ── engine ─────────────────────────────────────────────
+  // v2 scores on what the data pipeline measured (data/momuk-model.json, refreshed weekly).
+  // If that file can't be loaded, v1's hand-weighted rules still give an answer.
+  var engine = function () { return window.MOMUK_MODEL ? window.MomukV2 : window.Momuk; };
+  var dishCount = function () { return window.MOMUK_MODEL ? window.MOMUK_MODEL.dishes.length : window.MOMUK_DATA.length; };
+  fetch('data/momuk-model.json', { cache: 'no-cache' })
+    .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+    .then(function (m) { window.MOMUK_MODEL = m; renderStatus(statusKind); })
+    .catch(function () { /* stay on v1 */ });
   var t = function () { return S[lang]; };
 
   // ── state ──────────────────────────────────────────────
@@ -112,7 +122,8 @@
     statusKind = kind;
     var el = $('#status'), w = state.weather;
     if (kind === 'weather' && w.hasWeather) {
-      el.innerHTML = t().weather(Math.round(w.feelsC), Math.round(w.pm25));
+      var p = window.MOMUK_MODEL && window.MomukV2.nearestProvince(window.MOMUK_MODEL, w.lat, w.lon);
+      el.innerHTML = t().weather(Math.round(w.feelsC), Math.round(w.pm25), p ? p[lang] : '');
     } else if (kind) {
       el.textContent = t()[kind];
     }
@@ -135,15 +146,19 @@
       var la = pos.coords.latitude.toFixed(3), lo = pos.coords.longitude.toFixed(3);
       Promise.all([
         fetch('https://api.open-meteo.com/v1/forecast?latitude=' + la + '&longitude=' + lo +
-              '&current=temperature_2m,apparent_temperature,precipitation,relative_humidity_2m')
+              '&current=temperature_2m,apparent_temperature,precipitation,relative_humidity_2m' +
+              '&daily=temperature_2m_mean,rain_sum&timezone=auto&forecast_days=1')
           .then(function (r) { return r.json(); }),
         fetch('https://air-quality-api.open-meteo.com/v1/air-quality?latitude=' + la +
               '&longitude=' + lo + '&current=pm2_5')
           .then(function (r) { return r.json(); }).catch(function () { return null; })
       ]).then(function (res) {
-        var c = res[0].current;
+        var c = res[0].current, day = res[0].daily || {};
         state.weather = {
           hasWeather: true,
+          lat: +la, lon: +lo,
+          tempMeanC: day.temperature_2m_mean ? day.temperature_2m_mean[0] : null,   // the pipeline bins daily means
+          rainTodayMm: day.rain_sum ? day.rain_sum[0] : null,
           tempC: c.temperature_2m,
           feelsC: c.apparent_temperature,
           rainMm: c.precipitation,
@@ -162,11 +177,11 @@
     var box = $('#thinkingLines');
     box.innerHTML = '';
     var w = state.weather;
-    var ctx = window.Momuk.buildContext(inputs());
+    var ctx = engine().buildContext(inputs());
     var lines = [
       w.hasWeather ? t().think.weather(Math.round(w.feelsC), w.rainMm) : t().think.loc,
       t().think.slot[ctx.slot],
-      t().think.count(window.MOMUK_DATA.length)
+      t().think.count(dishCount())
     ];
     lines.forEach(function (text, i) {
       var p = document.createElement('p');
@@ -183,6 +198,7 @@
     var w = state.weather;
     return {
       feelsC: w.feelsC, tempC: w.tempC, rainMm: w.rainMm,
+      tempMeanC: w.tempMeanC, rainTodayMm: w.rainTodayMm, lat: w.lat, lon: w.lon,
       humidity: w.humidity, pm25: w.pm25, hasWeather: w.hasWeather,
       hunger: state.hunger, budget: state.budget, party: state.party,
       recent: state.recent
@@ -190,7 +206,7 @@
   }
 
   function suggest() {
-    var out = window.Momuk.suggest(inputs(), { lang: lang });
+    var out = engine().suggest(inputs(), { lang: lang });
     if (!out.picked) { $('#status').textContent = t().empty; show('q3'); return; }
     state.last = out;
 
@@ -209,6 +225,9 @@
       if (w.folklore) li.title = lang === 'en'
         ? 'a folk heuristic — being tested against real choices'
         : '속설에 기반한 이유 — 실제 선택으로 검증 중';
+      if (w.measured) li.title = lang === 'en'
+        ? 'measured from ten years of Naver searches and weather'
+        : '10년간의 네이버 검색과 날씨 데이터로 측정한 값';
       why.appendChild(li);
     });
 
