@@ -113,7 +113,7 @@
     {
       key: 'meal', measured: false,
       f: function (d, c) {
-        var fit = d.meal[c.meal] != null ? d.meal[c.meal] : 1;
+        var fit = lateDelivery(d, c) ? 1 : d.meal[c.meal] != null ? d.meal[c.meal] : 1;
         var label = { morning: ['아침', 'breakfast'], lunch: ['점심', 'lunch'], dinner: ['저녁', 'dinner'], late: ['야식', 'late night'] }[c.meal];
         return { v: ln(OFF_MEAL + (1 - OFF_MEAL) * fit),       // never positive: it only holds back off-hour dishes
                  reason: fit >= 1 ? { ko: label[0] + '으로 딱', en: 'Right for ' + label[1] } : null, weak: true };
@@ -230,6 +230,10 @@
     return model.dishes.some(function (d) { return d[NEEDS[key]] != null; });
   }
 
+  // Late at night, anything commonly delivered (치킨, 족발, 짜장면, 마라탕…) can be had — also by one
+  // person, since delivery comes in single portions. Catalog column `delivery`.
+  function lateDelivery(d, ctx) { return ctx.meal === 'late' && d.delivery === 1; }
+
   function rank(ctx, model) {
     var out = [];
     model.dishes.forEach(function (d) {
@@ -239,9 +243,9 @@
       // Early morning and late at night most restaurants are closed: only dishes marked for that time
       // (breakfast places, 24-hour places, delivery, 포차) can be had, so the others are left out
       // rather than scored down — a dish you can't get isn't "less likely", it's unavailable.
-      if ((ctx.meal === 'late' || ctx.meal === 'morning') && !(d.meal[ctx.meal] > 0)) return;
+      if ((ctx.meal === 'late' || ctx.meal === 'morning') && !(d.meal[ctx.meal] > 0) && !lateDelivery(d, ctx)) return;
       if (!matchesPrefs(d, ctx.prefs, model)) return;
-      if (ctx.party === 1 && !d.solo) return;          // so is eating alone (파전 stays a sharing dish)
+      if (ctx.party === 1 && !d.solo && !lateDelivery(d, ctx)) return;          // so is eating alone (파전 stays a sharing dish)
       var s = scoreDish(d, ctx, model);
       out.push({ dish: d, score: s.total, parts: s.parts });
     });
