@@ -81,9 +81,8 @@
       key: 'popular', measured: true,
       f: function (d, c, m) {
         if (!d.popularity) return { v: 0 };
-        var v = 0.5 * ln(d.popularity / m.medianPopularity);     // √popularity, centred on the median dish
-        return { v: v, reason: d.popularity >= m.topQuartile
-          ? { ko: '요즘 많이 찾는 메뉴', en: 'Searched a lot lately' } : null };
+        // √popularity, centred on the median dish. Scored, but not shown as a reason (decided 2026-11-22).
+        return { v: 0.5 * ln(d.popularity / m.medianPopularity) };
       }
     },
     {
@@ -124,7 +123,7 @@
       key: 'weekend', measured: true,
       f: function (d, c) {
         if (!c.isWeekend || !d.weekend) return { v: 0 };
-        return { v: ln(d.weekend), reason: { ko: '주말엔 ' + x(d.weekend), en: 'Weekends: ' + x(d.weekend) } };
+        return { v: ln(d.weekend) };                              // scored, not shown as a reason
       }
     },
     {
