@@ -207,6 +207,11 @@ event_lift = (occ.join(values, "date")
               .agg(F.expr("percentile_approx(ratio, 0.5)").alias("event_lift_raw"), F.count("*").alias("event_days"))
               # raw = the true effect, for findings; event_lift = clipped, used only in the score
               .withColumn("event_lift", F.greatest(F.lit(0.5), F.least(F.lit(3.0), F.col("event_lift_raw")))))
+# Some food days only make sense for their own dish. 동지 falls just before Christmas, so on that
+# day many dishes rise from Christmas-dinner searches; its boost applies to 팥죽 alone.
+EVENT_ONLY = {"dongji": ["patjuk"]}
+for ev, allowed in EVENT_ONLY.items():
+    event_lift = event_lift.filter((F.col("event") != ev) | F.col("dish_id").isin(allowed))
 event_lift.write.mode("overwrite").option("overwriteSchema", "true").saveAsTable("gold_event_lift")
 
 # COMMAND ----------
@@ -221,6 +226,7 @@ food_days = spark.createDataFrame([
     ("boknal",          "samgyetang",   "복날 → 삼계탕"),
     ("seollal",         "tteokguk",     "설날 → 떡국"),
     ("seollal",         "manduguk",     "설날 → 만둣국"),
+    ("dongji",          "patjuk",       "동지 → 팥죽"),
     ("chuseok",         "kimchijeon",   "추석 → 전"),
     ("christmas",       "chicken",      "크리스마스 → 치킨"),
     ("christmas",       "pizza",        "크리스마스 → 피자"),
@@ -257,7 +263,7 @@ display(spark.table("gold_event_lift").join(menu.select("dish_id", "ko"), "dish_
 # MAGIC   otherwise `OFF_MEAL` (0.3). Soft, not a filter: 삼겹살 at lunch is possible, just much less likely.
 # MAGIC   Naver data is daily, so this comes from the catalog, not from search data.
 # MAGIC - **calendar boost** — weekend lift on Saturdays and Sundays, times the event lift of any food day
-# MAGIC   on `DATE` (설날, 추석, 복날, 크리스마스, 수능, 삼겹살데이, 블랙데이).
+# MAGIC   on `DATE` (설날, 추석, 복날, 동지 — 팥죽 only, 크리스마스, 수능, 삼겹살데이, 블랙데이).
 # MAGIC - **the 3 questions** filter the menu first: party size, hunger, budget.
 # MAGIC
 # MAGIC Change the inputs in the next cell and rerun it to see recommendations shift.

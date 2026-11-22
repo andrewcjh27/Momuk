@@ -37,7 +37,7 @@ sources' terms apply to it. The scripts recreate it.
 | `keyword_candidates.csv` | 202 hand-listed candidates (spellings, spacing, synonyms, generic, ambiguous) |
 | `merge_chicken.py` | One-off: merges 후라이드치킨 / 양념치킨 / 간장치킨 into one dish, 치킨 (see DECISIONS.md) |
 | `ingest_tourism_trends.py` | Locals or visitors? Compares each regional dish's in-province share of searches in travel weeks (summer vacation, 설날, 추석) vs other weeks, with 김치찌개 as a control. Writes `reports/visitor_signature.csv` |
-| `build_calendar.py` → `calendar_kr.csv` | Korean food calendar 2016–2027: 설날, 추석, 복날, 크리스마스, 수능, 삼겹살데이, 블랙데이 |
+| `build_calendar.py` → `calendar_kr.csv` | Korean food calendar 2016–2027: 설날, 추석, 복날, 동지 (팥죽 only), 크리스마스, 수능, 삼겹살데이, 블랙데이 |
 | `ingest_google_trends.py` | Province profile for each dish's top keyword. Resumable; re-fetches dishes whose keyword changed |
 | `momuk-data.csv` | Pipeline copy of the catalog: the app's 14 columns plus `meal_*` time-of-day columns and `search_keyword` |
 | `notebooks/momuk_01_bronze_silver_gold.py` | Databricks: anchor rescaling, missing-day fill, weather (national + province), gold table, rain lift, weekend lift |

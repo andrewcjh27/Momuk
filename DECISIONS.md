@@ -59,6 +59,9 @@ bottom. Open questions are listed at the end, waiting for data or a decision.
 | 2026-11-21 | 카레 (4.1× the searches) had been merged into 카레라이스 — does it also cover Indian curry? | **Plain 카레 counts as 카레라이스; Indian curry stays separate.** In Korea, plain 카레 usually means the everyday Japanese/Korean-style curry rice, so 카레라이스 is searched as `카레\|일본카레\|카레라이스`, and 커리 (인도 카레) keeps its own `인도커리\|인도카레` |
 | 2026-11-21 | Should food days like 설날 and 추석, when many people eat at home, be handled differently? | **Leave as is.** People eating at home won't be looking at a recommendation anyway |
 | 2026-11-21 | Holiday foods missing from the catalog (송편, 모둠전) | **Not added.** 추석 → 김치전 stays as measured |
+| 2026-11-21 | 동지 was dropped because its food wasn't in the catalog | **Added 팥죽 and brought 동지 back, for 팥죽 only.** 팥죽: hot, soupy, mild, light, cheap, solo, quick, lunch and dinner. On 동지 (Dec 21–22) many dishes rise with Christmas-dinner searches, so `EVENT_ONLY` keeps 동지's boost to 팥죽 alone |
+| 2026-11-21 | While re-adding 동지: the solar-term calculation used the sun's J2000 position and was up to 15 minutes off, which put 2025's 동지 (00:02 KST on Dec 22) on Dec 21 | **Fixed** to use the sun's apparent position, which matches the astronomy library's solstice times exactly. Only 2025's 동지 moved; every 복날 date was unchanged |
+| 2026-11-21 | Planning automatic refreshes: which pieces need fresh data, and how often? | **Weekly** for recent popularity and weather; weekly-to-monthly for the weather and food-day lifts and monthly for regional leans (they need years of data or are rate-limited); live in the app for today's weather, hour, date and the 3 answers. Build after the cleaning notebook |
 | 2026-10-31 | 마라탕 and 로제떡볶이 sit near zero before their boom years | **Open** — see below |
 
 ## Personalization design
@@ -94,4 +97,3 @@ bottom. Open questions are listed at the end, waiting for data or a decision.
 - **Rainy-day definition:** national average rain ≥ 1 mm, or share of the population that got rain?
 - **Holidays and COVID (2020–2022):** flag, model, or exclude?
 - **Meal-time columns:** drafted by rule; review dish by dish.
-- **팥죽:** add it to the catalog and bring back 동지, applying its boost only to 팥죽?
