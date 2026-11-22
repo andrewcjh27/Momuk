@@ -7,7 +7,7 @@
 # MAGIC
 # MAGIC | Per dish | From |
 # MAGIC |---|---|
-# MAGIC | catalog: names, price, heaviness, spice, how common (ubiq), base (rice/noodle/bread/meat/other), solo/share, tags, meal-time fit | `bronze_menu` |
+# MAGIC | catalog: names, price, heaviness, spice, soup, speed, how common (ubiq), novel, base (rice/noodle/bread/meat/other), solo/share, tags, meal-time fit | `bronze_menu` |
 # MAGIC | popularity — mean interest over the last 2 years of data | `silver_dish_interest` |
 # MAGIC | rain lift (clipped 0.5–2) | `gold_dish_day`, same method as notebook 01 |
 # MAGIC | temperature boost per 5 °C bin | `gold_temp_boost` |
@@ -126,6 +126,8 @@ for _, d in menu.iterrows():
         "id": i, "ko": d["ko"], "en": d["en"], "cuisine": d["cuisine"],
         "price": int(num(d["price"], 2)), "heavy": int(num(d["heavy"], 1)),
         "spice": int(num(d["spice"])), "ubiq": int(num(d["ubiq"], 2)), "base": d.get("base") or None,
+        "soup": int(num(d["soup"])), "speed": d.get("speed") or None,
+        "novel": int(num(d["novel"])) if "novel" in d else None,
         "solo": int(num(d["solo"])), "share": int(num(d["share"])),
         "tags": [t for t in str(d["tags"] or "").split("|") if t and t != "nan"],
         "meal": {k: r3(num(d[f"meal_{c}"])) for k, c in

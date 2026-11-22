@@ -81,9 +81,8 @@
       key: 'popular', measured: true,
       f: function (d, c, m) {
         if (!d.popularity) return { v: 0 };
-        var v = 0.5 * ln(d.popularity / m.medianPopularity);     // √popularity, centred on the median dish
-        return { v: v, reason: d.popularity >= m.topQuartile
-          ? { ko: '요즘 많이 찾는 메뉴', en: 'Searched a lot lately' } : null };
+        // √popularity, centred on the median dish. Scored, but not shown as a reason (decided 2026-11-22).
+        return { v: 0.5 * ln(d.popularity / m.medianPopularity) };
       }
     },
     {
@@ -124,7 +123,7 @@
       key: 'weekend', measured: true,
       f: function (d, c) {
         if (!c.isWeekend || !d.weekend) return { v: 0 };
-        return { v: ln(d.weekend), reason: { ko: '주말엔 ' + x(d.weekend), en: 'Weekends: ' + x(d.weekend) } };
+        return { v: ln(d.weekend) };                              // scored, not shown as a reason
       }
     },
     {
@@ -196,20 +195,20 @@
 
   // Narrowing questions, asked after every three "안 땡겨". Strict: once answered, only dishes that
   // match are eligible — a dish whose attribute is unknown doesn't match.
-  function isFamiliar(d, model) { return d.ubiq >= 2 && d.popularity >= model.medianPopularity; }
   function matchesPrefs(d, p, model) {
     if (p.spice === 'hot' && !(d.spice >= 2)) return false;
     if (p.spice === 'mild' && !(d.spice != null && d.spice <= 1)) return false;
     if (p.base && d.base !== p.base) return false;
-    if (p.novelty) {
-      if (d.ubiq == null || !d.popularity) return false;
-      if ((p.novelty === 'familiar') !== isFamiliar(d, model)) return false;
-    }
+    if (p.soup === 'yes' && !(d.soup >= 2)) return false;                   // a proper broth (catalog soup 2-3)
+    if (p.soup === 'no' && !(d.soup != null && d.soup <= 1)) return false;
+    if (p.speed && d.speed !== (p.speed === 'fast' ? 'fast' : 'sit')) return false;
+    // 새로운 거 = dishes most Koreans don't eat regularly (catalog `novel`, marked by hand)
+    if (p.novelty && (d.novel == null || (p.novelty === 'new') !== (d.novel === 1))) return false;
     return true;
   }
 
   // Which narrowing questions this model can answer (older model files lack spice, base, ubiq).
-  var NEEDS = { spice: 'spice', base: 'base', novelty: 'ubiq' };
+  var NEEDS = { spice: 'spice', base: 'base', novelty: 'novel', soup: 'soup', speed: 'speed' };
   function canAsk(key, model) {
     return model.dishes.some(function (d) { return d[NEEDS[key]] != null; });
   }
