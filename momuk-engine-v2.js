@@ -65,7 +65,7 @@
       isWeekend: now.getDay() === 0 || now.getDay() === 6,
       events: model.calendar.filter(function (e) { return e.date === today; }),
       hunger: input.hunger != null ? input.hunger : 5,   // 1-10
-      budget: input.budget != null ? input.budget : 2,   // 1-3
+      budget: input.budget != null ? input.budget : 2,   // 1-4: up to ₩10k / ₩15k / ₩20k / 상관없어
       party: input.party != null ? input.party : 1,
       recent: input.recent || [],
       exclude: input.exclude || [],       // turned down with "안 땡겨" this round — never shown again
@@ -170,7 +170,7 @@
       // ×1.2 for ₩10–20k. Alone, 상관없어 means just that — no lean.
       key: 'treat',
       f: function (d, c) {
-        if (c.budget < 3 || c.party < 2 || c.priceWidened) return { v: 0 };   // not when 상관없어 was our widening
+        if (c.budget < ANY_PRICE || c.party < 2 || c.priceWidened) return { v: 0 };   // not when 상관없어 was our widening
         return { v: d.price === 3 ? ln(1.5) : d.price === 2 ? ln(1.2) : 0 };
       }
     },
@@ -232,13 +232,18 @@
 
   // Late at night, anything commonly delivered (치킨, 족발, 짜장면, 마라탕…) can be had — also by one
   // person, since delivery comes in single portions. Catalog column `delivery`.
+  // Price answer → the most a dish may cost. price_cap is the smallest of ₩10k/₩15k/₩20k/₩30k a dish fits
+  // under (catalog); without it (older model files) the price band stands in, conservatively.
+  var CAPS = [10000, 15000, 20000], ANY_PRICE = 4;
+  function priceCap(d) { return d.price_cap || { 1: 10000, 2: 20000, 3: 30000 }[d.price] || 30000; }
+
   function lateDelivery(d, ctx) { return ctx.meal === 'late' && d.delivery === 1; }
 
   function rank(ctx, model) {
     var out = [];
     model.dishes.forEach(function (d) {
-      // price: 1 = under ₩10k, 2 = ₩10–20k (exact bands); 3 = 상관없어 (any price)
-      if (ctx.budget < 3 && d.price !== ctx.budget) return;
+      // 얼마까지 가능해? — a maximum: every dish up to the chosen amount, cheaper ones included
+      if (ctx.budget < ANY_PRICE && priceCap(d) > CAPS[ctx.budget - 1]) return;
       if (ctx.exclude.indexOf(d.id) > -1) return;      // already turned down this round
       // Early morning and late at night most restaurants are closed: only dishes marked for that time
       // (breakfast places, 24-hour places, delivery, 포차) can be had, so the others are left out
@@ -285,8 +290,8 @@
     // Price is the most flexible answer: when every dish in the chosen band has been turned down
     // (or none exists — e.g. ₩10–20k alone late at night), widen to any price instead of stopping.
     // Meal-time availability and the narrowing answers are never relaxed.
-    if (!ranked.length && ctx.budget < 3) {
-      ctx = buildContext(Object.assign({}, input, { budget: 3 }), model);
+    if (!ranked.length && ctx.budget < ANY_PRICE) {
+      ctx = buildContext(Object.assign({}, input, { budget: ANY_PRICE }), model);
       ctx.priceWidened = true;
       ranked = rank(ctx, model);
       relaxed = ranked.length ? 'price' : null;

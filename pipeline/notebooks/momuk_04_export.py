@@ -125,6 +125,7 @@ for _, d in menu.iterrows():
     dishes.append({
         "id": i, "ko": d["ko"], "en": d["en"], "cuisine": d["cuisine"],
         "price": int(num(d["price"], 2)), "heavy": int(num(d["heavy"], 1)),
+        "price_cap": int(num(d["price_cap"])) if "price_cap" in d else None,
         "spice": int(num(d["spice"])), "ubiq": int(num(d["ubiq"], 2)), "base": d.get("base") or None,
         "soup": int(num(d["soup"])), "speed": d.get("speed") or None,
         "novel": int(num(d["novel"])) if "novel" in d else None,
