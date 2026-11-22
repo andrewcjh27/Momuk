@@ -97,10 +97,10 @@ bottom. Open questions are listed at the end, waiting for data or a decision.
 | 2026-11-14 | 파전 and 김치전 are hidden from solo diners (`solo = 0`), even on rainy days | **Keep them hidden from solo diners** (decided 2026-11-21): 전 is a sharing dish, so `solo` stays 0 |
 | 2026-11-22 | COVID years (2020–2022) might look unusual | **Keep them as ordinary data, no flag**: people still searched for and ordered food, and the searches are the signal the app cares about. Holidays are already handled by the food calendar |
 | 2026-11-22 | The national rainy-day flag used the population-weighted *average* rain ≥1 mm, so one heavy local storm (e.g. 15 mm in Busan and Gyeongnam only) could label the whole country rainy | **A day is rainy when ≥50% of the population's provinces got ≥1 mm** (`rain_share` ≥ 0.5). Considered: keeping the average; using the share as a continuous variable (more precise, but the result is a slope that's harder to explain); capital area only. The rain *boost* is measured nationally because Naver has no regions; the recommender applies it with the user's own province weather |
+| 2026-11-22 | Meal-time columns were drafted by rule; Junho reviewed the 28 least certain dishes | **Morning:** removed 짬뽕, 쌀국수 (noodles aren't a morning meal) and 감자탕 (a lunch dish, now marked lunch). **Late night:** added 찜닭, 아구찜, 마라탕, and 뼈해장국 / 순대국밥 / 콩나물국밥 (24-hour places are among the few open late); removed 낙지볶음 and 라멘. **Lunch:** 부대찌개, 찜닭, 닭볶음탕, 매운탕, 쭈꾸미볶음, 간장게장, 탕수육, 딤섬, 피자 and 아구찜 all fit lunch, but to different degrees, so meal columns now allow partial values (0–1) instead of yes/no; the lunch weights (0.5–0.8) are a first draft. 김밥, 샐러드 and 반미 stay off dinner |
 
 ## Open questions
 
 - **Dish start dates:** from when should each newer dish (마라탕, 로제떡볶이, 마라샹궈…) count? Zeros before a boom aren't "low interest".
 - **Viral spikes:** keep, flag or remove — and how large a spike counts as an outlier?
 - **Coarse series:** below how many distinct values is a dish too coarse to model?
-- **Meal-time columns:** drafted by rule; review dish by dish.

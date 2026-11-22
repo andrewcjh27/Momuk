@@ -259,8 +259,9 @@ display(spark.table("gold_event_lift").join(menu.select("dish_id", "ko"), "dish_
 # MAGIC - **weather boost** — each dish's rain lift (from notebook 01's method) when it's rainy, times its
 # MAGIC   temperature boost for today's temperature.
 # MAGIC - **regional lean** — the shrunk, clipped lean for the user's province (Google).
-# MAGIC - **time-of-day fit** — from the catalog's `meal_*` columns: 1.0 if the dish fits the current meal,
-# MAGIC   otherwise `OFF_MEAL` (0.3). Soft, not a filter: 삼겹살 at lunch is possible, just much less likely.
+# MAGIC - **time-of-day fit** — from the catalog's `meal_*` columns, which run from 0 (doesn't fit) to 1 (fits):
+# MAGIC   `OFF_MEAL + (1 − OFF_MEAL) × value`, so 1 → 1.0, 0 → `OFF_MEAL` (0.3), and a partial fit such as
+# MAGIC   부대찌개 at lunch (0.8) → 0.86. Soft, not a filter: 삼겹살 at lunch is possible, just much less likely.
 # MAGIC   Naver data is daily, so this comes from the catalog, not from search data.
 # MAGIC - **calendar boost** — weekend lift on Saturdays and Sundays, times the event lift of any food day
 # MAGIC   on `DATE` (설날, 추석, 복날, 동지 — 팥죽 only, 크리스마스, 수능, 삼겹살데이, 블랙데이).
@@ -339,7 +340,7 @@ recs = (menu.filter(party_ok & hunger_ok & (F.col("price") <= MAX_PRICE))
                  "weekend_boost": 1.0, "event_boost": 1.0})
         .withColumn("rain_boost", F.col("rain_lift") if IS_RAINY else F.lit(1.0))
         .withColumn("weather_boost", F.col("rain_boost") * F.col("temp_boost"))
-        .withColumn("meal_fit", F.when(F.col(MEAL_COL) == 1, F.lit(1.0)).otherwise(F.lit(OFF_MEAL)))
+        .withColumn("meal_fit", F.lit(OFF_MEAL) + F.lit(1 - OFF_MEAL) * F.col(MEAL_COL).cast("double"))
         .withColumn("calendar_boost", F.col("weekend_boost") * F.col("event_boost"))
         .withColumn("score", F.sqrt("popularity") * F.col("weather_boost")
                     * F.col("regional_lean") * F.col("meal_fit") * F.col("calendar_boost"))
