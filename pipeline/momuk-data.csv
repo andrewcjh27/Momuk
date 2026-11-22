@@ -76,7 +76,6 @@ makguksu,막국수,Buckwheat cold noodles,한식,cold,1,2,1,2,sit,1,0,1,여름|�
 dakbal,닭발,Spicy chicken feet,한식,hot,0,3,2,2,sit,0,1,3,야식|술안주,0,0,1,1,닭발
 agujjim,아구찜,Braised spicy monkfish,한식,hot,1,3,2,3,sit,0,1,2,술안주,0,0,1,0,아구찜
 kimchijjim,김치찜,Braised kimchi with pork,한식,hot,2,2,2,2,sit,1,1,3,밥|국물,0,1,1,0,김치찜
-juk,죽,Rice porridge (전복죽 etc.),한식,hot,2,0,1,1,fast,1,0,3,다이어트|해장,1,1,1,0,전복죽
 yukhoe,육회,Beef tartare,한식,cold,0,1,1,3,sit,0,1,2,고기|술안주,0,0,1,1,육회
 ori,오리고기,Roast or smoked duck,한식,hot,0,0,3,3,sit,0,1,2,고기|보양,0,0,1,0,오리고기
 dakhanmari,닭한마리,Whole chicken hot pot,한식,hot,3,0,3,2,sit,0,1,1,국물|겨울|보양,0,0,1,0,닭한마리
