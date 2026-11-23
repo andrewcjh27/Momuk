@@ -99,6 +99,16 @@
 
   var lang = (localStorage.getItem('momuk.lang') || 'ko');
 
+  // ── counting (GoatCounter: no cookies, no personal data) ──
+  // Events are short paths like "accept/naengmyeon" or "refine/spice/hot"; nothing about who.
+  function track(name) {
+    try {
+      if (window.goatcounter && window.goatcounter.count) {
+        window.goatcounter.count({ path: 'event/' + name, title: name, event: true });
+      }
+    } catch (e) { /* counting must never break the page */ }
+  }
+
   // ── engine ─────────────────────────────────────────────
   // v2 scores on what the data pipeline measured (data/momuk-model.json, refreshed weekly).
   // If that file can't be loaded, v1's hand-weighted rules still give an answer.
@@ -201,6 +211,7 @@
   // Without location the engine uses only nationwide signals — popularity, meal time, weekend,
   // food days. No local weather and no regional lean (v2 leaves both out when there's no position).
   function skipLocation() {
+    track('location/skipped');
     state.useLocation = false;
     state.locating = false;
     state.weather = { hasWeather: false };
@@ -249,8 +260,9 @@
           pm25: res[1] && res[1].current ? res[1].current.pm2_5 : 15
         };
         done('weather');
-      }).catch(function () { done('noloc'); });
-    }, function () { done('noloc'); }, { timeout: 8000, maximumAge: 600000 });
+        track('location/allowed');
+      }).catch(function () { done('noloc'); track('location/weather-failed'); });
+    }, function () { done('noloc'); track('location/denied'); }, { timeout: 8000, maximumAge: 600000 });
   }
 
   // ── the thinking beat ──────────────────────────────────
@@ -301,6 +313,7 @@
     box.classList.remove('is-open');
     $('#whyLink').setAttribute('aria-expanded', 'false');
     pop.innerHTML = '';
+    whyCounted = false;
     if (!info) return;
     var add = function (tag, cls, text) {
       var el = document.createElement(tag);
@@ -323,7 +336,11 @@
   }
 
   // Hover shows it on a computer; on a phone (no hover) a tap toggles it, and a tap elsewhere closes it.
+  var whyCounted = false;                    // count "opened the why box" once per suggestion
+  var countWhy = function () { if (!whyCounted) { whyCounted = true; track('why-open'); } };
+  $('#whyLink').addEventListener('mouseenter', countWhy);
   $('#whyLink').addEventListener('click', function (e) {
+    countWhy();
     e.stopPropagation();
     var open = !$('#whyBox').classList.contains('is-open');
     $('#whyBox').classList.toggle('is-open', open);
@@ -338,6 +355,7 @@
     var out = engine().suggest(inputs(), { lang: lang });
     if (!out.picked) { showExhausted(state.rejected.length ? t().allShown : t().empty); return; }
     state.last = out;
+    track('pick/' + out.picked.dish.id);
 
     renderAnswer(out);
     var d = out.picked.dish;
@@ -422,6 +440,7 @@
   }
 
   function answerRefine(key, value) {
+    track('refine/' + (key || 'skip') + '/' + (value || 'any'));
     if (value) { state.prefs[key] = value; state.prefOrder.push(key); }
     show('thinking');
     think(suggest);
@@ -436,6 +455,7 @@
   // Nothing left that fits every answer: say so plainly, on the same screen as the questions,
   // and offer to change the answers (no answer is quietly loosened).
   function showExhausted(message) {
+    track('nothing-left');
     $('#refineLead').textContent = '';
     $('#refineAsk').textContent = message;
     var box = $('#refineOptions');
@@ -513,6 +533,7 @@
         (t().peopleSub[i] ? '<span class="pill__sub">' + t().peopleSub[i] + '</span>' : '');
       b.addEventListener('click', function () {
         state.party = n;
+        track('party/' + n);
         readBudget();
         $$('#q1Options .pill').forEach(function (p) { p.classList.remove('is-chosen'); });
         b.classList.add('is-chosen');
@@ -538,6 +559,7 @@
     $('#langKo').setAttribute('aria-pressed', String(lang === 'ko'));
     $('#langEn').setAttribute('aria-pressed', String(lang === 'en'));
     document.documentElement.lang = lang;
+    document.title = lang === 'en' ? 'MoMuk — What should I eat today?' : 'MoMuk 모먹 — 오늘 뭐 먹지? 데이터가 골라주는 메뉴 추천';
     localStorage.setItem('momuk.lang', lang);
 
     $('#start').textContent = t().start;
@@ -558,10 +580,11 @@
     renderStatus(statusKind);
   }
 
-  $('#langKo').addEventListener('click', function () { lang = 'ko'; applyLang(); });
-  $('#langEn').addEventListener('click', function () { lang = 'en'; applyLang(); });
+  $('#langKo').addEventListener('click', function () { lang = 'ko'; applyLang(); track('lang/ko'); });
+  $('#langEn').addEventListener('click', function () { lang = 'en'; applyLang(); track('lang/en'); });
 
   $('#start').addEventListener('click', function () {
+    track('start');
     if (!state.locAsked && state.useLocation) { state.locAsked = true; loadWeather(); }
     show('q1');
   });
@@ -577,6 +600,7 @@
     setProgress(2); show('q3');
   });
   $('#s-q3 [data-next]').addEventListener('click', function () {
+    track('budget/' + ['10000', '15000', '20000', 'any'][state.budget - 1] + '/hunger-' + state.hunger);
     newRound();
     setProgress(3); show('thinking'); think(suggest);
   });
@@ -600,6 +624,7 @@
   });
 
   $('#again').addEventListener('click', function () {
+    track('again');
     // "음… 안 땡겨!" — that dish is out for the rest of this round, so the next pick is always new.
     if (state.last && state.last.picked) state.rejected.push(state.last.picked.dish.id);
     // After every third "안 땡겨", ask one narrowing question before the next pick
@@ -612,6 +637,7 @@
   });
 
   $('#accept').addEventListener('click', function () {
+    if (state.last && state.last.picked) track('accept/' + state.last.picked.dish.id);
     if (!state.last) return;
     var d = state.last.picked.dish;
     state.recent.unshift(d.id);
