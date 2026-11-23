@@ -333,27 +333,42 @@
 
   function won(n) { return '₩' + n.toLocaleString('en-US'); }
 
+  // The "왜 이 음식이야?" box shows the calculation itself: each factor's multiplier for this dish
+  // right now (the score is a product of them), largest effects first, then the total against a
+  // typical dish and the rank. Factors within ±5% are left out as noise.
+  var FACTOR = {
+    popular: ['인기', 'Popularity'], rain: ['비', 'Rain'], temp: ['기온', 'Temperature'],
+    region: ['지역', 'Region'], meal: ['시간대', 'Time of day'], weekend: ['주말', 'Weekend'],
+    foodday: ['기념일', 'Food day'], hunger: ['배고픔', 'Hunger'], party: ['인원', 'Party size'],
+    treat: ['예산', 'Budget'], dust: ['미세먼지', 'Fine dust'], recent: ['최근에 먹음', 'Had it recently']
+  };
+  var NOISE = Math.log(1.05), MAX_ROWS = 5;
+  function mult(v) { var m = Math.exp(v); return '×' + (m >= 10 ? Math.round(m) : m.toFixed(1)); }
+
   function describe(out, lang) {
-    var en = lang === 'en', ctx = out.ctx, r = out.picked, d = r.dish, lines = [];
-    // 1. the strongest measured effects for this dish today (at most two)
-    r.parts.filter(function (p) { return p.measured && p.reason && p.contrib >= CHIP_MIN; })
-      .sort(function (a, b) { return b.contrib - a.contrib; }).slice(0, 2)
-      .forEach(function (p) { lines.push({ text: en ? p.reason.en : p.reason.ko, strong: true }); });
-    // 2. how it fits the answers
-    var fit = [];
-    if (ctx.party === 1) fit.push(en ? 'Fine on your own' : '혼밥 OK');
-    else if (d.share) fit.push(en ? 'Made for sharing' : '나눠 먹기 좋음');
-    if (ctx.budget < 4 && !ctx.priceWidened) fit.push(en ? 'Under ' + won(CAPS[ctx.budget - 1]) + ' a head' : '1인 ' + won(CAPS[ctx.budget - 1]) + ' 이하');
-    fit.push(en ? ['Light', 'Medium portion', 'On the filling side', 'Very filling'][d.heavy] || ''
-                : ['가벼운 편', '적당한 양', '든든한 편', '아주 든든'][d.heavy] || '');
-    if (lateDelivery(d, ctx)) fit.push(en ? 'Late-night delivery' : '야식 배달 가능');
-    lines.push({ text: fit.filter(Boolean).join(' · ') });
-    // 3. where it ranked
+    var en = lang === 'en', ctx = out.ctx, r = out.picked, d = r.dish, i = en ? 1 : 0;
+    var rows = r.parts.filter(function (p) { return FACTOR[p.key] && Math.abs(p.contrib) >= NOISE; })
+      .sort(function (a, b) { return Math.abs(b.contrib) - Math.abs(a.contrib); }).slice(0, MAX_ROWS)
+      .map(function (p) {
+        var label = FACTOR[p.key][i], note = '';
+        if (p.key === 'rain') label = en ? 'Rain' : '비 오는 날';
+        if (p.key === 'temp' && ctx.tempC != null) label += ' ' + Math.round(ctx.tempC) + '°C';
+        if (p.key === 'region' && ctx.province) label += ' · ' + ctx.province[en ? 'en' : 'ko'];
+        if (p.key === 'foodday') {                       // the score is clipped at ×3; show the true effect too
+          var ev = ctx.events.filter(function (e) { return d.events[e.event]; })[0];
+          if (ev) { label = en ? ev.label_en : ev.label; note = (en ? 'actual searches ' : '실제 검색 ') + '×' + Math.round(d.events[ev.event].raw); }
+        }
+        return { label: label, value: mult(p.contrib), up: p.contrib > 0, note: note };
+      });
     var n = out.ranked.length;
-    lines.push({ text: n > 10 ? (en ? 'In the top 10 of ' + n + ' dishes for right now' : '지금 조건에 맞는 ' + n + '개 중 상위 10위 안')
-                              : (en ? 'One of ' + n + ' dishes that fit right now' : '지금 조건에 맞는 ' + n + '개 중 하나') });
-    return { lead: lead(ctx, lang), lines: lines,
-             foot: en ? 'From 10 years of Naver searches and weather' : '네이버 검색 10년 · 날씨 데이터로 계산' };
+    return {
+      lead: lead(ctx, lang),
+      rows: rows,
+      total: (en ? 'vs a typical dish ' : '평균 메뉴 대비 ') + mult(r.score),
+      rank: n > 10 ? (en ? 'Top 10 of ' + n + ' dishes right now' : '지금 조건 ' + n + '개 중 상위 10위')
+                   : (en ? 'One of ' + n + ' dishes that fit' : '조건에 맞는 ' + n + '개 중 하나'),
+      foot: en ? 'Weights from 10 years of Naver searches and weather' : '가중치: 네이버 검색 10년 · 날씨 데이터'
+    };
   }
 
   global.MomukV2 = {

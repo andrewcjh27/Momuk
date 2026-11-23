@@ -290,8 +290,17 @@ body {
 .whybox:hover .whypop, .whybox.is-open .whypop, .whylink:focus-visible + .whypop {
   opacity: 1; visibility: visible; transform: translate(-50%, 0); transition-delay: 0s;
 }
-.whypop p { margin: 0 0 6px; }
-.whypop .whypop__hi { font-weight: 800; }
+.whypop p { margin: 0; }
+.whypop__rows {
+  display: grid; grid-template-columns: 1fr auto; column-gap: var(--s4); row-gap: 3px;
+  padding-bottom: var(--s2); margin-bottom: var(--s2);
+  border-bottom: 1px solid rgba(255,255,255,0.18);
+}
+.whypop__label small { font-size: 11px; font-weight: 600; opacity: 0.65; }
+.whypop__value { font-weight: 800; font-variant-numeric: tabular-nums; text-align: right; opacity: 0.75; }
+.whypop__value.is-up { color: #FF9C94; opacity: 1; }        /* factors that pushed this dish up */
+.whypop__total { font-weight: 800; }
+.whypop__rank { opacity: 0.85; }
 .whypop .whypop__foot { margin: var(--s2) 0 0; font-size: 11px; font-weight: 600; opacity: 0.65; }
 .why li {
   list-style: none;

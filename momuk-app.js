@@ -302,16 +302,24 @@
     $('#whyLink').setAttribute('aria-expanded', 'false');
     pop.innerHTML = '';
     if (!info) return;
-    info.lines.forEach(function (l) {
-      var p = document.createElement('p');
-      if (l.strong) p.className = 'whypop__hi';
-      p.textContent = l.text;
-      pop.appendChild(p);
+    var add = function (tag, cls, text) {
+      var el = document.createElement(tag);
+      if (cls) el.className = cls;
+      if (text != null) el.textContent = text;
+      return el;
+    };
+    // one row per factor: label on the left, multiplier on the right (coral when it helped)
+    var table = add('div', 'whypop__rows');
+    info.rows.forEach(function (row) {
+      var label = add('span', 'whypop__label', row.label);
+      if (row.note) label.appendChild(add('small', null, ' ' + row.note));
+      table.appendChild(label);
+      table.appendChild(add('span', 'whypop__value' + (row.up ? ' is-up' : ''), row.value));
     });
-    var foot = document.createElement('p');
-    foot.className = 'whypop__foot';
-    foot.textContent = info.foot;
-    pop.appendChild(foot);
+    pop.appendChild(table);
+    pop.appendChild(add('p', 'whypop__total', info.total));
+    pop.appendChild(add('p', 'whypop__rank', info.rank));
+    pop.appendChild(add('p', 'whypop__foot', info.foot));
   }
 
   // Hover shows it on a computer; on a phone (no hover) a tap toggles it, and a tap elsewhere closes it.
