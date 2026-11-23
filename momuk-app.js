@@ -294,7 +294,12 @@
 
     var d = out.picked.dish;
     $('#answerLead').textContent = out.relaxed === 'price' ? t().relaxedPrice : t().lead;
-    $('#dish').textContent = lang === 'en' ? d.en : d.ko;
+    var name = lang === 'en' ? d.en : d.ko;
+    $('#dish').textContent = name;
+    // English names run long ("Pork bone hangover soup"): step the size down so the card stays
+    // two lines at most and never crowds the header on short screens.
+    $('#dish').classList.toggle('is-long', name.length > 12 && name.length <= 20);
+    $('#dish').classList.toggle('is-xlong', name.length > 20);
     $('#dishEn').textContent = lang === 'en' ? d.ko : d.en;
 
     var why = $('#why');

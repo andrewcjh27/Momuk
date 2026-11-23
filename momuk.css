@@ -252,6 +252,8 @@ body {
   margin: var(--s2) 0 0;
   text-wrap: balance;
 }
+.answer__dish.is-long  { font-size: clamp(28px, 8.6vw, 42px); }
+.answer__dish.is-xlong { font-size: clamp(22px, 6.6vw, 32px); line-height: 1.15; }
 .answer__en { font-size: 15px; font-weight: 600; color: var(--ink-soft); }
 
 /* why chips — the product's whole argument, so they get the payoff timing */
@@ -413,7 +415,7 @@ body {
   transform-origin: 50% 100%;
 }
 .bowl-slot { flex: 0 0 auto; width: 130px; height: 101px; }   /* the bowl at 1.2× */
-.screen { padding-bottom: calc(96px + max(env(safe-area-inset-bottom), 16px)); }
+.screen { padding-bottom: calc(108px + max(env(safe-area-inset-bottom), 16px)); }   /* bowl + room for its steam */
 
 /* ── short screens (iPhone SE, small Android, short laptop windows) ── */
 @media (max-height: 760px) {
@@ -432,6 +434,8 @@ body {
 }
 @media (max-height: 680px) {
   .jamo--sm { display: none; }                      /* the wordmark alone carries the header */
+  .answer { padding: var(--s4) var(--s4) var(--s5); }
+  .answer__lead { font-size: 17px; }
   .pill { min-height: 48px; }
   .pill__sub { font-size: 13px; }
 }
