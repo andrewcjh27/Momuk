@@ -13,7 +13,8 @@
   var S = {
     ko: {
       start: '시작하기', next: '다음', suggest: '추천받기', skip: '넘기기',
-      q1: '몇 명이야?', q2: '얼마나 배고파?', q3: '얼마까지 가능해?',
+      q1: '몇 명이야?', q2: '얼마나 배고파?', q3: '얼마까지 가능해?', q3group: '1인당 얼마까지 가능해?',
+      whyLink: '왜 이 음식이야?',
       q2lo: '가볍게', q2hi: '든든하게', q3lo: '₩10,000', q3hi: '상관없어',
       people: ['혼자', '둘이서', '셋이서', '넷 이상'],
       peopleSub: ['혼밥도 좋죠', '', '', '나눠 먹기 좋게'],
@@ -22,6 +23,7 @@
              : v <= 8 ? '든든하게' : '아주 든든하게';
       },
       budget: ['₩10,000까지', '₩15,000까지', '₩20,000까지', '상관없어'],
+      budgetGroup: ['1인 ₩10,000까지', '1인 ₩15,000까지', '1인 ₩20,000까지', '상관없어'],
       lead: '내 추천은…', accept: '이걸로!', again: '음… 안 땡겨!',
       restart: '다시 고르기', doneNote: '맛있게 드세요',
       locating: '위치 확인 중…',
@@ -53,7 +55,8 @@
     },
     en: {
       start: 'Start', next: 'Next', suggest: 'Suggest', skip: 'Skip',
-      q1: 'How many people?', q2: 'How hungry?', q3: 'How much can you spend?',
+      q1: 'How many people?', q2: 'How hungry?', q3: 'How much can you spend?', q3group: 'How much per person?',
+      whyLink: 'Why this one?',
       q2lo: 'Light', q2hi: 'Heavy', q3lo: '₩10,000', q3hi: "Doesn't matter",
       people: ['Just me', 'Two', 'Three', 'Four or more'],
       peopleSub: ['Solo is good', '', '', 'Something to share'],
@@ -62,6 +65,7 @@
              : v <= 8 ? 'Properly hungry' : 'Starving';
       },
       budget: ['Up to ₩10,000', 'Up to ₩15,000', 'Up to ₩20,000', "Doesn't matter"],
+      budgetGroup: ['Up to ₩10,000 a head', 'Up to ₩15,000 a head', 'Up to ₩20,000 a head', "Doesn't matter"],
       lead: 'How about…', accept: "Let's go", again: 'Eh… give me another',
       restart: 'Start over', doneNote: 'Enjoy',
       locating: 'Finding you…',
@@ -287,13 +291,48 @@
     };
   }
 
+  // The card's lead names the situation the pick was made for, and "왜 이 음식이야?" holds the
+  // reasoning (measured effects, fit with the answers, rank) — only with the measured model.
+  function renderAnswer(out) {
+    var info = window.MOMUK_MODEL && window.MomukV2 ? window.MomukV2.describe(out, lang) : null;
+    $('#answerLead').textContent = out.relaxed === 'price' ? t().relaxedPrice : info ? info.lead : t().lead;
+    var box = $('#whyBox'), pop = $('#whyPop');
+    box.hidden = !info;
+    box.classList.remove('is-open');
+    $('#whyLink').setAttribute('aria-expanded', 'false');
+    pop.innerHTML = '';
+    if (!info) return;
+    info.lines.forEach(function (l) {
+      var p = document.createElement('p');
+      if (l.strong) p.className = 'whypop__hi';
+      p.textContent = l.text;
+      pop.appendChild(p);
+    });
+    var foot = document.createElement('p');
+    foot.className = 'whypop__foot';
+    foot.textContent = info.foot;
+    pop.appendChild(foot);
+  }
+
+  // Hover shows it on a computer; on a phone (no hover) a tap toggles it, and a tap elsewhere closes it.
+  $('#whyLink').addEventListener('click', function (e) {
+    e.stopPropagation();
+    var open = !$('#whyBox').classList.contains('is-open');
+    $('#whyBox').classList.toggle('is-open', open);
+    this.setAttribute('aria-expanded', String(open));
+  });
+  document.addEventListener('click', function () {
+    $('#whyBox').classList.remove('is-open');
+    $('#whyLink').setAttribute('aria-expanded', 'false');
+  });
+
   function suggest() {
     var out = engine().suggest(inputs(), { lang: lang });
     if (!out.picked) { showExhausted(state.rejected.length ? t().allShown : t().empty); return; }
     state.last = out;
 
+    renderAnswer(out);
     var d = out.picked.dish;
-    $('#answerLead').textContent = out.relaxed === 'price' ? t().relaxedPrice : t().lead;
     var name = lang === 'en' ? d.en : d.ko;
     $('#dish').textContent = name;
     // English names run long ("Pork bone hangover soup"): step the size down so the card stays
@@ -466,6 +505,7 @@
         (t().peopleSub[i] ? '<span class="pill__sub">' + t().peopleSub[i] + '</span>' : '');
       b.addEventListener('click', function () {
         state.party = n;
+        readBudget();
         $$('#q1Options .pill').forEach(function (p) { p.classList.remove('is-chosen'); });
         b.classList.add('is-chosen');
         setProgress(1);
@@ -479,7 +519,12 @@
   function readHunger() {
     $('#hungerRead').textContent = state.hunger + ' / 10 · ' + t().hunger(state.hunger);
   }
-  function readBudget() { $('#budgetRead').textContent = t().budget[state.budget - 1]; }
+  // The price answer is always per person: for a group, ₩15,000 means ₩15,000 each, not in total.
+  function readBudget() {
+    var group = state.party > 1;
+    $('#q3Ask').textContent = group ? t().q3group : t().q3;
+    $('#budgetRead').textContent = (group ? t().budgetGroup : t().budget)[state.budget - 1];
+  }
 
   function applyLang() {
     $('#langKo').setAttribute('aria-pressed', String(lang === 'ko'));
@@ -490,7 +535,6 @@
     $('#start').textContent = t().start;
     $('#q1Ask').textContent = t().q1;
     $('#q2Ask').textContent = t().q2;
-    $('#q3Ask').textContent = t().q3;
     $('#q2Lo').textContent = t().q2lo; $('#q2Hi').textContent = t().q2hi;
     $('#q3Lo').textContent = t().q3lo; $('#q3Hi').textContent = t().q3hi;
     $('#accept').textContent = t().accept;
@@ -501,7 +545,8 @@
     $('#s-q2 [data-next]').textContent = t().next;
     $('#s-q3 [data-next]').textContent = t().suggest;
     buildOptions(); readHunger(); readBudget();
-    if (state.last) { $('#answerLead').textContent = t().lead; }
+    $('#whyLink').textContent = t().whyLink;
+    if (state.last && state.last.picked) renderAnswer(state.last);
     renderStatus(statusKind);
   }
 

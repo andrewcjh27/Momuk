@@ -261,6 +261,38 @@ body {
 /* why chips — the product's whole argument, so they get the payoff timing */
 .why { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--s2); margin-top: var(--s4); }
 .why[hidden] { display: none; }
+
+/* 왜 이 음식이야? — an underlined line at the bottom of the card; the reasoning pops up above it */
+.whybox { position: relative; margin-top: var(--s3); }
+.whybox[hidden] { display: none; }
+.whylink {
+  appearance: none; border: none; background: none; cursor: help;
+  font: inherit; font-size: 14px; font-weight: 700; color: var(--ink-soft);
+  text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1.5px;
+  padding: var(--s1) var(--s2);
+}
+.whylink:hover { color: var(--ink); }
+.whypop {
+  position: absolute; left: 50%; bottom: calc(100% + 10px); z-index: 5;
+  width: min(300px, calc(100vw - 48px));
+  transform: translate(-50%, 4px);
+  background: var(--ink); color: #FFFFFF;
+  border-radius: 14px; padding: var(--s3) var(--s4);
+  font-size: 13px; font-weight: 600; line-height: 1.45; text-align: left;
+  box-shadow: 0 12px 28px rgba(72,60,50,0.25);
+  opacity: 0; visibility: hidden; pointer-events: none;
+  transition: opacity var(--dur-fast) linear, transform var(--dur-fast) var(--ease), visibility 0s linear var(--dur-fast);
+}
+.whypop::after {                       /* small pointer down to the link */
+  content: ""; position: absolute; left: 50%; bottom: -6px; width: 12px; height: 12px;
+  background: var(--ink); transform: translateX(-50%) rotate(45deg); border-radius: 2px;
+}
+.whybox:hover .whypop, .whybox.is-open .whypop, .whylink:focus-visible + .whypop {
+  opacity: 1; visibility: visible; transform: translate(-50%, 0); transition-delay: 0s;
+}
+.whypop p { margin: 0 0 6px; }
+.whypop .whypop__hi { font-weight: 800; }
+.whypop .whypop__foot { margin: var(--s2) 0 0; font-size: 11px; font-weight: 600; opacity: 0.65; }
 .why li {
   list-style: none;
   font-size: 13px; font-weight: 700;

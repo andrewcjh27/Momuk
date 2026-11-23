@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@900&display=swap" />
-<link rel="stylesheet" href="momuk.css?v=20261122n" />
+<link rel="stylesheet" href="momuk.css?v=20261122o" />
 </head>
 <body>
 
@@ -164,6 +164,11 @@
         <p class="answer__dish reveal" style="--i:1" id="dish"></p>
         <p class="answer__en reveal" style="--i:2" id="dishEn"></p>
         <ul class="why" id="why" hidden></ul>
+        <!-- 왜 이 음식이야? — the reasoning, shown on hover (tap on phones) -->
+        <div class="whybox reveal" style="--i:3" id="whyBox" hidden>
+          <button type="button" class="whylink" id="whyLink" aria-describedby="whyPop" aria-expanded="false">왜 이 음식이야?</button>
+          <div class="whypop" id="whyPop" role="tooltip"></div>
+        </div>
       </div>
       <button class="cta enter" style="--i:5" id="accept">이걸로!</button>
       <button class="linkbtn" id="again">음… 안 땡겨!</button>
@@ -209,9 +214,9 @@
 
 </div>
 
-<script src="momuk-data.js?v=20261122n"></script>
-<script src="momuk-engine.js?v=20261122n"></script>
-<script src="momuk-engine-v2.js?v=20261122n"></script>
-<script src="momuk-app.js?v=20261122n"></script>
+<script src="momuk-data.js?v=20261122o"></script>
+<script src="momuk-engine.js?v=20261122o"></script>
+<script src="momuk-engine-v2.js?v=20261122o"></script>
+<script src="momuk-app.js?v=20261122o"></script>
 </body>
 </html>
