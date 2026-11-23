@@ -141,6 +141,7 @@
     current = name;
 
     $('#bowlDock').classList.toggle('is-centred', name === 'landing');
+    placeBowl();
     $('#bowl').classList.toggle('is-steaming', name === 'response' || name === 'done');
 
     // replay entrance animations on the screen we just moved to
@@ -150,6 +151,16 @@
       el.style.animation = '';
     });
   }
+
+  // On the landing screen the bowl sits in its own slot in the layout (between the logo and the
+  // button), so it can't overlap anything at any screen height. Elsewhere it docks at the bottom.
+  function placeBowl() {
+    var slot = $('#bowlSlot'), app = $('#app');
+    if (!slot || !app) return;
+    var gap = app.getBoundingClientRect().bottom - slot.getBoundingClientRect().bottom;
+    $('#bowlDock').style.setProperty('--bowl-bottom', Math.max(0, gap) + 'px');
+  }
+  window.addEventListener('resize', placeBowl);
 
   function setProgress(n) {
     answered = Math.max(0, Math.min(3, n));
@@ -334,7 +345,7 @@
   }
 
   function askRefine() {
-    $('#refineSkip').hidden = false;
+    $('#refineSkip').style.visibility = '';
     $('#refineSkip').textContent = t().skip;
     state.refineMode = 'ask';
     var key = state.refineOrder[state.asked++];
@@ -383,7 +394,7 @@
       if (state.prefOrder.length) showDropAnswers(); else { setProgress(0); show('q1'); }
     });
     box.appendChild(b);
-    $('#refineSkip').hidden = true;
+    $('#refineSkip').style.visibility = 'hidden';
     show('refine');
   }
 
@@ -427,7 +438,7 @@
     });
     box.appendChild(go);
     state.refineMode = 'drop';
-    $('#refineSkip').hidden = false;
+    $('#refineSkip').style.visibility = '';
     $('#refineSkip').textContent = t().startOver;
     show('refine');
   }
@@ -579,5 +590,6 @@
   // ── go ─────────────────────────────────────────────────
   applyLang();
   setProgress(0);
+  placeBowl();
   renderStatus(navigator.geolocation ? 'askLoc' : 'noloc');
 })();
