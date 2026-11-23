@@ -161,6 +161,12 @@ food days), with no local weather or regional lean.
 Static files, so anything works. GitHub Pages: enable it on the default
 branch in Settings → Pages.
 
+## Sharing, search and counting
+
+- **Link previews**: Open Graph and Twitter tags with a 1200×630 preview image (`assets/og-image.png`), so a link pasted into KakaoTalk, Instagram, Slack or iMessage shows a card. Favicon and home-screen icon included.
+- **Search**: Korean-first title and description, `WebApplication` structured data, and `sitemap.xml` for Google Search Console and Naver Search Advisor.
+- **Counting**: [GoatCounter](https://www.goatcounter.com) — no cookies and no personal data. Besides page views it counts a few anonymous events (start, party size, price step, each pick, 안 땡겨, narrowing answers, 이걸로!, opening 왜 이 음식이야?), which show which dishes people accept and which questions they skip.
+
 ## How the project has evolved
 
 **v1 — a rules engine, on purpose (Aug 2026).** With no usage data, a learned
