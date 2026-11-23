@@ -359,6 +359,10 @@
     $('#refineAsk').textContent = q.ask;
     var box = $('#refineOptions');
     box.innerHTML = '';
+    box.classList.remove('options--grid');
+    // Four answers (밥 · 면 · 빵 · 고기) sit in a 2×2 grid with 상관없어 full width underneath,
+    // so the screen keeps the same height and rhythm as the two-answer questions.
+    box.classList.toggle('options--grid', q.options.length === 4);
     q.options.concat([[null, t().refine.any]]).forEach(function (opt, i) {
       var b = document.createElement('button');
       b.className = 'pill enter';
@@ -389,6 +393,7 @@
     $('#refineAsk').textContent = message;
     var box = $('#refineOptions');
     box.innerHTML = '';
+    box.classList.remove('options--grid');
     var b = document.createElement('button');
     b.className = 'pill enter';
     b.style.setProperty('--i', 1);
@@ -415,6 +420,7 @@
     $('#refineAsk').textContent = t().dropAsk;
     var box = $('#refineOptions');
     box.innerHTML = '';
+    box.classList.remove('options--grid');
     state.prefOrder.forEach(function (key, i) {
       var b = document.createElement('button');
       b.className = 'pill enter';
