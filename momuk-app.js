@@ -294,7 +294,12 @@
 
     var d = out.picked.dish;
     $('#answerLead').textContent = out.relaxed === 'price' ? t().relaxedPrice : t().lead;
-    $('#dish').textContent = lang === 'en' ? d.en : d.ko;
+    var name = lang === 'en' ? d.en : d.ko;
+    $('#dish').textContent = name;
+    // English names run long ("Pork bone hangover soup"): step the size down so the card stays
+    // two lines at most and never crowds the header on short screens.
+    $('#dish').classList.toggle('is-long', name.length > 12 && name.length <= 20);
+    $('#dish').classList.toggle('is-xlong', name.length > 20);
     $('#dishEn').textContent = lang === 'en' ? d.ko : d.en;
 
     var why = $('#why');
@@ -354,6 +359,10 @@
     $('#refineAsk').textContent = q.ask;
     var box = $('#refineOptions');
     box.innerHTML = '';
+    box.classList.remove('options--grid');
+    // Four answers (밥 · 면 · 빵 · 고기) sit in a 2×2 grid with 상관없어 full width underneath,
+    // so the screen keeps the same height and rhythm as the two-answer questions.
+    box.classList.toggle('options--grid', q.options.length === 4);
     q.options.concat([[null, t().refine.any]]).forEach(function (opt, i) {
       var b = document.createElement('button');
       b.className = 'pill enter';
@@ -384,6 +393,7 @@
     $('#refineAsk').textContent = message;
     var box = $('#refineOptions');
     box.innerHTML = '';
+    box.classList.remove('options--grid');
     var b = document.createElement('button');
     b.className = 'pill enter';
     b.style.setProperty('--i', 1);
@@ -410,6 +420,7 @@
     $('#refineAsk').textContent = t().dropAsk;
     var box = $('#refineOptions');
     box.innerHTML = '';
+    box.classList.remove('options--grid');
     state.prefOrder.forEach(function (key, i) {
       var b = document.createElement('button');
       b.className = 'pill enter';
