@@ -62,6 +62,7 @@
       province: nearestProvince(model, input.lat, input.lon),
       hour: hour, meal: meal,
       slot: { morning: 'breakfast', lunch: 'lunch', dinner: 'dinner', late: 'late' }[meal],  // v1 name, for the app
+      dow: now.getDay(),
       isWeekend: now.getDay() === 0 || now.getDay() === 6,
       events: model.calendar.filter(function (e) { return e.date === today; }),
       hunger: input.hunger != null ? input.hunger : 5,   // 1-10
@@ -89,7 +90,8 @@
       key: 'rain', measured: true,
       f: function (d, c) {
         if (!c.isRainy || !d.rain) return { v: 0 };
-        return { v: ln(d.rain), reason: { ko: '비 오는 날 검색 ' + x(d.rain), en: 'Rainy days: searched ' + x(d.rain) } };
+        return { v: ln(d.rain), reason: { ko: '비 오는 날엔 평소보다 ' + x(d.rain) + ' 더 찾아요',
+                                          en: 'Searched ' + x(d.rain) + ' more on rainy days' } };
       }
     },
     {
@@ -98,7 +100,8 @@
         var b = c.tempBin != null && d.temp[c.tempBin];
         if (!b) return { v: 0 };
         var t = Math.round(c.tempC);
-        return { v: ln(b), reason: { ko: t + '°C엔 평소의 ' + x(b), en: 'At ' + t + '°C: ' + x(b) + ' its usual searches' } };
+        return { v: ln(b), reason: { ko: '오늘 같은 ' + t + '°C 안팎엔 평소의 ' + x(b),
+                                     en: 'Around ' + t + '°C, searched ' + x(b) + ' its usual' } };
       }
     },
     {
@@ -106,8 +109,8 @@
       f: function (d, c) {
         var l = c.province && d.region[c.province.geo];
         if (!l) return { v: 0 };
-        return { v: ln(l), reason: { ko: c.province.ko + '에서 ' + x(l) + ' 더 찾는 메뉴',
-                                     en: c.province.en + ' searches it ' + x(l) + ' the national level' } };
+        return { v: ln(l), reason: { ko: c.province.ko + '에선 전국보다 ' + x(l) + ' 더 찾아요',
+                                     en: c.province.en + ' searches it ' + x(l) + ' the national rate' } };
       }
     },
     {
@@ -302,7 +305,59 @@
              why: explain(s.pick, opts.lang || 'ko', 3) };
   }
 
+  // ── how the answer is presented ──────────────────────────
+  // lead: the situation the pick was made for ("비 오는 금요일 저녁, 혼자라면…").
+  // lines: a short "왜 이 음식이야?" — the strongest measured effects (with their real numbers),
+  // how the dish fits the answers, and where it ranked. Kept to four lines at most.
+  var WEEK_KO = ['일', '월', '화', '수', '목', '금', '토'];
+  var WEEK_EN = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+  function lead(ctx, lang) {
+    var t = ctx.tempC, w = null;
+    if (ctx.hasWeather) {
+      w = ctx.isRainy ? ['비 오는', 'rainy'] : t == null ? null : t <= 3 ? ['추운', 'cold'] : t <= 12 ? ['쌀쌀한', 'chilly']
+        : t >= 28 ? ['무더운', 'sweltering'] : t >= 23 ? ['더운', 'hot'] : null;
+    }
+    var ev = ctx.events[0], small = ctx.meal === 'late' && ctx.hour < 5;
+    var party = Math.min(ctx.party, 4) - 1;
+    if (lang === 'en') {
+      var meal = { morning: 'morning', lunch: 'lunchtime', dinner: 'evening', late: 'night' }[ctx.meal];
+      var when = (ev ? ev.label_en : WEEK_EN[ctx.dow]) + ' ' + meal;
+      var s = (w ? 'a ' + w[1] + ' ' : '') + when;
+      return s.charAt(0).toUpperCase() + s.slice(1) + ', ' + ['on your own', 'for two', 'for three', 'for a group'][party] + '…';
+    }
+    var mealKo = { morning: '아침', lunch: '점심', dinner: '저녁', late: small ? '새벽' : '밤' }[ctx.meal];
+    return (w ? w[0] + ' ' : '') + (ev ? ev.label : WEEK_KO[ctx.dow] + '요일') + ' ' + mealKo + ', '
+      + ['혼자라면', '둘이라면', '셋이라면', '여럿이라면'][party] + '…';
+  }
+
+  function won(n) { return '₩' + n.toLocaleString('en-US'); }
+
+  function describe(out, lang) {
+    var en = lang === 'en', ctx = out.ctx, r = out.picked, d = r.dish, lines = [];
+    // 1. the strongest measured effects for this dish today (at most two)
+    r.parts.filter(function (p) { return p.measured && p.reason && p.contrib >= CHIP_MIN; })
+      .sort(function (a, b) { return b.contrib - a.contrib; }).slice(0, 2)
+      .forEach(function (p) { lines.push({ text: en ? p.reason.en : p.reason.ko, strong: true }); });
+    // 2. how it fits the answers
+    var fit = [];
+    if (ctx.party === 1) fit.push(en ? 'Fine on your own' : '혼밥 OK');
+    else if (d.share) fit.push(en ? 'Made for sharing' : '나눠 먹기 좋음');
+    if (ctx.budget < 4 && !ctx.priceWidened) fit.push(en ? 'Under ' + won(CAPS[ctx.budget - 1]) + ' a head' : '1인 ' + won(CAPS[ctx.budget - 1]) + ' 이하');
+    fit.push(en ? ['Light', 'Medium portion', 'On the filling side', 'Very filling'][d.heavy] || ''
+                : ['가벼운 편', '적당한 양', '든든한 편', '아주 든든'][d.heavy] || '');
+    if (lateDelivery(d, ctx)) fit.push(en ? 'Late-night delivery' : '야식 배달 가능');
+    lines.push({ text: fit.filter(Boolean).join(' · ') });
+    // 3. where it ranked
+    var n = out.ranked.length;
+    lines.push({ text: n > 10 ? (en ? 'In the top 10 of ' + n + ' dishes for right now' : '지금 조건에 맞는 ' + n + '개 중 상위 10위 안')
+                              : (en ? 'One of ' + n + ' dishes that fit right now' : '지금 조건에 맞는 ' + n + '개 중 하나') });
+    return { lead: lead(ctx, lang), lines: lines,
+             foot: en ? 'From 10 years of Naver searches and weather' : '네이버 검색 10년 · 날씨 데이터로 계산' };
+  }
+
   global.MomukV2 = {
+    describe: describe,
     buildContext: function (input) { return buildContext(input, prepare(global.MOMUK_MODEL)); },
     nearestProvince: nearestProvince,
     canAsk: function (key) { return canAsk(key, global.MOMUK_MODEL); },
